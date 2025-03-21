@@ -1,0 +1,34 @@
+@switch (variant) {
+  @case ('default') {
+    <div class="flex flex-col items-center justify-center gap-4">
+      <div class="loading-spinner" [class]="size + ' ' + color"></div>
+      @if (text) {
+        <p class="text-sm text-gray-600">{{ text }}</p>
+      }
+    </div>
+  }
+  @case ('inline') {
+    <span class="inline-flex items-center gap-2">
+      <div class="loading-spinner" [class]="size + ' ' + color"></div>
+      @if (text) {
+        <span class="text-sm text-gray-600">{{ text }}</span>
+      }
+    </span>
+  }
+  @case ('fullscreen') {
+    <div class="fixed inset-0 bg-white/50 dark:bg-gray-900/50 flex flex-col items-center justify-center z-50">
+      <div class="loading-spinner lg" [class]="color"></div>
+      @if (text) {
+        <p class="mt-4 text-sm text-gray-600">{{ text }}</p>
+      }
+    </div>
+  }
+  @case ('button') {
+    <span class="inline-flex items-center gap-2 opacity-70 pointer-events-none">
+      <div class="loading-spinner" [class]="size + ' ' + color"></div>
+      @if (text) {
+        <span class="text-sm">{{ text }}</span>
+      }
+    </span>
+  }
+}

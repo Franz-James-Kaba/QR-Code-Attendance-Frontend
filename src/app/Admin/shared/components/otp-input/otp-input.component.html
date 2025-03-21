@@ -1,0 +1,17 @@
+<div class="flex gap-2 items-center justify-center">
+  @for (value of otpValues; track $index) {
+    <div class="w-12 h-12">
+      <input
+        type="text"
+        inputmode="numeric"
+        maxlength="1"
+        [value]="value"
+        [disabled]="disabled"
+        class="w-full h-full text-center text-xl font-semibold rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+        (keydown)="onKeyDown($event, $index)"
+        (input)="onInput($event, $index)"
+        (paste)="onPaste($event)"
+      >
+    </div>
+  }
+</div>

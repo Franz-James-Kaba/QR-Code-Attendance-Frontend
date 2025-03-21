@@ -1,0 +1,31 @@
+<div>
+<button
+  [type]="type"
+  [disabled]="disabled || loading"
+  [class]="classes"
+  (click)="onClick($event)"
+>
+  @if (loading) {
+    <app-loading
+      variant="button"
+      [size]="loadingSize"
+      color="primary"
+      class="-ml-1 mr-2"
+    />
+  }
+
+  @if (icon && iconPosition === 'left' && !loading) {
+    <span class="mr-2">
+      <i [class]="icon"></i>
+    </span>
+  }
+
+  <ng-content></ng-content>
+
+  @if (icon && iconPosition === 'right' && !loading) {
+    <span class="ml-2">
+      <i [class]="icon"></i>
+    </span>
+  }
+</button>
+</div>

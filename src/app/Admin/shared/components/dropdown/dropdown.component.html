@@ -1,0 +1,59 @@
+<div class="relative">
+  <button
+    (click)="toggleDropdown()"
+    class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
+  >
+    @if (showAvatar) {
+      <img
+        [src]="avatarUrl"
+        [alt]="label"
+        class="w-8 h-8 rounded-full"
+      >
+    }
+    <span class="text-sm font-medium text-gray-700">{{ label }}</span>
+    <svg
+      class="w-4 h-4 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  </button>
+
+  @if (isOpen) {
+    <div
+      class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+    >
+      <div
+        class="py-1"
+        role="menu"
+        aria-orientation="vertical"
+      >
+        @for (item of items; track item.label) {
+          <button
+            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            role="menuitem"
+            (click)="onItemClick(item)"
+          >
+            <div class="flex items-center">
+              @if (item.icon) {
+                <app-icon
+                  [path]="item.icon"
+                  [size]="16"
+                  class="mr-2"
+                />
+              }
+              {{ item.label }}
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

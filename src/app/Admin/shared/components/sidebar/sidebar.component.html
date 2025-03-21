@@ -1,0 +1,63 @@
+<aside
+[class]="'fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-[#464646] border-r border-gray-200 ' +
+        (isOpen ? 'translate-x-0' : '-translate-x-full') + ' ' +
+        (isMinimized ? 'w-16' : 'w-64') + ' ' +
+        'md:translate-x-0'"
+>
+<!-- Logo Section -->
+<div class="flex items-center h-16 px-4">
+  <div class="flex items-center overflow-hidden">
+    <!-- <img src="#" alt="Logo" class="w-8 h-8 shrink-0"> -->
+    @if (!isMinimized) {
+      <span class="ml-2 text-xl font-semibold text-white truncate">
+        Attendance System
+      </span>
+    }
+  </div>
+
+  <!-- Mobile close button -->
+  <button
+    class="ml-auto p-2 rounded-lg hover:bg-[#656565] md:hidden"
+    (click)="onToggle()"
+    onkeypress="onToggle()"
+  >
+    <app-icon
+      path="M6 18L18 6M6 6l12 12"
+      class="text-white"
+    />
+  </button>
+</div>
+
+<!-- Navigation Menu -->
+<nav class="p-4 space-y-2">
+  @for (item of navItems; track item.route) {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="bg-[#656565]"
+      class="flex items-center p-2 text-white rounded-lg hover:bg-[#656565] group"
+      (click)="updateBreadcrumbs(item.breadcrumbs)"
+    >
+      <app-icon
+        [path]="item.icon"
+        class="text-white"
+      />
+      @if (!isMinimized) {
+        <span class="ml-3">{{ item.label }}</span>
+      }
+    </a>
+  }
+</nav>
+
+<!-- Minimize Toggle (Desktop only) -->
+<!-- <button
+  (click)="onToggle()"
+  onkeypress="onToggle()"
+  class="hidden md:flex absolute -right-3 top-20 bg-white border border-gray-200 rounded-full p-1.5 hover:bg-gray-50"
+>
+  <app-icon
+    path="M15 19l-7-7 7-7"
+    [class]="isMinimized ? 'rotate-180' : ''"
+    [size]="16"
+  />
+</button> -->
+</aside>

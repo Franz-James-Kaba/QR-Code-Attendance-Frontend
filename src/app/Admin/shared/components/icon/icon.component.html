@@ -1,0 +1,19 @@
+<div
+      [class]="'inline-flex items-center justify-center ' + class"
+      [style.width]="size + 'px'"
+      [style.height]="size + 'px'"
+    >
+      <svg
+        [attr.viewBox]="viewBox"
+        fill="none"
+        stroke="currentColor"
+        [class]="'w-full h-full ' + iconClass"
+      >
+        <path
+          [attr.d]="path"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          [attr.stroke-width]="strokeWidth"
+        />
+      </svg>
+    </div>
