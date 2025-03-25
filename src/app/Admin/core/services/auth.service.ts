@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay, throwError } from 'rxjs';
 import { AuthResponse, LoginCredentials } from '@shared/models/auth.model';
+import { Observable, of, delay, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +11,7 @@ export class AuthService {
   //Simulate stored email for OTP verification
   private tempEmail: string | null = null;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor() {}
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     // Simulate API call with correct response shape
@@ -27,7 +26,7 @@ export class AuthService {
     }).pipe(delay(1000));
   }
 
-  resetPassword(oldPassword: string, newPassword: string): Observable<void> {
+  resetPassword(p0: string, newPassword: string): Observable<void> {
     // Simulate password reset
     if (this.tempEmail) {
       // Clear stored email after successful reset
@@ -52,9 +51,7 @@ export class AuthService {
     this.tempEmail = email;
 
     // Simulate API delay and success
-    return of(void 0).pipe(
-      delay(1500)
-    );
+    return of(void 0).pipe(delay(1500));
   }
 
   logout(): void {

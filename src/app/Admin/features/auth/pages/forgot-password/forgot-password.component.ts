@@ -1,52 +1,72 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule, ValidatorFn, ValidationErrors, AbstractControl } from '@angular/forms';
+// Angular core imports
 import { AsyncPipe } from '@angular/common';
-import { Store } from '@ngrx/store';
-import { AuthActions } from '@store/states/auth/auth.actions';
-import { selectAuthStep, selectIsLoading, selectAuthError } from '@store/states/auth/auth.selectors';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InputFieldComponent } from "@shared/components/input-field/input-field.component";
-import { ButtonComponent } from "@shared/components/button/button.component";
+import {
+  FormBuilder,
+  Validators,
+  ReactiveFormsModule,
+  ValidatorFn,
+  ValidationErrors,
+  AbstractControl,
+} from '@angular/forms';
+import { RouterLink } from '@angular/router';
+// App imports
 import { OtpInputComponent } from '@app/shared/components/otp-input/otp-input.component';
 import { AuthStep } from '@app/shared/models/auth.model';
-import { map, take } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
 import { amaliTechEmailValidator } from '@app/shared/validators/email.validator';
-import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
+// NgRx imports
+import { AuthActions } from '@store/states/auth/auth.actions';
+import {
+  selectAuthStep,
+  selectIsLoading,
+  selectAuthError,
+} from '@store/states/auth/auth.selectors';
+// RxJS imports
+import { combineLatest } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.css',
-  imports: [InputFieldComponent, ButtonComponent, AsyncPipe, ReactiveFormsModule, OtpInputComponent, RouterLink],
-  standalone: true
+  imports: [
+    InputFieldComponent,
+    ButtonComponent,
+    AsyncPipe,
+    ReactiveFormsModule,
+    OtpInputComponent,
+    RouterLink,
+  ],
+  standalone: true,
 })
 export class ForgotPasswordComponent implements OnInit {
   private readonly store = inject(Store);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  forgotPasswordForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email, amaliTechEmailValidator()]],
-    otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-    newPassword: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', [Validators.required]]
-  }, {validators: this.passwordMatchValidator() });
+  forgotPasswordForm = this.fb.group(
+    {
+      email: ['', [Validators.required, Validators.email, amaliTechEmailValidator()]],
+      otp: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    { validators: this.passwordMatchValidator() }
+  );
 
   currentStep$ = this.store.select(selectAuthStep);
   isLoading$ = this.store.select(selectIsLoading);
-  error$ = this.store.select(selectAuthError).pipe(
-    takeUntilDestroyed(this.destroyRef)
-  );
+  error$ = this.store.select(selectAuthError).pipe(takeUntilDestroyed(this.destroyRef));
 
   isSubmitting$ = this.store.select(selectIsLoading);
 
   readonly AuthStep = AuthStep;
 
-  isStepValid$ = combineLatest([
-    this.currentStep$,
-    this.forgotPasswordForm.statusChanges
-  ]).pipe(
+  isStepValid$ = combineLatest([this.currentStep$, this.forgotPasswordForm.statusChanges]).pipe(
     map(([step]) => {
       if (!step) return false;
 
@@ -61,9 +81,12 @@ export class ForgotPasswordComponent implements OnInit {
         case AuthStep.OTP:
           return otpControl?.valid ?? false;
         case AuthStep.RESET_PASSWORD:
-          return (newPasswordControl?.valid &&
-                 confirmPasswordControl?.valid &&
-                 newPasswordControl?.value === confirmPasswordControl?.value) ?? false;
+          return (
+            (newPasswordControl?.valid &&
+              confirmPasswordControl?.valid &&
+              newPasswordControl?.value === confirmPasswordControl?.value) ??
+            false
+          );
         default:
           return false;
       }
@@ -95,7 +118,7 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.currentStep$.pipe(take(1)).subscribe(step => {
+    this.currentStep$.pipe(take(1)).subscribe((step: AuthStep | null) => {
       if (!step) return;
 
       switch (step) {
@@ -116,10 +139,12 @@ export class ForgotPasswordComponent implements OnInit {
         case AuthStep.RESET_PASSWORD: {
           const newPassword = this.forgotPasswordForm.get('newPassword')?.value;
           if (newPassword) {
-            this.store.dispatch(AuthActions.resetPassword({
-              newPassword,
-              oldPassword: ''
-            }));
+            this.store.dispatch(
+              AuthActions.resetPassword({
+                newPassword,
+                oldPassword: '',
+              })
+            );
           }
           break;
         }

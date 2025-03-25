@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from "../icon/icon.component";
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+import { IconComponent } from '../icon/icon.component';
 
 interface DropdownItem {
   label: string;
@@ -13,7 +14,7 @@ interface DropdownItem {
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: './dropdown.component.html',
-  styleUrl: './dropdown.component.css'
+  styleUrl: './dropdown.component.css',
 })
 export class DropdownComponent {
   @Input() label = '';

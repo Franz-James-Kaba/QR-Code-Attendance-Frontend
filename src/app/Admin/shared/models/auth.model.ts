@@ -1,8 +1,10 @@
-export enum AuthStep {
-  EMAIL = 'EMAIL',
-  OTP = 'OTP',
-  RESET_PASSWORD = 'RESET_PASSWORD',
-}
+export const AuthStep = {
+  EMAIL: 'EMAIL',
+  OTP: 'OTP',
+  RESET_PASSWORD: 'RESET_PASSWORD',
+} as const;
+
+export type AuthStep = typeof AuthStep[keyof typeof AuthStep];
 
 export interface User {
   id: string;

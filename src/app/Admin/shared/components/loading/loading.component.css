@@ -6,7 +6,6 @@
     transform: rotate(360deg);
   }
 }
-
 .loading-spinner {
   border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
@@ -51,8 +50,9 @@
   .loading-spinner {
     border-color: rgba(255, 255, 255, 0.1);
   }
-
   .fullscreen {
     background-color: rgba(0, 0, 0, 0.8);
   }
 }
+
+/*# sourceMappingURL=loading.component.css.map */

@@ -2,7 +2,7 @@ import { Directive, ElementRef, EventEmitter, HostListener, Output } from '@angu
 
 @Directive({
   selector: '[clickOutside]',
-  standalone: true
+  standalone: true,
 })
 export class ClickOutsideDirective {
   @Output() clickOutside = new EventEmitter<void>();
@@ -10,8 +10,10 @@ export class ClickOutsideDirective {
   constructor(private readonly elementRef: ElementRef) {}
 
   @HostListener('document:click', ['$event.target'])
-  onClick(target: any): void {
-    const clickedInside = this.elementRef.nativeElement.contains(target);
+  onClick(target: HTMLElement | EventTarget): void {
+    // Explicitly use elementRef to satisfy linter
+    const element = this.elementRef.nativeElement;
+    const clickedInside = element.contains(target);
     if (!clickedInside) {
       this.clickOutside.emit();
     }

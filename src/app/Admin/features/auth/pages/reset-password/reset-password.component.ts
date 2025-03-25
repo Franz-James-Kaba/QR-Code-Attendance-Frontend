@@ -1,48 +1,56 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
-import { ButtonComponent } from '@shared/components/button/button.component';
+import { Component, OnInit, inject } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    InputFieldComponent,
-    ButtonComponent,
-    RouterModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent, ButtonComponent, RouterModule],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent implements OnInit {
   resetPasswordForm!: FormGroup;
-
-  constructor(private readonly fb: FormBuilder) { }
+  private readonly fb = inject(FormBuilder);
+  constructor() {}
 
   ngOnInit() {
     this.resetPasswordForm = this.fb.group({
-      newPassword: ['', {
-        validators: [
-          Validators.required,
-          Validators.minLength(8),
-          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-        ],
-        nonNullable: true
-      }],
-      confirmPassword: ['', {
-        validators: [Validators.required],
-        nonNullable: true
-      }]
+      newPassword: [
+        '',
+        {
+          validators: [
+            Validators.required,
+            Validators.minLength(8),
+            Validators.pattern(
+              /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+            ),
+          ],
+          nonNullable: true,
+        },
+      ],
+      confirmPassword: [
+        '',
+        {
+          validators: [Validators.required],
+          nonNullable: true,
+        },
+      ],
     });
 
     // Add password match validator as a form-level validator
-    this.resetPasswordForm.addValidators(
-      this.passwordMatchValidator()
-    );
+    this.resetPasswordForm.addValidators(this.passwordMatchValidator());
   }
 
   // Update password match validator to be a factory function
@@ -74,7 +82,7 @@ export class ResetPasswordComponent implements OnInit {
   onSubmit() {
     if (this.resetPasswordForm.valid) {
       // Implement password reset logic here
-      console.log(this.resetPasswordForm.value);
+      return this.resetPasswordForm.value;
     }
   }
 }

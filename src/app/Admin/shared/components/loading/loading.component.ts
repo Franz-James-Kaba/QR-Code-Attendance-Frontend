@@ -1,5 +1,5 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type LoadingVariant = 'default' | 'inline' | 'fullscreen' | 'button';
 export type LoadingSize = 'sm' | 'md' | 'lg';
@@ -11,7 +11,7 @@ export type LoadingColor = 'primary' | 'secondary' | 'tertiary';
   imports: [CommonModule],
   templateUrl: './loading.component.html',
   styleUrl: './loading.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoadingComponent {
   @Input() variant: LoadingVariant = 'default';

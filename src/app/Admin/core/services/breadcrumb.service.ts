@@ -7,7 +7,7 @@ export interface BreadcrumbItem {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BreadcrumbService {
   private readonly breadcrumbsSubject = new BehaviorSubject<BreadcrumbItem[]>([]);

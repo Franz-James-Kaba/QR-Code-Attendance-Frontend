@@ -2,12 +2,13 @@ import { Routes } from '@angular/router';
 
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent as AdminLayoutComponent } from './layouts/admin-layout/layout.component';
-import { LayoutComponent } from './layouts/auth-layout/layout.component';
+import { LayoutComponent as AuthLayoutComponent } from './layouts/auth-layout/layout.component';
 
-export const adminRoutes: Routes = [
+// Authentication routes - exported separately for lazy loading
+export const authRoutes: Routes = [
   {
-    path: 'auth',
-    component: LayoutComponent,
+    path: '',
+    component: AuthLayoutComponent,
     children: [
       {
         path: '',
@@ -35,22 +36,36 @@ export const adminRoutes: Routes = [
           .then(m => m.UnauthorizedComponent)
       }
     ]
-  },
+  }
+];
+
+// Admin routes - these require authentication
+export const adminRoutes: Routes = [
   {
-    path: 'dashboard',
+    path: '',
     component: AdminLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       {
         path: '',
-        redirectTo: 'home',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       },
       {
-        path: 'home',
-        loadComponent: () => import('./features/dashboard/pages/dashboard/dashboard.component')
-          .then(m => m.DashboardComponent),
-        data: { title: 'Dashboard' }
+        path: 'dashboard',
+        children: [
+          {
+            path: '',
+            redirectTo: 'home',
+            pathMatch: 'full'
+          },
+          {
+            path: 'home',
+            loadComponent: () => import('./features/dashboard/pages/dashboard/dashboard.component')
+              .then(m => m.DashboardComponent),
+            data: { title: 'Dashboard' }
+          }
+        ]
       },
       {
         path: '**',
@@ -58,15 +73,5 @@ export const adminRoutes: Routes = [
           .then(m => m.NotFoundComponent)
       }
     ]
-  },
-  {
-    path: '',
-    redirectTo: 'auth/login',
-    pathMatch: 'full'
-  },
-  {
-    path: '**',
-    loadComponent: () => import('./shared/components/not-found/not-found.component')
-      .then(m => m.NotFoundComponent)
   }
 ];

@@ -1,5 +1,5 @@
-import { Component, Input, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, forwardRef, OnInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -12,26 +12,26 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => OtpInputComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
-export class OtpInputComponent implements ControlValueAccessor {
+export class OtpInputComponent implements ControlValueAccessor, OnInit {
   @Input() length = 6;
   @Input() disabled = false;
 
   otpValues: string[] = [];
   focused = false;
 
-  private onChange = (value: string) => {};
-  private onTouched = () => {};
+  private onChange: (value: string) => void = () => {};
+  private onTouched: () => void = () => {};
 
   ngOnInit() {
     this.otpValues = new Array(this.length).fill('');
   }
 
-  onKeyDown(event: KeyboardEvent, index: number) {
-    const isNumber = /[\d]/.test(event.key);
+  onKeyDown(event: KeyboardEvent, _index: number) {
+    const isNumber = /\d/.test(event.key);
     const isBackspace = event.key === 'Backspace';
     const isArrowLeft = event.key === 'ArrowLeft';
     const isArrowRight = event.key === 'ArrowRight';
@@ -65,7 +65,10 @@ export class OtpInputComponent implements ControlValueAccessor {
 
     if (!pastedData) return;
 
-    this.otpValues = [...pastedData.split(''), ...new Array(this.length).fill('')].slice(0, this.length);
+    this.otpValues = [...pastedData.split(''), ...new Array(this.length).fill('')].slice(
+      0,
+      this.length
+    );
     this.emitValue();
   }
 
@@ -83,11 +86,11 @@ export class OtpInputComponent implements ControlValueAccessor {
     this.otpValues = value.split('').slice(0, this.length);
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

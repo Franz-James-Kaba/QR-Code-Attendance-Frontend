@@ -16,7 +16,9 @@
     </span>
   }
   @case ('fullscreen') {
-    <div class="fixed inset-0 bg-white/50 dark:bg-gray-900/50 flex flex-col items-center justify-center z-50">
+    <div
+      class="fixed inset-0 bg-white/50 dark:bg-gray-900/50 flex flex-col items-center justify-center z-50"
+    >
       <div class="loading-spinner lg" [class]="color"></div>
       @if (text) {
         <p class="mt-4 text-sm text-gray-600">{{ text }}</p>

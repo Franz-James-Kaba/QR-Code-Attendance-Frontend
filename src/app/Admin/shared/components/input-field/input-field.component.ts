@@ -1,5 +1,5 @@
-import { Component, Input, Self, Optional, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, Self, Optional, OnInit } from '@angular/core';
 import { ControlValueAccessor, NgControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -7,7 +7,7 @@ import { ControlValueAccessor, NgControl, ReactiveFormsModule } from '@angular/f
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './input-field.component.html',
-  styleUrl: './input-field.component.css'
+  styleUrl: './input-field.component.css',
 })
 export class InputFieldComponent implements ControlValueAccessor, OnInit {
   @Input() type: 'text' | 'email' | 'password' | 'number' | 'tel' = 'text';
@@ -17,8 +17,8 @@ export class InputFieldComponent implements ControlValueAccessor, OnInit {
   @Input() required = false;
   @Input() disabled = false;
   @Input() showPasswordToggle = false;
-  @Input() validateAmalitechEmail = false;
-  value: any = '';
+  @Input() validateAmaliTechEmail = false;
+  value: string = '';
   isPassword = false;
   showPassword = false;
   hasError = false;
@@ -35,18 +35,18 @@ export class InputFieldComponent implements ControlValueAccessor, OnInit {
   }
 
   // ControlValueAccessor methods
-  onChange = (value: any) => {};
-  onTouched = () => {};
+  onChange: (value: string) => void = () => {};
+  onTouched: () => void = () => {};
 
-  writeValue(value: any): void {
+  writeValue(value: string): void {
     this.value = value;
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
