@@ -8,7 +8,6 @@ import { LoadingComponent } from '../loading/loading.component';
   standalone: true,
   imports: [CommonModule, LoadingComponent],
   templateUrl: './button.component.html',
-  styleUrl: './button.component.css',
 })
 export class ButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
