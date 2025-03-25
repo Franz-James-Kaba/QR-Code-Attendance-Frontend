@@ -41,37 +41,34 @@ export const authRoutes: Routes = [
 
 // Admin routes - these require authentication
 export const adminRoutes: Routes = [
-  {
-    path: '',
-    component: AdminLayoutComponent,
-    canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
-        path: 'dashboard',
-        children: [
-          {
-            path: '',
-            redirectTo: 'home',
-            pathMatch: 'full'
-          },
-          {
-            path: 'home',
-            loadComponent: () => import('./features/dashboard/pages/dashboard/dashboard.component')
-              .then(m => m.DashboardComponent),
-            data: { title: 'Dashboard' }
-          }
-        ]
-      },
-      {
-        path: '**',
-        loadComponent: () => import('./shared/components/not-found/not-found.component')
-          .then(m => m.NotFoundComponent)
-      }
-    ]
-  }
+    {
+      path: '',
+      component: AdminLayoutComponent,
+      canActivate: [AuthGuard],
+      children: [
+        {
+          path: '',
+          redirectTo: 'dashboard',
+          pathMatch: 'full'
+        },
+        {
+          path: 'dashboard',
+          loadComponent: () => import('./features/dashboard/pages/dashboard/dashboard.component')
+            .then(m => m.DashboardComponent),
+          data: { title: 'Dashboard', breadcrumb: 'Dashboard' }
+        },
+        // Other routes like users would be defined here with the same pattern
+        // {
+        //   path: 'users',
+        //   loadComponent: () => import('./path/to/users/component')
+        //     .then(m => m.UsersComponent),
+        //   data: { title: 'Users', breadcrumb: 'Users' }
+        // },
+        {
+          path: '**',
+          loadComponent: () => import('./shared/components/not-found/not-found.component')
+            .then(m => m.NotFoundComponent)
+        }
+      ]
+    }
 ];
