@@ -13,6 +13,21 @@ export class AuthEffects {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+    initAuth$ = createEffect(() => 
+    this.actions$.pipe(
+      ofType(AuthActions.initAuth),
+      map(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          return AuthActions.initAuthSuccess({ token });
+        } else {
+          // If you want to explicitly handle no token case
+          return AuthActions.logout();
+        }
+      })
+    )
+  );
+
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),

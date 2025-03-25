@@ -2,6 +2,8 @@ import { AuthResponse, AuthStep } from '@app/shared/models/auth.model';
 import { createAction, props } from '@ngrx/store';
 
 export const AuthActions = {
+  initAuth: createAction('[Auth] Initialize Auth'),
+initAuthSuccess: createAction('[Auth] Initialize Auth Success', props<{ token: string }>()),
   login: createAction('[Auth] Login', props<{ email: string; password: string }>()),
   loginSuccess: createAction('[Auth] Login Success', props<{ response: AuthResponse }>()),
   loginFailure: createAction('[Auth] Login Failure', props<{ error: string }>()),
@@ -20,5 +22,4 @@ export const AuthActions = {
   verifyOtpSuccess: createAction('[Auth] Verify OTP Success'),
   verifyOtpFailure: createAction('[Auth] Verify OTP Failure', props<{ error: string }>()),
   setAuthStep: createAction('[Auth] Set Auth Step', props<{ step: AuthStep }>()),
-  setReturnUrl: createAction('[Auth] Set Return Url', props<{ url: string }>()),
 };

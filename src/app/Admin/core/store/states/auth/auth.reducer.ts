@@ -18,6 +18,12 @@ const initialState: AuthState = {
 export const authReducer = createReducer(
   initialState,
 
+  on(AuthActions.initAuthSuccess, (state, { token }) => ({
+    ...state,
+    token: token,
+    // You may not have user data at this point, just the token
+  })),
+
   on(AuthActions.login, state => ({
     ...state,
     isLoading: true,
