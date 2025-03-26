@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  position: relative;
+}
+
+input {
+  width: 100%;
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+input.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}

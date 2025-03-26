@@ -5,6 +5,7 @@
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -16,7 +17,24 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2022"
+    "module": "ES2022",
+    "baseUrl": "src",
+    "paths": {
+
+      // Custom Admin paths
+      "@store/*": ["app/Admin/core/store/*"],
+      "@environments/*": ["app/Admin/environments/*"],
+      "@app/*": ["app/Admin/*"],
+      "@core/*": ["app/Admin/core/*"],
+      "@shared/*": ["app/Admin/shared/*"],
+      "@features/*": ["app/Admin/features/*"],
+      "@services/*": ["app/Admin/core/services/*"],
+      "@models/*": ["app/Admin/core/models/*"],
+      "@utils/*": ["app/Admin/core/utils/*"],
+      "@config/*": ["app/Admin/core/config/*"],
+      "@assets/*": ["app/Admin/assets/*"],
+      "@styles/*": ["app/assets/styles/*"],
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
