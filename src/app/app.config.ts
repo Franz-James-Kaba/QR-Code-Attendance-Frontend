@@ -3,7 +3,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { APP_INITIALIZER } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { authInterceptor } from '@core/interceptors/auth.interceptor';
+import { authInterceptor } from '@core/interceptors/auth/auth.interceptor';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore, Store } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
