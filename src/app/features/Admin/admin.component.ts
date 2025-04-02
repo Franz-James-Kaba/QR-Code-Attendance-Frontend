@@ -7,7 +7,6 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterOutlet],
   templateUrl: './admin.component.html',
-  styleUrl: './admin.component.css',
 })
 export class AdminComponent {
   title = 'admin-frontend';
