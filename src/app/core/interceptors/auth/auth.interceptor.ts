@@ -7,11 +7,11 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AuthActions } from '../store/states/auth/auth.actions';
+import { AuthService } from '@services/auth/auth.service';
+import { AuthActions } from '@store/states/auth/auth.actions';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (
   request: HttpRequest<unknown>,

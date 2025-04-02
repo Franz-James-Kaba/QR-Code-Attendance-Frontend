@@ -3,12 +3,12 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { amaliTechEmailValidator } from '../../../../shared/validators/email.validator';
 import { Store } from '@ngrx/store';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
-import { AuthActions } from '../../../../../../core/store/states/auth/auth.actions';
-import { selectIsLoading, selectAuthError } from '../../../../../../core/store/states/auth/auth.selectors';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
+import { amaliTechEmailValidator } from '@shared/validators/email.validator';
+import { AuthActions } from '@store/states/auth/auth.actions';
+import { selectIsLoading, selectAuthError } from '@store/states/auth/auth.selectors';
 
 @Component({
   selector: 'app-login',

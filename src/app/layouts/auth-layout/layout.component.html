@@ -1,8 +1,26 @@
-<!-- Content Container -->
-<div class="relative min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-lg">
-    <div class="max-w-2xl">
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  <!-- Header with Logo -->
+  <header class="py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex justify-center md:justify-start">
+        <!-- Replace with your actual logo -->
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-lg mx-auto">
+      <!-- Actual content goes here -->
       <router-outlet></router-outlet>
     </div>
-  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-4 px-4 sm:px-6 lg:px-8 text-center">
+    <div class="max-w-5xl mx-auto">
+     
+    </div>
+  </footer>
 </div>

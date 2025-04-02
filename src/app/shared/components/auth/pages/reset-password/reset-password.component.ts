@@ -10,8 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
 
 @Component({
   selector: 'app-reset-password',
@@ -66,19 +66,6 @@ export class ResetPasswordComponent implements OnInit {
   get newPasswordControl() {
     return this.resetPasswordForm.get('newPassword');
   }
-
-  get passwordError(): string {
-    const control = this.newPasswordControl;
-    if (!control?.errors) return '';
-
-    if (control.errors['required']) return 'Password is required';
-    if (control.errors['minlength']) return 'Password must be at least 8 characters';
-    if (control.errors['pattern']) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character';
-    }
-    return '';
-  }
-
   onSubmit() {
     if (this.resetPasswordForm.valid) {
       // Implement password reset logic here

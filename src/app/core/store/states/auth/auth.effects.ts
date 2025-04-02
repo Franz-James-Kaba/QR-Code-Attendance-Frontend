@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthStep } from '../../../../shared/Admin/shared/models/auth.model';
-import { AuthService } from '../../../services/auth.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { AuthService } from '@services/auth/auth.service';
+import { AuthStep } from '@shared/models/auth/auth.model';
 import { of } from 'rxjs';
 import { map, catchError, exhaustMap, tap } from 'rxjs/operators';
 
@@ -13,7 +13,7 @@ export class AuthEffects {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-    initAuth$ = createEffect(() =>
+  initAuth$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.initAuth),
       map(() => {
@@ -21,7 +21,7 @@ export class AuthEffects {
         if (token) {
           return AuthActions.initAuthSuccess({ token });
         } else {
-          // If you want to explicitly handle no token case
+          // If no token found, log out
           return AuthActions.logout();
         }
       })
@@ -51,11 +51,29 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(({ response }) => {
+          // Store token
           localStorage.setItem('auth_token', response.token);
-          const redirectUrl = response.passwordResetRequired
-            ? '/auth/reset-password'
-            : '/admin/dashboard';
-          this.router.navigate([redirectUrl]);
+
+          // Handle password reset if required
+          if (response.passwordResetRequired) {
+            this.router.navigate(['/auth/reset-password']);
+            return;
+          }
+
+          // Route based on role
+          switch (response.user.role) {
+            case 'ADMIN':
+              this.router.navigate(['/admin']);
+              break;
+            case 'NSP':
+              this.router.navigate(['/nsp']);
+              break;
+            case 'FACILITATOR':
+              this.router.navigate(['/facilitator']);
+              break;
+            default:
+              this.router.navigate(['/auth/login']);
+          }
         })
       ),
     { dispatch: false }
@@ -84,6 +102,19 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.resetPasswordSuccess),
         tap(() => {
+          this.router.navigate(['/auth/login']);
+        })
+      ),
+    { dispatch: false }
+  );
+
+  logout$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.logout),
+        tap(() => {
+          localStorage.removeItem('auth_token');
+          this.authService.logout();
           this.router.navigate(['/auth/login']);
         })
       ),
@@ -138,17 +169,5 @@ export class AuthEffects {
       ofType(AuthActions.verifyOtpSuccess),
       map(() => AuthActions.setAuthStep({ step: AuthStep.RESET_PASSWORD }))
     )
-  );
-
-  logout$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.logout),
-        tap(() => {
-          localStorage.removeItem('auth_token');
-          this.router.navigate(['/auth/login']);
-        })
-      ),
-    { dispatch: false }
   );
 }

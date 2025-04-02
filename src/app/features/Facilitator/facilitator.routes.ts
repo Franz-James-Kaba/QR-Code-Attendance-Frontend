@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 
-export const adminRoutes: Routes = [
+export const facilitatorRoutes: Routes = [
       {
         path: '',
-        loadComponent: () => import('./admin.component')
-          .then(m => m.AdminComponent)
+        loadComponent: () => import('./facilitator.component')
+          .then(m => m.FacilitatorComponent)
       },
       {
         path: '**',

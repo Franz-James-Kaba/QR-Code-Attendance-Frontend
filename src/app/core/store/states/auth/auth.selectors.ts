@@ -1,6 +1,5 @@
-// auth.selectors.ts
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { AuthState } from '../../../../shared/Admin/shared/models/auth.model';
+import { AuthState } from '@shared/models/auth/auth.model';
 
 export const selectAuthState = createFeatureSelector<AuthState>('auth');
 

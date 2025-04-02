@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { AuthState, AuthStep } from '../../../../shared/Admin/shared/models/auth.model';
+import { AuthState, AuthStep } from '@shared/models/auth/auth.model';
 
 import { AuthActions } from './auth.actions';
 

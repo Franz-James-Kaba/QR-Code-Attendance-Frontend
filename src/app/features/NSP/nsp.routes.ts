@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 
-export const adminRoutes: Routes = [
+export const nspRoutes: Routes = [
       {
         path: '',
-        loadComponent: () => import('./admin.component')
-          .then(m => m.AdminComponent)
+        loadComponent: () => import('./nsp.component')
+          .then(m => m.NspComponent)
       },
       {
         path: '**',

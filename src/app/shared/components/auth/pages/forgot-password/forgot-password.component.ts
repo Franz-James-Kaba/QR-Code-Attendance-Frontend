@@ -1,4 +1,3 @@
-// Angular core imports
 import { AsyncPipe } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,21 +10,18 @@ import {
   AbstractControl,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-// App imports
-import { OtpInputComponent } from '../../../../shared/components/otp-input/otp-input.component';
-import { AuthStep } from '../../../../shared/models/auth.model';
-import { amaliTechEmailValidator } from '../../../../shared/validators/email.validator';
 import { Store } from '@ngrx/store';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
-// NgRx imports
-import { AuthActions } from '../../../../../../core/store/states/auth/auth.actions';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
+import { OtpInputComponent } from '@shared/components/otp-input/otp-input.component';
+import { AuthStep } from '@shared/models/auth/auth.model';
+import { amaliTechEmailValidator } from '@shared/validators/email.validator';
+import { AuthActions } from '@store/states/auth/auth.actions';
 import {
   selectAuthStep,
   selectIsLoading,
   selectAuthError,
-} from '../../../../../../core/store/states/auth/auth.selectors';
-// RxJS imports
+} from '@store/states/auth/auth.selectors';
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 

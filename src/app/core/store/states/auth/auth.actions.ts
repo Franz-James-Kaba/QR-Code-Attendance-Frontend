@@ -1,5 +1,5 @@
-import { AuthResponse, AuthStep } from '../../../../shared/Admin/shared/models/auth.model';
 import { createAction, props } from '@ngrx/store';
+import { AuthResponse, AuthStep } from '@shared/models/auth/auth.model';
 
 export const AuthActions = {
   initAuth: createAction('[Auth] Initialize Auth'),
