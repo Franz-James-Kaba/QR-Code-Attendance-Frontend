@@ -1,0 +1,74 @@
+<section
+  class="w-full max-w-lg mx-auto p-4 min-h-[calc(100vh-4rem)] flex items-center justify-center"
+>
+  <div class="w-full">
+    <!-- Title -->
+    <div class="mb-6">
+      <h1 class="text-2xl md:text-3xl text-gray-900 text-center font-semibold">
+        Sign in to continue...
+      </h1>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Email Field -->
+        <div>
+          <app-input-field
+            type="email"
+            label="Work email"
+            name="email"
+            placeholder="Enter work email"
+            [required]="true"
+            formControlName="email"
+            class="block"
+          />
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <app-input-field
+            type="password"
+            label="Password"
+            name="password"
+            placeholder="Enter password"
+            [required]="true"
+            [showPasswordToggle]="true"
+            formControlName="password"
+            class="block"
+          />
+        </div>
+
+        <!-- Error Message -->
+        @if (error$ | async) {
+          <div class="text-sm text-red-600 mt-2 text-center" role="alert">
+            {{ error$ | async }}
+          </div>
+        }
+
+        <!-- Sign In Button -->
+        <div class="pt-2">
+          <app-button
+            type="submit"
+            [disabled]="loginForm.invalid || ((isLoading$ | async) ?? false)"
+            [fullWidth]="true"
+          >
+            @if (isLoading$ | async) {
+              <span>Signing in...</span>
+            } @else {
+              <span>Sign in</span>
+            }
+          </app-button>
+        </div>
+
+        <!-- Reset Password Link -->
+        <div class="text-center text-sm">
+          <span class="text-gray-600">Forgot password? </span>
+          <a routerLink="/auth/forgot-password" class="text-gray-900 hover:underline font-medium">
+            Reset
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
