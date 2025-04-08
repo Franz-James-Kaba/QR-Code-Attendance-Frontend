@@ -1,3 +1,8 @@
-<p>
-  navigation-loading works!
-</p>
+@if (isLoading$ | async) {
+  <app-loading
+    variant="navigation"
+    color="primary"
+    text="Loading page..."
+    size="lg"
+  ></app-loading>
+}

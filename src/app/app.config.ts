@@ -4,6 +4,7 @@ import { APP_INITIALIZER } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
 import { authInterceptor } from '@core/interceptors/auth/auth.interceptor';
+import { NavigationLoadingInterceptor } from '@core/interceptors/navigation-loading/navigation-loading.interceptor';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore, Store } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
@@ -36,6 +37,7 @@ export const appConfig: ApplicationConfig = {
       useFactory: initializeAuth,
       deps: [Store],
       multi: true
-    }
+    },
+    NavigationLoadingInterceptor
   ],
 };

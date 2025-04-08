@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Router,
   NavigationStart,
@@ -14,24 +15,24 @@ import { filter } from 'rxjs/operators';
 })
 export class NavigationLoadingInterceptor {
   private navigationInProgress = false;
-  private navigationTimeout: any = null;
-  private readonly router = inject(Router)
-  private readonly loadingService = inject(LoadingService)
+  private navigationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly router = inject(Router);
+  private readonly loadingService = inject(LoadingService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-  ) {
+  constructor() {
     this.setupNavigationListener();
   }
 
   setupNavigationListener(): void {
     this.router.events.pipe(
-      // Only interested in navigation events
       filter(event =>
         event instanceof NavigationStart ||
         event instanceof NavigationEnd ||
         event instanceof NavigationCancel ||
         event instanceof NavigationError
-      )
+      ),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(event => {
       // Show loading when navigation starts
       if (event instanceof NavigationStart) {
@@ -47,7 +48,7 @@ export class NavigationLoadingInterceptor {
           if (this.navigationInProgress) {
             this.loadingService.showNavigationLoading();
           }
-        }, 200); // 200ms delay before showing the loader
+        }, 100); // 100ms delay before showing the loader
       }
 
       // Hide loading when navigation is complete or cancelled
@@ -67,7 +68,7 @@ export class NavigationLoadingInterceptor {
         // Add a small delay before hiding to ensure transitions are smooth
         setTimeout(() => {
           this.loadingService.hideNavigationLoading();
-        }, 100);
+        }, 200);
       }
     });
   }
