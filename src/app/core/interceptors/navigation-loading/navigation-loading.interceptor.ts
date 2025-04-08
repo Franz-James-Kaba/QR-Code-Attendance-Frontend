@@ -24,7 +24,7 @@ export class NavigationLoadingInterceptor {
     this.setupNavigationListener();
   }
 
-  setupNavigationListener(): void {
+    setupNavigationListener(): void {
     this.router.events.pipe(
       filter(event =>
         event instanceof NavigationStart ||
@@ -43,12 +43,12 @@ export class NavigationLoadingInterceptor {
           clearTimeout(this.navigationTimeout);
         }
 
-        // Add a small delay to avoid flickering for fast navigations
+        // Reduce delay to show loader more frequently
         this.navigationTimeout = setTimeout(() => {
           if (this.navigationInProgress) {
             this.loadingService.showNavigationLoading();
           }
-        }, 100); // 100ms delay before showing the loader
+        }, 50); // Reduced from 100ms to 50ms to show loader more often
       }
 
       // Hide loading when navigation is complete or cancelled
@@ -65,10 +65,10 @@ export class NavigationLoadingInterceptor {
           this.navigationTimeout = null;
         }
 
-        // Add a small delay before hiding to ensure transitions are smooth
+        // Increase minimum display time to ensure loader is visible
         setTimeout(() => {
           this.loadingService.hideNavigationLoading();
-        }, 200);
+        }, 500); // Increased from 200ms to 500ms for better visibility
       }
     });
   }

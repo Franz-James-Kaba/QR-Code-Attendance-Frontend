@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule, LoadingComponent],
   templateUrl: './navigation-loading.component.html',
-  styleUrl:'./navigation-loading.component.scss',
+  styleUrls: ['./navigation-loading.component.scss'],
 })
 export class NavigationLoadingComponent implements OnInit {
   isLoading$!: Observable<boolean>;
