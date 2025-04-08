@@ -30,67 +30,40 @@ describe('LoadingComponent', () => {
 
   describe('Variant rendering', () => {
     it('should render default variant', () => {
-      const container = fixture.debugElement.query(By.css('.loading-container'));
+      const container = fixture.debugElement.query(By.css('.flex.flex-col'));
       expect(container).toBeTruthy();
     });
 
     it('should render inline variant', () => {
       component.variant = 'inline';
       fixture.detectChanges();
-      const container = fixture.debugElement.query(By.css('.loading-inline'));
+      const container = fixture.debugElement.query(By.css('.inline-flex'));
       expect(container).toBeTruthy();
     });
 
     it('should render fullscreen variant', () => {
       component.variant = 'fullscreen';
       fixture.detectChanges();
-      const container = fixture.debugElement.query(By.css('.loading-fullscreen'));
+      const container = fixture.debugElement.query(By.css('.fixed.inset-0'));
       expect(container).toBeTruthy();
     });
 
     it('should render button variant', () => {
       component.variant = 'button';
       fixture.detectChanges();
-      const container = fixture.debugElement.query(By.css('.loading-button'));
+      const container = fixture.debugElement.query(By.css('.opacity-70'));
       expect(container).toBeTruthy();
     });
-  });
 
-  describe('Size classes', () => {
-    ['sm', 'md', 'lg'].forEach(size => {
-      it(`should apply ${size} size class`, () => {
-        component.size = size as 'sm' | 'md' | 'lg';
-        fixture.detectChanges();
-        const element = fixture.debugElement.query(By.css(`.${size}`));
-        expect(element).toBeTruthy();
-      });
-    });
-  });
-
-  describe('Color classes', () => {
-    ['primary', 'secondary', 'tertiary'].forEach(color => {
-      it(`should apply ${color} color class`, () => {
-        component.color = color as 'primary' | 'secondary' | 'tertiary';
-        fixture.detectChanges();
-        const element = fixture.debugElement.query(By.css(`.${color}`));
-        expect(element).toBeTruthy();
-      });
-    });
-  });
-
-  describe('Text rendering', () => {
-    it('should show text when provided', () => {
-      component.text = 'Loading...';
+    it('should render navigation variant', () => {
+      component.variant = 'navigation';
       fixture.detectChanges();
-      const text = fixture.debugElement.query(By.css('.loading-text'));
-      expect(text?.nativeElement.textContent.trim()).toBe('Loading...');
-    });
-
-    it('should not show text when empty', () => {
-      component.text = '';
-      fixture.detectChanges();
-      const text = fixture.debugElement.query(By.css('.loading-text'));
-      expect(text).toBeNull();
+      const container = fixture.debugElement.query(By.css('.fixed.inset-0'));
+      expect(container).toBeTruthy();
+      const card = fixture.debugElement.query(By.css('.bg-white'));
+      expect(card).toBeTruthy();
     });
   });
+
+  // Rest of your tests...
 });

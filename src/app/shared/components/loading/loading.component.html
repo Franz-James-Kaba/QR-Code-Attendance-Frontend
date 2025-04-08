@@ -33,4 +33,18 @@
       }
     </span>
   }
+  @case ('navigation') {
+    <div
+      class="fixed inset-0 bg-white/80 dark:bg-gray-900/80 flex flex-col items-center justify-center z-[9999] transition-opacity duration-300"
+    >
+      <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-lg p-8 flex flex-col items-center">
+        <div class="loading-spinner lg" [class]="color"></div>
+        @if (text) {
+          <p class="mt-4 text-base font-medium text-gray-700 dark:text-gray-300">{{ text }}</p>
+        } @else {
+          <p class="mt-4 text-base font-medium text-gray-700 dark:text-gray-300">Loading...</p>
+        }
+      </div>
+    </div>
+  }
 }
