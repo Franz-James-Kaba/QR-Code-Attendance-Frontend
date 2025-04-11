@@ -6,18 +6,18 @@
       <p class="text-sm text-gray-600">This is the summary of your dashboard</p>
     </div>
     <div class="flex flex-row items-center space-x-3">
-      <app-button 
-        variant="primary" 
-        size="md" 
-        icon="fas fa-plus-circle" 
+      <app-button
+        variant="primary"
+        size="md"
+        icon="fas fa-plus-circle"
         iconPosition="left"
         (buttonClick)="onCreateNsp()">
         Create NSP
       </app-button>
-      <app-button 
-        variant="secondary" 
-        size="md" 
-        icon="fas fa-user-plus" 
+      <app-button
+        variant="secondary"
+        size="md"
+        icon="fas fa-user-plus"
         iconPosition="left"
         (buttonClick)="onCreateFacilitator()">
         Create Facilitator
@@ -46,28 +46,39 @@
   <section class="grid grid-cols-3 gap-6 mb-6">
     <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4">Attendance Overview</h2>
-      <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
-        <!-- Placeholder for line chart -->
-        <p class="text-gray-500">Line Chart Placeholder</p>
-      </div>
+      <!-- Using the unified chart component for bar chart -->
+      <app-chart
+        [dataSet]="attendanceChartData"
+        [options]="attendanceChartOptions"
+        [isLoading]="attendanceChartLoading"
+        chartType="bar"
+        (timeRangeChanged)="onAttendanceTimeRangeChange($event)">
+      </app-chart>
     </div>
     <div class="bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4">Program Distribution</h2>
-      <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
-        <!-- Placeholder for pie chart -->
-        <p class="text-gray-500">Pie Chart Placeholder</p>
-      </div>
+      <!-- Using the unified chart component for program distribution (pie chart) -->
+      <app-chart
+        [dataSet]="programDistributionData"
+        [options]="programDistributionOptions"
+        [isLoading]="programDistributionLoading"
+        chartType="pie">
+      </app-chart>
     </div>
   </section>
 
   <!-- Col 4: Analytics Graph and Early Attendees -->
   <section class="grid grid-cols-3 gap-6 mb-6">
     <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4">Monthly Trends</h2>
-      <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
-        <!-- Placeholder for analytics graph -->
-        <p class="text-gray-500">Analytics Graph Placeholder</p>
-      </div>
+      <h2 class="text-lg font-semibold mb-4">Average Staying Time</h2>
+      <!-- Using the unified chart component for line chart -->
+      <app-chart
+        [dataSet]="stayingTimeChartData"
+        [options]="stayingTimeChartOptions"
+        [isLoading]="stayingTimeChartLoading"
+        chartType="line"
+        (timeRangeChanged)="onStayingTimeRangeChange($event)">
+      </app-chart>
     </div>
     <div class="col-span-1 bg-white rounded-lg shadow-md p-4">
       <h2 class="text-lg font-semibold mb-4">Early Attendees</h2>

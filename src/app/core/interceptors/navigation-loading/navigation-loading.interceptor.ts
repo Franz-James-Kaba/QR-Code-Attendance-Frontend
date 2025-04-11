@@ -48,7 +48,7 @@ export class NavigationLoadingInterceptor {
           if (this.navigationInProgress) {
             this.loadingService.showNavigationLoading();
           }
-        }, 50); // Reduced from 100ms to 50ms to show loader more often
+        }, 100); // Reduced from 100ms to 50ms to show loader more often
       }
 
       // Hide loading when navigation is complete or cancelled
@@ -68,7 +68,7 @@ export class NavigationLoadingInterceptor {
         // Increase minimum display time to ensure loader is visible
         setTimeout(() => {
           this.loadingService.hideNavigationLoading();
-        }, 500); // Increased from 200ms to 500ms for better visibility
+        }, 200); // Increased from 200ms to 500ms for better visibility
       }
     });
   }
