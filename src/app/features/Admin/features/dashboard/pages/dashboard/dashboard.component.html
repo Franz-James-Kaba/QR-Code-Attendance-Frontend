@@ -1,4 +1,4 @@
-<main class="container mx-auto px-4 py-6">
+<main class="container mx-auto">
   <!-- Col 1: Header with greeting and action buttons -->
   <section class="flex justify-between items-center mb-6">
     <div>
@@ -9,7 +9,13 @@
       <app-button
         variant="primary"
         size="md"
-        icon="fas fa-plus-circle"
+        [svgIcon]="
+          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+            <circle cx='12' cy='12' r='10'></circle>
+            <line x1='12' y1='8' x2='12' y2='16'></line>
+            <line x1='8' y1='12' x2='16' y2='12'></line>
+          </svg>`
+        "
         iconPosition="left"
         (buttonClick)="onCreateNsp()">
         Create NSP
@@ -17,7 +23,14 @@
       <app-button
         variant="secondary"
         size="md"
-        icon="fas fa-user-plus"
+        [svgIcon]="
+          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+            <path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path>
+            <circle cx='8.5' cy='7' r='4'></circle>
+            <line x1='20' y1='8' x2='20' y2='14'></line>
+            <line x1='17' y1='11' x2='23' y2='11'></line>
+          </svg>`
+        "
         iconPosition="left"
         (buttonClick)="onCreateFacilitator()">
         Create Facilitator

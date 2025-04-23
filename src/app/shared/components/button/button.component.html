@@ -15,12 +15,20 @@
       </span>
     }
 
+    @if (svgIcon && iconPosition === 'left' && !loading) {
+      <span class="mr-2 h-5 w-5" [innerHTML]="svgIcon | safe"></span>
+    }
+
     <ng-content></ng-content>
 
     @if (icon && iconPosition === 'right' && !loading) {
       <span class="ml-2">
         <i [class]="icon"></i>
       </span>
+    }
+
+    @if (svgIcon && iconPosition === 'right' && !loading) {
+      <span class="ml-2 h-5 w-5" [innerHTML]="svgIcon | safe"></span>
     }
   </button>
 </div>

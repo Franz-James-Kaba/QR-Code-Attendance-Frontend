@@ -1,68 +1,54 @@
-<div class="relative">
-  <!-- User avatar and details -->
-  <button
-    type="button"
-    (click)="toggleDropdown()"
-    class="flex items-center gap-2 focus:outline-none"
-    aria-haspopup="true"
-    [attr.aria-expanded]="isDropdownOpen"
-  >
-    <div class="flex items-center">
-      @if (userAvatar) {
-        <img
-          [src]="userAvatar"
-          alt="{{ userName }}'s avatar"
-          class="w-8 h-8 rounded-full object-cover border border-gray-200"
-        />
-      } @else {
-        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold">
-          {{ userName.charAt(0) }}
-        </div>
-      }
-      <div class="ml-2 text-left hidden md:block">
-        <div class="text-sm font-medium text-gray-900">{{ userName }}</div>
-        <div class="text-xs text-gray-500">{{ userRole }}</div>
+<div
+  [ngClass]="[
+    avatarOnly ? '' : 'flex items-center gap-2',
+    clickable ? 'cursor-pointer' : '',
+    customClass
+  ]"
+  (click)="onBadgeClick()"
+  onkeypress="onBadgeClick()"
+>
+  <div class="relative">
+    @if (userAvatar) {
+      <img
+        [src]="userAvatar"
+        alt="{{ userName }}'s avatar"
+        [ngClass]="[
+          sizeClasses,
+          'rounded-full object-cover border border-gray-200'
+        ]"
+      />
+    } @else {
+      <div
+        [ngClass]="[
+          sizeClasses,
+          'rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold'
+        ]"
+      >
+        {{ userName.charAt(0).toUpperCase() }}
       </div>
-      <!-- Dropdown arrow -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-4 w-4 ml-1 text-gray-500"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-      </svg>
-    </div>
-  </button>
+    }
 
-  <!-- Dropdown menu -->
-  @if (isDropdownOpen) {
-    <div
-      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100"
-      role="menu"
-    >
-      <a
-        routerLink="/profile"
-        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        role="menuitem"
-      >
-        Profile
-      </a>
-      <a
-        routerLink="/settings"
-        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        role="menuitem"
-      >
-        Settings
-      </a>
-      <div class="border-t border-gray-100 my-1"></div>
-      <a
-        routerLink="/auth/login"
-        class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-        role="menuitem"
-      >
-        Logout
-      </a>
+    <!-- Status indicator -->
+    @if (status !== 'none') {
+      <span
+        [ngClass]="[
+          statusClasses,
+          'absolute bottom-0 right-0 block rounded-full border-2 border-white'
+        ]"
+        [style.width.px]="size === 'sm' ? 8 : (size === 'md' ? 10 : 12)"
+        [style.height.px]="size === 'sm' ? 8 : (size === 'md' ? 10 : 12)"
+        aria-hidden="true"
+      ></span>
+    }
+  </div>
+
+  <!-- User info (name and role) -->
+  @if (!avatarOnly) {
+    <div class="text-left">
+      <div [ngClass]="nameTextClass" class="font-medium text-gray-900">{{ userName }}</div>
+      @if (showRole) {
+        <div [ngClass]="roleTextClass" class="text-gray-500">{{ userRole }}</div>
+      }
     </div>
   }
 </div>

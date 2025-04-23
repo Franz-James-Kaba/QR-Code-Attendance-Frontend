@@ -1,56 +1,55 @@
-import { BreadcrumbService } from '@Admin/services/breadcrumb.service';
-import { BreadcrumbComponent } from '@Admin/shared/components/breadcrumb/breadcrumb.component';
-import { DropdownComponent } from '@Admin/shared/components/dropdown/dropdown.component';
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
-import { IconComponent } from '@shared/components/icon/icon.component';
+import { Component, ElementRef, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-interface UserMenuItem {
-  label: string;
-  icon: string;
-}
+import { BreadcrumbComponent } from '../../../../../shared/components/breadcrumb/breadcrumb.component';
+import { IconComponent } from '../../../../../shared/components/icon/icon.component';
+import { UserBadgeComponent } from '../../../../../shared/components/user-badge/user-badge.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, BreadcrumbComponent, IconComponent, DropdownComponent],
+  imports: [CommonModule, RouterModule, BreadcrumbComponent, IconComponent, UserBadgeComponent],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
-  @Input() showMobileMenu = true;
-  @Input() showUserMenu = true;
-  @Input() userAvatar = 'https://ui-avatars.com/api/?name=Admin+User';
-  @Input() userName = 'Admin User';
-  @Input() sidebarOpen = true;
-  @Input() sidebarMinimized = false;
-
+export class HeaderComponent implements OnInit {
+  @Input() sidebarOpen: boolean = true;
+  @Input() sidebarMinimized: boolean = false;
   @Output() toggleSidebar = new EventEmitter<void>();
 
-  private readonly breadcrumbService = inject(BreadcrumbService);
-  breadcrumbItems$ = this.breadcrumbService.breadcrumbs$;
 
-  userMenuItems = [
-    {
-      label: 'Profile',
-      icon: 'M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z',
-    },
-    {
-      label: 'Settings',
-      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-    },
-    {
-      label: 'Logout',
-      icon: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
-    },
-  ];
+  private readonly elementRef = inject(ElementRef);
+
+  isScrolled = false;
+  hasNotifications = false;
+  showUserDropdown = false;
+
+  readonly BELL_ICON_PATH = 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0';
+  readonly MENU_ICON_PATH = 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5';
+
+  ngOnInit(): void {
+    this.checkNotifications();
+  }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    this.isScrolled = window.scrollY > 10;
+  }
 
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
   }
 
-   onUserMenuItemClick(item: UserMenuItem): void {
-    // Using allowed console method
-    console.warn('User menu item clicked:', item.label);
+  onUserBadgeClick(): void {
+    // This is where you would handle opening a separate dropdown component
+    // For now, it's just a placeholder since we've removed the dropdown from UserBadgeComponent
+    this.showUserDropdown = !this.showUserDropdown;
+    // Using allowed console method instead
+    console.warn('User badge clicked - implement dropdown component integration here');
+  }
+
+  private checkNotifications(): void {
+    this.hasNotifications = true;
   }
 }

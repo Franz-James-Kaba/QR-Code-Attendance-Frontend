@@ -33,11 +33,10 @@ interface QuickAccessItem {
   standalone: true,
   imports: [CommonModule, ButtonComponent, ChartComponent],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-  public userName = 'Franz';
+  private readonly destroy$ = new Subject<void>();
+  public readonly userName = 'Franz';
 
   // Chart data and state management
   attendanceChartData: ChartDataSet | null = null;
@@ -46,11 +45,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   attendanceChartLoading = true;
   stayingTimeChartLoading = true;
   programDistributionLoading = true;
-  
+
   // Time ranges
   selectedAttendanceTimeRange: TimeRange = 'Weekly';
   selectedStayingTimeRange: TimeRange = 'Weekly';
-  
+
   // Chart options
   attendanceChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
@@ -61,7 +60,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     barWidth: 20,
     barGap: 4
   };
-  
+
   stayingTimeChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
     defaultTimeRange: 'Weekly',
@@ -93,10 +92,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   loadAttendanceChartData(): void {
     this.attendanceChartLoading = true;
-    
+
     // Use the chart service with the updated environment settings
     this.chartService.getChartData('attendance', this.selectedAttendanceTimeRange, 'bar')
       .pipe(takeUntil(this.destroy$))
@@ -114,7 +113,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadStayingTimeChartData(): void {
     this.stayingTimeChartLoading = true;
-    
+
     // Use the chart service with the updated environment settings
     this.chartService.getChartData('staying-time', this.selectedStayingTimeRange, 'line')
       .pipe(takeUntil(this.destroy$))
@@ -132,7 +131,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadProgramDistributionData(): void {
     this.programDistributionLoading = true;
-    
+
     // Use the chart service to fetch program distribution data
     this.chartService.getChartData('program-distribution', 'Monthly', 'pie')
       .pipe(takeUntil(this.destroy$))
