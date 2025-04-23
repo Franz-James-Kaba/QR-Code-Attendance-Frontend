@@ -1,135 +1,121 @@
-<main class="container mx-auto">
-  <!-- Col 1: Header with greeting and action buttons -->
-  <section class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-800">Hi, {{userName}}</h1>
-      <p class="text-sm text-gray-600">This is the summary of your dashboard</p>
-    </div>
-    <div class="flex flex-row items-center space-x-3">
-      <app-button
-        variant="primary"
-        size="md"
-        [svgIcon]="
-          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
-            <circle cx='12' cy='12' r='10'></circle>
-            <line x1='12' y1='8' x2='12' y2='16'></line>
-            <line x1='8' y1='12' x2='16' y2='12'></line>
-          </svg>`
-        "
-        iconPosition="left"
-        (buttonClick)="onCreateNsp()">
-        Create NSP
-      </app-button>
-      <app-button
-        variant="secondary"
-        size="md"
-        [svgIcon]="
-          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
-            <path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path>
-            <circle cx='8.5' cy='7' r='4'></circle>
-            <line x1='20' y1='8' x2='20' y2='14'></line>
-            <line x1='17' y1='11' x2='23' y2='11'></line>
-          </svg>`
-        "
-        iconPosition="left"
-        (buttonClick)="onCreateFacilitator()">
-        Create Facilitator
-      </app-button>
-    </div>
-  </section>
+<!-- Col 1: Header with greeting and action buttons -->
+<section class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800">Hi, {{userName}}</h1>
+    <p class="text-sm text-gray-600">This is the summary of your dashboard</p>
+  </div>
+  <div class="flex flex-row items-center space-x-3">
+    <app-button
+      variant="primary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <circle cx='12' cy='12' r='10'></circle>
+          <line x1='12' y1='8' x2='12' y2='16'></line>
+          <line x1='8' y1='12' x2='16' y2='12'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="onCreateNsp()">
+      Create NSP
+    </app-button>
+    <app-button
+      variant="secondary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path>
+          <circle cx='8.5' cy='7' r='4'></circle>
+          <line x1='20' y1='8' x2='20' y2='14'></line>
+          <line x1='17' y1='11' x2='23' y2='11'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="onCreateFacilitator()">
+      Create Facilitator
+    </app-button>
+  </div>
+</section>
 
-  <!-- Col 2: Analytics Cards -->
-  <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    @for (card of statCards; track $index) {
-      <div class="bg-white rounded-lg shadow-md p-4 flex items-center">
-        <div class="rounded-full {{card.bgColor}} p-3 mr-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{card.textColor}}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="card.icon" />
-          </svg>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">{{card.title}}</p>
-          <h3 class="text-xl font-bold">{{card.value}}</h3>
-        </div>
-      </div>
-    }
-  </section>
+<!-- Col 2: Stats Cards -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  <!-- NSP Stats Card -->
+  <app-stat-card
+    value="112"
+    title="Total number of NSPs"
+    iconPath="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+    detailsLink="#">
+  </app-stat-card>
 
-  <!-- Col 3: Charts and Graphs -->
-  <section class="grid grid-cols-3 gap-6 mb-6">
-    <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4">Attendance Overview</h2>
-      <!-- Using the unified chart component for bar chart -->
-      <app-chart
-        [dataSet]="attendanceChartData"
-        [options]="attendanceChartOptions"
-        [isLoading]="attendanceChartLoading"
-        chartType="bar"
-        (timeRangeChanged)="onAttendanceTimeRangeChange($event)">
-      </app-chart>
-    </div>
-    <div class="bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4">Program Distribution</h2>
-      <!-- Using the unified chart component for program distribution (pie chart) -->
-      <app-chart
-        [dataSet]="programDistributionData"
-        [options]="programDistributionOptions"
-        [isLoading]="programDistributionLoading"
-        chartType="pie">
-      </app-chart>
-    </div>
-  </section>
+  <!-- Facilitator Stats Card -->
+  <app-stat-card
+    value="16"
+    title="Total number of Facilitators"
+    iconPath="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0"
+    detailsLink="#">
+  </app-stat-card>
+</section>
 
-  <!-- Col 4: Analytics Graph and Early Attendees -->
-  <section class="grid grid-cols-3 gap-6 mb-6">
-    <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4">Average Staying Time</h2>
-      <!-- Using the unified chart component for line chart -->
-      <app-chart
-        [dataSet]="stayingTimeChartData"
-        [options]="stayingTimeChartOptions"
-        [isLoading]="stayingTimeChartLoading"
-        chartType="line"
-        (timeRangeChanged)="onStayingTimeRangeChange($event)">
-      </app-chart>
-    </div>
-    <div class="col-span-1 bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4">Early Attendees</h2>
-      <div class="space-y-4">
-        @for (attendee of earlyAttendees; track attendee.name) {
-          <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
-            <div class="rounded-full bg-green-100 p-3 mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <div>
-              <p class="font-medium text-gray-800">{{attendee.name}}</p>
-              <p class="text-sm text-gray-500">{{attendee.program}}</p>
-            </div>
-            <div class="ml-auto">
-              <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">{{attendee.time}}</span>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  </section>
+<!-- Col 3: Charts and Graphs -->
+<section class="grid grid-cols-3 gap-6 mb-6">
+  <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
+    <h2 class="text-lg font-semibold mb-4">Attendance Overview</h2>
+    <!-- Using the unified chart component for bar chart -->
+    <app-chart
+      [dataSet]="attendanceChartData"
+      [options]="attendanceChartOptions"
+      [isLoading]="attendanceChartLoading"
+      chartType="bar"
+      (timeRangeChanged)="onAttendanceTimeRangeChange($event)">
+    </app-chart>
+  </div>
+  <div class="bg-white rounded-lg shadow-md p-4">
+    <h2 class="text-lg font-semibold mb-4">Program Distribution</h2>
+    <!-- Using the unified chart component for program distribution (pie chart) -->
+    <app-chart
+      [dataSet]="programDistributionData"
+      [options]="programDistributionOptions"
+      [isLoading]="programDistributionLoading"
+      chartType="pie">
+    </app-chart>
+  </div>
+</section>
 
-  <!-- Col 5: Quick Access Area -->
-  <section class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h2 class="text-lg font-semibold mb-4">Quick Access</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      @for (item of quickAccessItems; track item.title) {
-        <a [href]="item.link" class="flex flex-col items-center p-4 {{item.bgColor}} rounded-lg hover:{{item.bgColor.replace('50', '100')}} transition-colors">
-          <div class="rounded-full {{item.bgColor.replace('50', '100')}} p-3 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{item.textColor}}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+<!-- Col 4: Analytics Graph and Early Attendees -->
+<section class="grid grid-cols-3 gap-6 mb-6">
+  <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
+    <h2 class="text-lg font-semibold mb-4">Average Staying Time</h2>
+    <!-- Using the unified chart component for line chart -->
+    <app-chart
+      [dataSet]="stayingTimeChartData"
+      [options]="stayingTimeChartOptions"
+      [isLoading]="stayingTimeChartLoading"
+      chartType="line"
+      (timeRangeChanged)="onStayingTimeRangeChange($event)">
+    </app-chart>
+  </div>
+  <div class="col-span-1 bg-white rounded-lg shadow-md p-4">
+    <h2 class="text-lg font-semibold mb-4">Early Attendees</h2>
+    <div class="space-y-4">
+      @for (attendee of earlyAttendees; track attendee.name) {
+        <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
+          <div class="rounded-full bg-green-100 p-3 mr-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
-          <span class="text-sm font-medium text-gray-700">{{item.title}}</span>
-        </a>
+          <div>
+            <p class="font-medium text-gray-800">{{attendee.name}}</p>
+            <p class="text-sm text-gray-500">{{attendee.program}}</p>
+          </div>
+          <div class="ml-auto">
+            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">{{attendee.time}}</span>
+          </div>
+        </div>
       }
     </div>
-  </section>
-</main>
+  </div>
+</section>
+
+<!-- Col 5: Quick Access Area -->
+<app-personnel-table></app-personnel-table>

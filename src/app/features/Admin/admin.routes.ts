@@ -23,35 +23,35 @@ export const adminRoutes: Routes = [
         }
       },
       {
-        path: 'users',
+        path: 'nsps',
         data: {
-          title: 'Users'
+          title: 'NSP Management'
         },
         children: [
           {
             path: '',
-            loadComponent: () => import('@Admin/features/dashboard/pages/user-list/user-list.component')
-              .then(m => m.UserListComponent),
+            loadComponent: () => import('@app/features/Admin/features/dashboard/pages/nsp-overview/nsp-overview.component')
+              .then(m => m.NspOverviewComponent),
             data: {
-              title: 'All Users'
+              title: 'NSP Overview'
             }
-          },
-          // {
-          //   path: ':id',
-          //   loadComponent: () => import('@Admin/features/dashboard/pages/user-detail/user-detail.component')
-          //     .then(m => m.UserDetailComponent),
-          //   data: {
-          //     title: 'User Details'
-          //   }
-          // },
-          // {
-          //   path: ':id/edit',
-          //   loadComponent: () => import('@Admin/features/dashboard/pages/user-edit/user-edit.component')
-          //     .then(m => m.UserEditComponent),
-          //   data: {
-          //     title: 'Edit User'
-          //   }
-          // }
+          }
+        ]
+      },
+      {
+        path: 'facilitators',
+        data: {
+          title: 'Facilitator Management'
+        },
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('@app/features/Admin/features/dashboard/pages/facilitator-overview/facilitator-overview.component')
+              .then(m => m.FacilitatorOverviewComponent),
+            data: {
+              title: 'Facilitator Overview'
+            }
+          }
         ]
       },
       {

@@ -1,0 +1,24 @@
+<app-modal 
+  [title]="modalTitle" 
+  [visible]="isModalVisible"
+  (modalClosed)="onModalClose()">
+  
+  <!-- NSP Form -->
+  <ng-container *ngIf="modalType === 'createNsp' || modalType === 'editNsp'">
+    <app-nsp-form
+      [initialData]="modalData"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()">
+    </app-nsp-form>
+  </ng-container>
+  
+  <!-- Facilitator Form -->
+  <ng-container *ngIf="modalType === 'createFacilitator' || modalType === 'editFacilitator'">
+    <app-facilitator-form
+      [initialData]="modalData"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()">
+    </app-facilitator-form>
+  </ng-container>
+  
+</app-modal>
