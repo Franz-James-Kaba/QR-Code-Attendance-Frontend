@@ -20,10 +20,8 @@ describe('AuthService', () => {
     });
     service = TestBed.inject(AuthService);
 
-    // Reset localStorage before each test
     localStorage.clear();
 
-    // Reset any mocked static methods
     jest.spyOn(MockStorage, 'storeOtp').mockClear();
     jest.spyOn(MockStorage, 'recordPasswordResetRequest').mockClear();
     jest.spyOn(MockStorage, 'completePasswordReset').mockClear();

@@ -1,5 +1,10 @@
+import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
+import { PersonnelTableComponent } from "@Admin/shared/components/personnel-table/personnel-table.component";
+import { Attendee } from '@Admin/shared/models/attendee.interface';
+import { QuickAccessItem } from '@Admin/shared/models/quick-access-item.interface';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { ChartComponent } from '@shared/components/chart/chart.component';
 import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
@@ -7,41 +12,23 @@ import { ChartDataSet, ChartOptions, TimeRange } from '@shared/models/chart.mode
 import { ChartService } from '@shared/services/chart.service';
 import { Subject, takeUntil } from 'rxjs';
 
-import { PersonnelTableComponent } from "../../../../shared/components/personnel-table/personnel-table.component";
-
-interface StatCard {
-  title: string;
-  value: string | number;
-  icon: string;
-  bgColor: string;
-  textColor: string;
-}
-
-interface Attendee {
-  name: string;
-  program: string;
-  time: string;
-}
-
-interface QuickAccessItem {
-  title: string;
-  icon: string;
-  link: string;
-  bgColor: string;
-  textColor: string;
-}
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, ChartComponent, StatCardComponent, PersonnelTableComponent],
+  imports: [
+    CommonModule, 
+    ButtonComponent, 
+    ChartComponent, 
+    StatCardComponent, 
+    PersonnelTableComponent,
+    ModalContainerComponent
+  ],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   public readonly userName = 'Franz';
 
-  // Chart data and state management
   attendanceChartData: ChartDataSet | null = null;
   stayingTimeChartData: ChartDataSet | null = null;
   programDistributionData: ChartDataSet | null = null;
@@ -49,11 +36,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   stayingTimeChartLoading = true;
   programDistributionLoading = true;
 
-  // Time ranges
   selectedAttendanceTimeRange: TimeRange = 'Weekly';
   selectedStayingTimeRange: TimeRange = 'Weekly';
 
-  // Chart options
   attendanceChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
     defaultTimeRange: 'Weekly',
@@ -81,11 +66,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     tooltipEnabled: true
   };
 
-  // Inject services
   private readonly chartService = inject(ChartService);
+  private readonly modalService = inject(ModalService);
 
   ngOnInit(): void {
-    // Load initial chart data
     this.loadAttendanceChartData();
     this.loadStayingTimeChartData();
     this.loadProgramDistributionData();
@@ -99,7 +83,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadAttendanceChartData(): void {
     this.attendanceChartLoading = true;
 
-    // Use the chart service with the updated environment settings
     this.chartService.getChartData('attendance', this.selectedAttendanceTimeRange, 'bar')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -117,7 +100,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadStayingTimeChartData(): void {
     this.stayingTimeChartLoading = true;
 
-    // Use the chart service with the updated environment settings
     this.chartService.getChartData('staying-time', this.selectedStayingTimeRange, 'line')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -163,13 +145,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Action button handlers
   onCreateNsp(): void {
-    console.log('Create NSP button clicked');
-    // Implement your NSP creation logic here or navigate to NSP creation page
+    this.modalService.openModal('createNsp');
   }
 
   onCreateFacilitator(): void {
-    console.log('Create Facilitator button clicked');
-    // Implement your facilitator creation logic here or navigate to facilitator creation page
+    this.modalService.openModal('createFacilitator');
   }
 
   earlyAttendees: Attendee[] = [

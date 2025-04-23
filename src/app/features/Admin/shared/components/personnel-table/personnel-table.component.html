@@ -4,20 +4,12 @@
     Quick Access
   </div>
 
-  <!-- Title Section with Logo -->
-  <div class="flex items-center space-x-3 mb-6">
-    <div class="bg-gradient-to-r from-blue-500 to-orange-500 rounded-full p-3">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    </div>
-    <h2 class="text-xl font-semibold text-gray-800">Personnel</h2>
-  </div>
-
-  <!-- Search and Filter Controls -->
-  <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-6">
+  <!-- Title Section with Logo and Search Bar -->
+  <div class="flex items-center mb-6">
+    <h2 class="text-xl font-semibold text-gray-800 mr-4 whitespace-nowrap">Personnel</h2>
+    
     <!-- Search Box -->
-    <div class="relative flex-grow">
+    <div class="relative flex-grow w-full">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -31,9 +23,12 @@
         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
       >
     </div>
+  </div>
 
+  <!-- Filter Controls -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <!-- Stack Filter Dropdown -->
-    <div class="md:w-48">
+    <div>
       <select
         [(ngModel)]="selectedStack"
         (change)="onStackFilterChange($event)"
@@ -46,7 +41,7 @@
     </div>
 
     <!-- Status Filter Dropdown -->
-    <div class="md:w-48">
+    <div>
       <select
         [(ngModel)]="selectedStatus"
         (change)="onStatusFilterChange($event)"

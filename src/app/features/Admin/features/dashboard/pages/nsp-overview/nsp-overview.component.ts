@@ -6,7 +6,7 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 import { DeleteConfirmationComponent } from '../../../../shared/components/delete-confirmation/delete-confirmation.component';
 import { ModalContainerComponent } from '../../../../shared/components/modal-container/modal-container.component';
 import { NspTableComponent, NSP } from '../../../../shared/components/nsp-table/nsp-table.component';
-import { ModalService } from '../../../../shared/services/modal.service';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-nsp-overview',

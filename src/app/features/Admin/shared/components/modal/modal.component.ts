@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, EventEmitter, Output, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
@@ -8,7 +8,7 @@ import { Component, Input, EventEmitter, Output, OnInit, OnDestroy } from '@angu
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss']
 })
-export class ModalComponent implements OnInit, OnDestroy {
+export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() title = 'Modal';
   @Input() visible = false;
   @Output() modalClosed = new EventEmitter<void>();
@@ -23,9 +23,17 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // React to visible input changes
+    if (changes['visible']) {
+      this.onVisibilityChange(changes['visible'].currentValue);
+    }
+  }
+
   ngOnDestroy(): void {
     // Cleanup any potential animation timeouts
     this.showContent = false;
+    document.body.style.overflow = '';
   }
 
   /**

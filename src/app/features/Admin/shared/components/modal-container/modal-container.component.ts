@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
-import { ModalService, ModalType } from '../../services/modal.service';
+import { ModalService, ModalType } from '../../../core/services/modal.service';
 import { FacilitatorFormComponent } from '../facilitator-form/facilitator-form.component';
 import { ModalComponent } from '../modal/modal.component';
 import { NspFormComponent } from '../nsp-form/nsp-form.component';

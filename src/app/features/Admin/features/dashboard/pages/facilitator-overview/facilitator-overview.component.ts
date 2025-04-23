@@ -1,4 +1,4 @@
-import { ModalService } from '@Admin/app/shared/services/modal.service';
+import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
