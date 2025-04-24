@@ -1,0 +1,16 @@
+// User badge styles
+:host {
+  display: inline-block;
+}
+
+.user-badge-hover {
+  &:hover {
+    .avatar-image {
+      transform: scale(1.05);
+    }
+  }
+}
+
+img, div.rounded-full {
+  transition: all 0.2s ease-in-out;
+}

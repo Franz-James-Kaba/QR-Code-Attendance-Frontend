@@ -1,0 +1,36 @@
+<div class="notification-item" 
+     [ngClass]="typeClass" 
+     [attr.data-type]="notification.type"
+     role="alert"
+     aria-live="assertive">
+  <div class="notification-content">
+    <div class="notification-icon" aria-hidden="true">
+      <span class="icon icon-{{icon}}"></span>
+    </div>
+    <div class="notification-text">
+      <!-- Title if provided -->
+      <div *ngIf="notification.title" class="notification-title">{{ notification.title }}</div>
+      <div class="notification-message">{{ notification.message }}</div>
+    </div>
+    <!-- Action button if provided -->
+    <button *ngIf="notification.actionLabel && notification.onAction" 
+            (click)="handleAction()"
+            class="action-button"
+            type="button">
+      {{ notification.actionLabel }}
+    </button>
+    <button (click)="close()" 
+            class="close-button" 
+            aria-label="Close notification"
+            type="button">
+      <span class="icon icon-x" aria-hidden="true"></span>
+    </button>
+  </div>
+  
+  <!-- Progress bar for auto-close notifications -->
+  <div *ngIf="notification.showProgress && notification.autoClose" 
+       class="progress-bar"
+       aria-hidden="true">
+    <div class="progress" [style.width]="progressWidth"></div>
+  </div>
+</div>

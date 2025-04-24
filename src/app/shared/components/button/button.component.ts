@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
+import { SafePipe } from '../../pipes/safe.pipe';
 import { LoadingComponent } from '../loading/loading.component';
 
 @Component({
   selector: 'app-button',
   standalone: true,
-  imports: [CommonModule, LoadingComponent],
+  imports: [CommonModule, LoadingComponent, SafePipe],
   templateUrl: './button.component.html',
 })
 export class ButtonComponent {
@@ -17,6 +18,7 @@ export class ButtonComponent {
   @Input() loading = false;
   @Input() fullWidth = false;
   @Input() icon?: string;
+  @Input() svgIcon?: string;
   @Input() iconPosition: 'left' | 'right' = 'left';
 
   @Output() buttonClick = new EventEmitter<void>();

@@ -3,14 +3,11 @@ import { Routes } from '@angular/router';
 import { LayoutComponent as AuthLayoutComponent } from './layouts/auth-layout/layout.component';
 
 export const routes: Routes = [
-  // Default route redirects to auth
   {
     path: '',
-    redirectTo: 'auth',
+    redirectTo: '/auth/login',
     pathMatch: 'full'
   },
-
-
   {
     path: 'auth',
     component: AuthLayoutComponent,
@@ -40,29 +37,33 @@ export const routes: Routes = [
       }
     ]
   },
-
   {
     path: 'admin',
     loadChildren: () => import('./features/Admin/admin.routes')
-      .then(m => m.adminRoutes)
+      .then(r => r.adminRoutes),
+    data: {
+      title: 'Admin'
+    }
   },
-
   {
     path: 'nsp',
     loadChildren: () => import('./features/NSP/nsp.routes')
-      .then(m => m.nspRoutes)
+      .then(r => r.nspRoutes),
+    data: {
+      title: 'NSP'
+    }
   },
-
   {
     path: 'facilitator',
     loadChildren: () => import('./features/Facilitator/facilitator.routes')
-      .then(m => m.facilitatorRoutes)
+      .then(r => r.facilitatorRoutes),
+    data: {
+      title: 'Facilitator'
+    }
   },
-
   {
     path: '**',
-    loadComponent: () => import('./shared/components/not-found/not-found.component')
-      .then(m => m.NotFoundComponent),
-    title: 'Page Not Found'
+    loadComponent: () => import('@shared/components/not-found/not-found.component')
+      .then(m => m.NotFoundComponent)
   }
 ];
