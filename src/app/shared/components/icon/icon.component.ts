@@ -6,7 +6,6 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './icon.component.html',
-  styleUrl: './icon.component.css',
 })
 export class IconComponent {
   @Input() path!: string;
