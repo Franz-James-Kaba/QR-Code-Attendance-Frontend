@@ -21,7 +21,7 @@ export const MOCK_USERS: Record<string, User & { password: string; passwordReset
     email: 'nsp@amalitech.com',
     role: UserRole.NSP,
     password: 'Nsp@123',
-    passwordResetRequired: true // This user needs to reset password
+    passwordResetRequired: false // This user needs to reset password
   },
   'facilitator@amalitech.com': {
     id: 'facilitator-001',
