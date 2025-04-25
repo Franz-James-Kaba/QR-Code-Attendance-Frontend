@@ -1,0 +1,59 @@
+<!-- Success message notification -->
+<div *ngIf="showSuccessMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+  <div class="flex items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+    </svg>
+    <span>{{ successMessage }}</span>
+  </div>
+</div>
+
+<!-- NSP Table view when there are records -->
+<app-nsp-table
+  *ngIf="hasRecords"
+  [nsps]="nsps"
+  [showSuccessMessage]="false"
+  (edit)="editNsp($event)"
+  (delete)="confirmDelete($event)"
+  (create)="createNsp()">
+</app-nsp-table>
+
+<!-- Empty state when no records -->
+<div *ngIf="!hasRecords" class="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center min-h-[60vh]">
+  <!-- Empty state illustration (isometric cube) -->
+  <div class="mb-6 w-40 h-40 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="w-full h-full text-gray-300">
+      <path fill="currentColor" d="M232,128a8,8,0,0,1-4,6.93l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,24,128V72a8,8,0,0,1,12-6.93l92,53.65,92-53.65A8,8,0,0,1,232,72ZM128,48,40,96l88,48,88-48ZM36,184V135.43l84,49V233Zm100,49V184.43l84-49V184Z"></path>
+    </svg>
+  </div>
+  <h3 class="text-xl font-semibold text-gray-700 mb-2">No Record Found</h3>
+  <p class="text-gray-500">Create your first NSP to get started</p>
+
+  <!-- Add create button for empty state -->
+  <app-button
+    class="mt-4"
+    variant="primary"
+    size="md"
+    [svgIcon]="
+      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+        <circle cx='12' cy='12' r='10'></circle>
+        <line x1='12' y1='8' x2='12' y2='16'></line>
+        <line x1='8' y1='12' x2='16' y2='12'></line>
+      </svg>`
+    "
+    iconPosition="left"
+    (buttonClick)="createNsp()">
+    Create NSP
+  </app-button>
+</div>
+
+<!-- Delete confirmation modal -->
+<app-delete-confirmation
+  [showModal]="showDeleteModal"
+  [nsp]="nspToDelete"
+  (confirm)="executeDelete()"
+  (cancel)="cancelDelete()">
+</app-delete-confirmation>
+
+<!-- Modal Container (shared between NSP and Facilitator) -->
+<app-modal-container></app-modal-container>

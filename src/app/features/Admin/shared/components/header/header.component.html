@@ -1,0 +1,62 @@
+<header
+  class="py-4 px-6 transition-all duration-200"
+  [ngClass]="{'shadow-md': isScrolled}"
+>
+  <div class="flex items-center justify-between">
+    <!-- Left section with toggle and breadcrumb -->
+    <div class="flex items-center space-x-4">
+      <!-- Sidebar toggle button (visible on mobile) -->
+      <button
+        type="button"
+        class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none"
+        (click)="onToggleSidebar()"
+        aria-label="Toggle sidebar"
+      >
+        <app-icon
+          [path]="MENU_ICON_PATH"
+          [size]="24"
+        ></app-icon>
+      </button>
+
+      <!-- Breadcrumb navigation -->
+      <app-breadcrumb></app-breadcrumb>
+    </div>
+
+    <!-- Right section: Notification and User Profile -->
+    <div class="flex items-center space-x-4">
+      <!-- Notification Bell -->
+      <div class="relative">
+        <button
+          type="button"
+          class="text-gray-600 hover:text-gray-900 focus:outline-none relative"
+          aria-label="Notifications"
+        >
+          <app-icon
+            [path]="BELL_ICON_PATH"
+            [size]="24"
+          ></app-icon>
+
+          <!-- Notification indicator -->
+          @if (hasNotifications) {
+            <span
+              class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 transform translate-x-1 -translate-y-1"
+              aria-hidden="true"
+            ></span>
+          }
+        </button>
+      </div>
+
+      <!-- User Badge - Now using new properties -->
+      <app-user-badge
+        userName="John Doe"
+        userRole="Administrator"
+        [userAvatar]="'/assets/images/default-avatar.png'"
+        size="md"
+        [clickable]="true"
+        status="online"
+        customClass="hover:bg-gray-50 rounded-full p-1"
+        (badgeClick)="onUserBadgeClick()"
+      ></app-user-badge>
+    </div>
+  </div>
+</header>

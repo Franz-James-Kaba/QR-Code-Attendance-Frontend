@@ -1,0 +1,14 @@
+/* Modal animation styles */
+:host {
+  display: contents;
+}
+
+div.fixed {
+  transition: opacity 0.3s ease-in-out;
+}
+
+div.bg-white {
+  transition: 
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}

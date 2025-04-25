@@ -1,0 +1,114 @@
+<form [formGroup]="facilitatorForm" (ngSubmit)="onSubmit()" class="space-y-4">
+  <!-- Name Field -->
+  <div class="space-y-2">
+    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+    <input 
+      type="text" 
+      id="name" 
+      formControlName="name"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Enter facilitator's full name"
+    />
+    <div *ngIf="facilitatorForm.get('name')?.invalid && facilitatorForm.get('name')?.touched" class="text-red-500 text-sm">
+      Name is required
+    </div>
+  </div>
+
+  <!-- Email Field -->
+  <div class="space-y-2">
+    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+    <input 
+      type="email" 
+      id="email" 
+      formControlName="email"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Enter email address"
+    />
+    <div *ngIf="facilitatorForm.get('email')?.errors?.['required'] && facilitatorForm.get('email')?.touched" class="text-red-500 text-sm">
+      Email is required
+    </div>
+    <div *ngIf="facilitatorForm.get('email')?.errors?.['email'] && facilitatorForm.get('email')?.touched" class="text-red-500 text-sm">
+      Please enter a valid email address
+    </div>
+  </div>
+
+  <!-- Phone Field -->
+  <div class="space-y-2">
+    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+    <input 
+      type="tel" 
+      id="phone" 
+      formControlName="phone"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Enter phone number"
+    />
+    <div *ngIf="facilitatorForm.get('phone')?.invalid && facilitatorForm.get('phone')?.touched" class="text-red-500 text-sm">
+      Phone number is required
+    </div>
+  </div>
+
+  <!-- Program Field -->
+  <div class="space-y-2">
+    <label for="program" class="block text-sm font-medium text-gray-700">Program</label>
+    <select 
+      id="program" 
+      formControlName="program"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+    >
+      <option value="" disabled>Select a program</option>
+      <option value="Web Development">Web Development</option>
+      <option value="Mobile Development">Mobile Development</option>
+      <option value="Data Science">Data Science</option>
+      <option value="UI/UX Design">UI/UX Design</option>
+      <option value="Cloud Computing">Cloud Computing</option>
+    </select>
+    <div *ngIf="facilitatorForm.get('program')?.invalid && facilitatorForm.get('program')?.touched" class="text-red-500 text-sm">
+      Please select a program
+    </div>
+  </div>
+
+  <!-- Status Field -->
+  <div class="space-y-2">
+    <label for="status-active" class="block text-sm font-medium text-gray-700">Status</label>
+    <div class="flex space-x-4">
+      <div class="flex items-center">
+        <input 
+          type="radio" 
+          id="status-active" 
+          formControlName="status" 
+          value="active"
+          class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
+        />
+        <label for="status-active" class="ml-2 block text-sm text-gray-700">Active</label>
+      </div>
+      <div class="flex items-center">
+        <input 
+          type="radio" 
+          id="status-inactive" 
+          formControlName="status" 
+          value="inactive"
+          class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
+        />
+        <label for="status-inactive" class="ml-2 block text-sm text-gray-700">Inactive</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex justify-end space-x-3 pt-4">
+    <app-button
+      type="button" 
+      variant="secondary"
+      size="md"
+      (buttonClick)="onCancel()">
+      Cancel
+    </app-button>
+    <app-button
+      type="submit" 
+      variant="primary"
+      size="md"
+      [loading]="isSubmitting">
+      {{ initialData ? 'Update' : 'Create' }} Facilitator
+    </app-button>
+  </div>
+</form>

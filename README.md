@@ -1,59 +1,224 @@
-# QrCodeAttendanceFrontend
+# 📌 QR Code Attendance System - Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.7.
+🔹 This Angular application implements a **QR code-based attendance tracking system** with **role-based access** (Admin, NSP, and Facilitator). It features authentication workflows, dashboard interfaces, and role-specific functionality.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🚀 Tech Stack
 
-```bash
-ng serve
-```
+| Technology   | Version      |
+| ------------ | ------------ |
+| Angular      | 19.1.0       |
+| TypeScript   | 5.7          |
+| Tailwind CSS | 3.4          |
+| NgRx         | 19.0         |
+| Jest         | Unit Testing |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 📖 Project Overview
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+This application follows a modern Angular architecture, incorporating:
+✅ **Angular 19**: Standalone components & lazy-loaded modules\
+✅ **NgRx**: State management for authentication & other features\
+✅ **Tailwind CSS**: Utility-first styling\
+✅ **Jest**: Unit testing framework\
+✅ **Role-Based Routing**: Admin, NSP, and Facilitator interfaces
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🏁 Getting Started
 
-```bash
-ng generate --help
-```
+### 📌 Prerequisites
 
-## Building
+Ensure you have the following installed:
 
-To build the project run:
+- **Node.js** (18+)
+- **npm** (9+)
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### 📥 Installation
 
 ```bash
-ng test
+# Clone the repository
+git clone https://github.com/your-repo/qr-code-attendance-frontend.git
+
+# Navigate to project directory
+cd qr-code-attendance-frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
 ```
 
-## Running end-to-end tests
+📌 Open your browser and visit **[http://localhost:4200/](http://localhost:4200/)**. The application redirects to the **login page** by default.
 
-For end-to-end (e2e) testing, run:
+---
+
+## 🔑 Test Accounts
+
+Use these mock accounts to test different user roles:
+
+| Role                                   | Email                       | Password          |
+| -------------------------------------- | --------------------------- | ----------------- |
+| **Admin**                              | `admin@amalitech.com`       | `Admin@123`       |
+| **NSP**                                | `nsp@amalitech.com`         | `Nsp@123`         |
+| **Facilitator**                        | `facilitator@amalitech.com` | `Facilitator@123` |
+| **New User (requires password reset)** | `new-user@amalitech.com`    | `NewUser@123`     |
+
+---
+
+## 📂 Project Structure
+
+```
+src/
+├── app/
+│   ├── core/                   # Core functionality
+│   │   ├── data/               # Mock data
+│   │   ├── guards/             # Auth guards
+│   │   ├── interceptors/       # HTTP interceptors
+│   │   ├── services/           # Core services
+│   │   └── store/              # NgRx store
+│   ├── features/               # Feature modules
+│   │   ├── Admin/              # Admin feature
+│   │   ├── NSP/                # NSP feature
+│   │   └── Facilitator/        # Facilitator feature
+│   ├── layouts/                # Layout components
+│   └── shared/                 # Shared modules
+│       ├── components/         # Reusable components
+│       ├── directives/         # Custom directives
+│       ├── models/             # Shared interfaces and types
+│       └── validators/         # Custom form validators
+├── assets/                     # Static assets
+└── environments/               # Environment configurations
+```
+
+---
+
+## ⚙️ Feature Development Guide
+
+### 📌 Setting Up Your Feature
+
+Each **role-based feature** (Admin, NSP, Facilitator) follows the same structure:
+
+```
+features/[Feature]/
+├── [feature].component.ts                # Root component
+├── [feature].routes.ts                   # Feature routes
+├── layouts/                              # Feature-specific layouts
+│   └── [feature]-layout/
+├── features/                             # Sub-features
+│   ├── dashboard/
+│   │   └── pages/
+│   └── [other-sub-features]/
+└── shared/                               # Feature-specific shared components
+    └── components/
+```
+
+### 📌 Adding New Components
 
 ```bash
-ng e2e
+ng generate component features/[Feature]/features/[sub-feature]/pages/[component-name] --standalone
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### 📌 Adding a Dashboard to NSP
 
-## Additional Resources
+```bash
+ng generate component features/NSP/features/dashboard/pages/dashboard --standalone
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Then update the `nsp.routes.ts` file:
+
+```typescript
+{
+  path: 'dashboard',
+  loadComponent: () => import('./features/dashboard/pages/dashboard/dashboard.component')
+    .then(m => m.DashboardComponent),
+  data: {
+    title: 'Dashboard',
+    breadcrumbs: [{ label: 'Dashboard', link: '/nsp/dashboard' }]
+  }
+}
+```
+
+---
+
+## 🎨 Styling Guidelines
+
+✅ Use **Tailwind CSS** utility classes for styling\
+✅ Follow the **BEM methodology** within SCSS files\
+✅ Maintain a **consistent color scheme & design pattern**
+
+---
+
+## 📊 Component Library
+
+| Component      | Description                              |
+| -------------- | ---------------------------------------- |
+| **Button**     | Multi-variant button with loading states |
+| **InputField** | Form input with validation support       |
+| **Loading**    | Loading indicators for various contexts  |
+| **OtpInput**   | Input for verification codes             |
+| **Icon**       | SVG icon wrapper                         |
+
+---
+
+## 🔄 Git Workflow
+
+✅ **Create feature branches:** `git checkout -b feature/your-feature-name`\
+✅ **Make small, focused commits**\
+✅ **Write descriptive commit messages**\
+✅ **Submit pull requests for review**
+
+---
+
+## ✅ Testing
+
+```bash
+# Run unit tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+---
+
+## 📦 Build and Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+```
+
+---
+
+## 🛠️ Additional Commands
+
+```bash
+# Fix linting issues
+npm run lint:fix
+
+# Check formatting
+npm run format:check
+
+# Fix formatting
+npm run format:fix
+```
+
+---
+
+## 📚 More Info
+
+For additional Angular CLI commands, visit the **[Angular CLI Documentation](https://angular.io/cli)**. 🚀
+

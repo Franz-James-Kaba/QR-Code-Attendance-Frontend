@@ -1,0 +1,48 @@
+// Custom styling for personnel table component
+// This file contains styles that go beyond what Tailwind provides
+
+// Custom styling for the table
+.personnel-table {
+  // Add any table-specific custom styling here
+}
+
+// Custom gradient animation for the logo
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  transition: all 0.5s ease;
+
+  &:hover {
+    background-position: right center;
+  }
+}
+
+// Custom dropdown styling
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
+
+// Enhanced hover effects for table rows
+tr {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(243, 244, 246, 1) !important;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    th, td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+}

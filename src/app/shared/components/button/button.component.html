@@ -1,0 +1,34 @@
+<div>
+  <button
+    [type]="type"
+    [disabled]="disabled || loading"
+    [class]="classes"
+    (click)="onClick($event)"
+  >
+    @if (loading) {
+      <app-loading variant="button" [size]="loadingSize" color="primary" class="-ml-1 mr-2" />
+    }
+
+    @if (icon && iconPosition === 'left' && !loading) {
+      <span class="mr-2">
+        <i [class]="icon"></i>
+      </span>
+    }
+
+    @if (svgIcon && iconPosition === 'left' && !loading) {
+      <span class="mr-2 h-5 w-5" [innerHTML]="svgIcon | safe"></span>
+    }
+
+    <ng-content></ng-content>
+
+    @if (icon && iconPosition === 'right' && !loading) {
+      <span class="ml-2">
+        <i [class]="icon"></i>
+      </span>
+    }
+
+    @if (svgIcon && iconPosition === 'right' && !loading) {
+      <span class="ml-2 h-5 w-5" [innerHTML]="svgIcon | safe"></span>
+    }
+  </button>
+</div>

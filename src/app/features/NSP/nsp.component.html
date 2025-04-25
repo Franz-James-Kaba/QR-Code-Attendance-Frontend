@@ -1,0 +1,28 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <div class="mb-6">
+    <div class="flex-none px-4 py-2">
+      <app-profile />
+    </div>
+    <div class="flex-none px-4 py-2">
+      <app-calender />
+    </div>
+  </div>
+  <div class="flex-1 px-4 py-6 overflow-auto bg-[#F0F8FF] rounded-t-[32px] rounded-r-[32px]">
+    <div class="mb-6">
+      <h2 class="text-lg font-medium text-gray-800 mb-4">Attendance Summary</h2>
+      <app-attendance-summary />
+    </div>
+    <div class="">
+      <div class="flex justify-between items-center mt-6 mb-4">
+        <h2 class="text-base font-bold text-[#292929]">Today's Activity</h2>
+        <a href="" class="font-normal text-sm text-[#464646]">View All</a>
+      </div>
+      <app-activity-list />
+    </div>
+  </div>
+  <div class="flex-none px-4 py-4">
+    <app-slide-button></app-slide-button>
+  </div>
+</div>
+
+<router-outlet />

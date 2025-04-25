@@ -1,0 +1,24 @@
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+  <div class="p-8 bg-white rounded-lg shadow-md text-center w-full max-w-4xl">
+    <h1 class="text-3xl font-bold text-purple-600 mb-4">Facilitator Dashboard</h1>
+
+    <!-- Pie Chart Demo -->
+    <div class="mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+      <h2 class="text-xl font-semibold mb-6 text-gray-700">Distribution of NSPs and Facilitators</h2>
+
+      <!-- Using our chart component with pie chart type -->
+      <app-chart
+        [dataSet]="pieChartData"
+        [options]="pieChartOptions"
+        [isLoading]="false"
+        chartType="pie">
+      </app-chart>
+
+      <p class="mt-6 text-sm text-gray-500">This hollow circular chart shows the relative proportion of NSPs and Facilitators in the system.</p>
+    </div>
+
+    <div class="mt-6 p-4 bg-purple-50 rounded-md">
+      <p class="text-gray-600">You are logged in as a <span class="font-semibold">Facilitator</span></p>
+    </div>
+  </div>
+</div>
