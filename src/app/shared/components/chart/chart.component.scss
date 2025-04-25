@@ -1,0 +1,381 @@
+.chart-component {
+  --primary-color: #3b82f6;
+  --secondary-color: #1f2937;
+  --grid-color: #e5e7eb;
+  --label-color: #6b7280;
+  --line-thickness: 0.2px;
+  --point-radius: 1px;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  width: 100%;
+  position: relative;
+
+  // Time range selectors
+  .active-time-range {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+  }
+
+  .inactive-time-range {
+    background-color: white;
+    color: #4b5563;
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  // Shared chart properties
+  .chart-content-container {
+    &.animating {
+      opacity: 0.5;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  // Chart tooltip styles
+  .chart-tooltip {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+
+    .tooltip-content {
+      min-width: 120px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      border-radius: 4px;
+      padding: 8px 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      .font-semibold {
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+      }
+    }
+  }
+
+  // Bar chart specific styles
+  &.chart-bar {
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .chart-scroll-container {
+      margin-bottom: 8px;
+
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background-color: #f1f1f1;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #c1c1c1;
+        border-radius: 3px;
+
+        &:hover {
+          background-color: #a8a8a8;
+        }
+      }
+    }
+
+    .chart-content-wrapper {
+      width: 100%;
+    }
+
+    .bars-container {
+      width: 100%;
+    }
+
+    .bar-column-wrapper {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .bar-column {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    .bar-item {
+      transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 4px;
+      will-change: height;
+
+      &:hover {
+        filter: brightness(1.1);
+      }
+    }
+
+    .label-column {
+      flex: 1;
+      padding: 8px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+
+    // Ensure that x-axis labels align with the bars
+    .pl-12 {
+      .flex {
+        width: 100%;
+
+        .label-column {
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  // Line chart specific styles
+  &.chart-line {
+    .line-chart-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      position: relative;
+      gap: 0.5rem;
+    }
+
+    .chart-area {
+      display: flex;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 0.5rem 0;
+    }
+
+    .y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 3rem;
+      padding-right: 0.75rem;
+    }
+
+    .y-label {
+      font-size: 0.75rem;
+      color: var(--label-color);
+      text-align: right;
+      white-space: nowrap;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .chart-svg-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      border-left: 1px solid var(--grid-color);
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .grid-line {
+      stroke: var(--grid-color);
+      stroke-width: 0.5px;
+    }
+
+    .data-line {
+      fill: none;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 0;
+      stroke-width: var(--line-thickness, 1px);
+      // Remove all style properties for data-line as they're now set as attributes in the SVG
+    }
+
+    .x-axis {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      padding-left: 3rem;
+    }
+
+    .x-label {
+      font-size: 0.75rem;
+      color: var(--label-color);
+      text-align: center;
+      flex: 1;
+    }
+  }
+
+  // Pie chart specific styles
+  &.chart-pie {
+    .pie-chart-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .pie-chart-svg {
+      overflow: visible;
+    }
+
+    path {
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        opacity: 0.9;
+        stroke-width: 12; // Slightly expand on hover
+      }
+    }
+
+    .percentage-label {
+      pointer-events: none;
+      -webkit-user-select:none ;
+      user-select: none;
+      text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .chart-tooltip {
+      // Position adjustments for pie chart
+      z-index: 100;
+    }
+
+    circle {
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+
+  // Remove the old tooltip and fixed-tooltip styles
+  .tooltip, .fixed-tooltip {
+    display: none;
+  }
+
+  // Chart legend specific styles
+  .chart-legend {
+    flex-wrap: wrap;
+    justify-content: center;
+
+    > div {
+      transition: opacity 0.3s ease;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      &.opacity-50 .w-4 {
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: -1px;
+          right: -1px;
+          height: 2px;
+          background-color: rgba(0, 0, 0, 0.5);
+          transform: rotate(-45deg);
+        }
+      }
+    }
+
+    .legend-item {
+      transition: all 0.3s ease;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      &.inactive {
+        opacity: 0.5;
+      }
+
+      .custom-radio {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        .radio-outer {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 2px solid;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: white;
+
+          .radio-inner {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.2s ease-in-out;
+
+            &.active {
+              transform: scale(1);
+            }
+          }
+        }
+      }
+
+      .color-indicator {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+// Chart header styles
+.chart-header {
+  margin-bottom: 1.5rem;
+}
+
+// Pie chart placeholder styles
+.chart-pie {
+  .pie-chart-container {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host ::ng-deep {
+  // Make SVG styles take priority and prevent Angular's style encapsulation from affecting them
+  svg.chart-svg {
+    .data-line {
+      fill: none !important;
+      stroke-width: var(--line-thickness, 1px) !important;
+      stroke-linejoin: round !important;
+      stroke-linecap: round !important;
+    }
+
+    .data-point {
+      r: var(--point-radius, 1px) !important;
+    }
+
+    .grid-line {
+      stroke: #e5e7eb !important;
+      stroke-width: 1px !important;
+    }
+  }
+}

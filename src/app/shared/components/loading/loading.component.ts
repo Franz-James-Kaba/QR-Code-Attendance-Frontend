@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
-export type LoadingVariant = 'default' | 'inline' | 'fullscreen' | 'button';
+export type LoadingVariant = 'default' | 'inline' | 'fullscreen' | 'button' | 'navigation';
 export type LoadingSize = 'sm' | 'md' | 'lg';
 export type LoadingColor = 'primary' | 'secondary' | 'tertiary';
 

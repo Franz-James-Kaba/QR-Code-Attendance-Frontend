@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <app-sidebar
+    [isOpen]="isSidebarOpen()"
+    [isMinimized]="isSidebarMinimized()"
+    (toggleSidebar)="toggleSidebar()"
+  >
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <div
+    class="min-h-screen transition-all duration-300"
+    [class.md:ml-64]="isSidebarOpen() && !isSidebarMinimized()"
+    [class.md:ml-16]="isSidebarOpen() && isSidebarMinimized()"
+  >
+    <!-- Header -->
+    <app-header
+      [sidebarOpen]="isSidebarOpen()"
+      [sidebarMinimized]="isSidebarMinimized()"
+      (toggleSidebar)="toggleSidebar()"
+    >
+    </app-header>
+
+    <!-- Main Content Area -->
+    <main class="px-4 py-6">
+      <div class="max-w-7xl mx-auto">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>
