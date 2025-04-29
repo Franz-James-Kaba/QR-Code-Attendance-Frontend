@@ -1,0 +1,76 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    branches:
+      - testing
+      - develop
+
+jobs:
+  checks:
+    name: Run Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      # 1. Branch naming check (e.g., feature/bugfix/hotfix etc.)
+      - name: Check branch naming convention
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Checking branch name: $BRANCH_NAME"
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|chore|release)/[a-z0-9._-]+$ ]]; then
+            echo "❌ Branch name does not follow naming convention."
+            exit 1
+          fi
+          echo "✅ Branch name is valid."
+
+      # 2. Commit message check
+      - name: Check commit messages
+        run: |
+          COMMITS=$(git log origin/${{ github.base_ref }}..HEAD --pretty=format:'%s')
+          echo "Checking commit messages..."
+          echo "$COMMITS" | while read -r msg; do
+            if [[ ! "$msg" =~ ^(feat|fix|chore|docs|style|refactor|test|perf)(\(.+\))?:\ .* ]]; then
+              echo "❌ Invalid commit message: $msg"
+              exit 1
+            fi
+          done
+          echo "✅ All commit messages are valid."
+
+      # 3. Check for sensitive files
+      - name: Check for sensitive files
+        run: |
+          echo "Checking for sensitive files..."
+          if git ls-files | grep -E '(\.env|environment/)' > /dev/null; then
+            echo "❌ Sensitive files or folders found in the PR."
+            git ls-files | grep -E '(\.env|environment/)'
+            exit 1
+          fi
+          echo "✅ No sensitive files found."
+
+      # 4. Run ESLint
+      - name: Run ESLint
+        run: npm run lint
+
+      # 5. Check code formatting
+      - name: Check Prettier formatting
+        run: npm run format:check
+
+      # 6. Run tests
+      - name: Run Tests
+        run: npm run test
+
+      # 7. Run test coverage
+      - name: Run Test Coverage
+        run: npm run test:coverage
+
