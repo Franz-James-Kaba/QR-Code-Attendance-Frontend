@@ -1,12 +1,10 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '@environments/environment';
 import { AuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-
-import { environment } from '@environments/environment';
-
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +43,15 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          localStorage.setItem('current_user', JSON.stringify(response));
-          this.currentUserSubject.next(response);
+          // Ensure email is included in the response
+          const responseWithEmail: AuthResponse = {
+            ...response,
+            email: credentials.email // Add email from the login credentials
+          };
+          
+          localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
+          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
+          this.currentUserSubject.next(responseWithEmail);
         }),
         catchError(this.handleError)
       );
@@ -103,6 +107,11 @@ export class AuthService {
   getCurrentUserRole(): UserRole | null {
     const user = this.currentUserSubject.value;
     return user ? user.role : null;
+  }
+
+  getCurrentUserEmail(): string | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.email : null;
   }
 
   private handleError(error: HttpErrorResponse) {

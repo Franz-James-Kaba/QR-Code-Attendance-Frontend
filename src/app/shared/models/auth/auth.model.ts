@@ -22,6 +22,7 @@ export interface AuthResponse {
   token: string;
   passwordResetRequired: boolean;
   role: UserRole;
+  email: string; // Added email property to fix the type error
 }
 
 export interface LoginCredentials {

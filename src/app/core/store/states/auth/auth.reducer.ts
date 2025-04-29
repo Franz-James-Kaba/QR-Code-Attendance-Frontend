@@ -24,7 +24,7 @@ export const authReducer = createReducer(
     user: {
       role: response.role,
       id: null, // These will be populated by user profile if needed
-      email: state.email ?? '',
+      email: response.email ?? state.email ?? '',
       firstName: '',
       lastName: ''
     },
@@ -66,6 +66,20 @@ export const authReducer = createReducer(
     ...state,
     isLoading: true,
     error: null,
+  })),
+
+  on(AuthActions.firstTimePasswordResetSuccess, state => ({
+    ...state,
+    passwordResetRequired: false,
+    isLoading: false,
+    error: null,
+    successMessage: 'Password has been reset successfully',
+  })),
+
+  on(AuthActions.firstTimePasswordResetFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error,
   })),
 
   on(AuthActions.clearError, state => ({

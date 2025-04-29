@@ -1,14 +1,15 @@
-import { inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthService } from '@core/services/auth/auth.service';
-import { NotificationService } from '@shared/services/notification.service';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthStep } from '@shared/models/auth/auth.model';
+import { NotificationService } from '@shared/services/notification.service';
 import { of } from 'rxjs';
-import { map, catchError, exhaustMap, tap, switchMap } from 'rxjs/operators';
+import { map, catchError, exhaustMap, tap } from 'rxjs/operators';
 
 import { AuthActions } from './auth.actions';
 
+@Injectable()
 export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly authService = inject(AuthService);
@@ -42,7 +43,7 @@ export class AuthEffects {
           catchError(error =>
             of(
               AuthActions.loginFailure({
-                error: error.message || 'An error occurred during login',
+                error: error.message ?? 'An error occurred during login',
               })
             )
           )
@@ -93,7 +94,7 @@ export class AuthEffects {
           catchError(error =>
             of(
               AuthActions.resetPasswordFailure({
-                error: error.message || 'Failed to reset password',
+                error: error.message ?? 'Failed to reset password',
               })
             )
           )
@@ -105,29 +106,33 @@ export class AuthEffects {
   firstTimePasswordReset$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.firstTimePasswordReset),
+      tap(action => console.log('firstTimePasswordReset action received:', action)),
       exhaustMap(({ email, password, confirmPassword }) =>
         this.authService.firstTimePasswordReset(email, { password, confirmPassword }).pipe(
+          tap(response => console.log('firstTimePasswordReset API response:', response)),
           map(() => {
             this.notificationService.success('Password has been updated successfully');
-            return AuthActions.resetPasswordSuccess();
+            return AuthActions.firstTimePasswordResetSuccess();
           }),
-          catchError(error =>
-            of(
-              AuthActions.resetPasswordFailure({
-                error: error.message || 'Failed to update password',
+          catchError(error => {
+            console.error('firstTimePasswordReset error:', error);
+            return of(
+              AuthActions.firstTimePasswordResetFailure({
+                error: error.message ?? 'Failed to update password',
               })
-            )
-          )
+            );
+          })
         )
       )
     )
   );
 
-  resetPasswordSuccess$ = createEffect(
+  firstTimePasswordResetSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.resetPasswordSuccess),
+        ofType(AuthActions.firstTimePasswordResetSuccess),
         tap(() => {
+          console.log('Password reset success, navigating to login');
           this.router.navigate(['/auth/login']);
         })
       ),
@@ -158,7 +163,7 @@ export class AuthEffects {
           catchError(error =>
             of(
               AuthActions.forgotPasswordFailure({
-                error: error.message || 'Failed to send password reset instructions',
+                error: error.message ?? 'Failed to send password reset instructions',
               })
             )
           )

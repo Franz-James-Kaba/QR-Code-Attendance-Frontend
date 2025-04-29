@@ -1,13 +1,13 @@
 export const environment = {
   production: false,
   auth: {
-    baseUrl: 'http://54.227.155.43:8090/api/auth/',
+    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth',
     tokenKey: 'auth_token'
   },
   api: {
-    baseUrl: 'http://54.227.155.43:8090/api',
+    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
   },
-  apiUrl: 'http://54.227.155.43:8090/api',
+  apiUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
   charts: {
     cacheExpiration: 300000,
     enableMockData: true
