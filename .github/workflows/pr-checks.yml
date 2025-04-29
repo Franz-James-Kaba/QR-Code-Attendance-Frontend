@@ -14,6 +14,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history and branches
+          ref: ${{ github.head_ref }} # Checkout the PR's source branch
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -23,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 1. Branch naming check (e.g., feature/bugfix/hotfix etc.)
+      # 1. Branch naming check
       - name: Check branch naming convention
         run: |
           BRANCH_NAME="${{ github.head_ref }}"
@@ -51,7 +58,7 @@ jobs:
       - name: Check for sensitive files
         run: |
           echo "Checking for sensitive files..."
-          if git ls-files | grep -E '(\.env|environment/)' > /dev/null; then
+          if git ls-files | grep -E '(\.env|environment/)'; then
             echo "❌ Sensitive files or folders found in the PR."
             git ls-files | grep -E '(\.env|environment/)'
             exit 1
@@ -73,4 +80,3 @@ jobs:
       # 7. Run test coverage
       - name: Run Test Coverage
         run: npm run test:coverage
-
