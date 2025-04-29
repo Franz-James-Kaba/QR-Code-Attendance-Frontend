@@ -15,7 +15,7 @@ import { AuthService } from '@core/services/auth/auth.service';
 import { AuthActions } from '@core/store/states/auth/auth.actions';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
-import { authInterceptor } from './auth.interceptor';
+import { AuthInterceptor } from './auth.interceptor';
 
 describe('authInterceptor', () => {
   let httpClient: HttpClient;
@@ -34,7 +34,7 @@ describe('authInterceptor', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClient(withInterceptors([AuthInterceptor])),
         provideHttpClientTesting(),
         provideMockStore(),
         { provide: AuthService, useValue: authServiceMock }

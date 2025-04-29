@@ -1,13 +1,15 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api', // Development API URL
   auth: {
-    baseUrl: 'http://localhost:3000/api/auth',
-    tokenKey: 'auth_token',
-    refreshTokenKey: 'refresh_token'
+    baseUrl: 'http://54.227.155.43:8090/api/auth/',
+    tokenKey: 'auth_token'
   },
+  api: {
+    baseUrl: 'http://54.227.155.43:8090/api',
+  },
+  apiUrl: 'http://54.227.155.43:8090/api',
   charts: {
-    enableMockData: true, // Use mock data in development
-    cacheExpiration: 5 * 60 * 1000 // 5 minutes cache expiration
+    cacheExpiration: 300000,
+    enableMockData: true
   }
 };

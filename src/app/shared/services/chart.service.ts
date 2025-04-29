@@ -4,7 +4,7 @@ import { ChartDataPoint, ChartDataSet, ChartType, TimeRange } from '@shared/mode
 import { Observable, of } from 'rxjs';
 import { catchError, delay, map } from 'rxjs/operators';
 
-import { environment } from '../../../environments/environment';
+import { environment } from '@environments/environment';
 
 
 /**
