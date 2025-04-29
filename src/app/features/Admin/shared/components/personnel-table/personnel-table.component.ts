@@ -1,10 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
-import { ButtonComponent } from '@shared/components/button/button.component';
-import { IconComponent } from '@shared/components/icon/icon.component';
-import { LoadingComponent } from '@shared/components/loading/loading.component';
 
 // Personnel interface
 export interface Personnel {
@@ -19,11 +15,7 @@ export interface Personnel {
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
-    InputFieldComponent,
-    ButtonComponent,
-    IconComponent,
-    LoadingComponent
+    ReactiveFormsModule
   ],
   templateUrl: './personnel-table.component.html',
   styleUrls: ['./personnel-table.component.scss']

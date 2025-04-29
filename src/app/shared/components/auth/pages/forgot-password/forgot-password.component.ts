@@ -133,12 +133,18 @@ export class ForgotPasswordComponent implements OnInit {
           break;
         }
         case AuthStep.RESET_PASSWORD: {
-          const newPassword = this.forgotPasswordForm.get('newPassword')?.value;
-          if (newPassword) {
+          const email = this.forgotPasswordForm.get('email')?.value;
+          const password = this.forgotPasswordForm.get('newPassword')?.value;
+          const confirmPassword = this.forgotPasswordForm.get('confirmPassword')?.value;
+          const token = '';
+
+          if (email && password && confirmPassword) {
             this.store.dispatch(
               AuthActions.resetPassword({
-                newPassword,
-                oldPassword: '',
+                email,
+                token,
+                password,
+                confirmPassword
               })
             );
           }

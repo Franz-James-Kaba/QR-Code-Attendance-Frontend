@@ -53,7 +53,7 @@
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="flex items-center">
             <div class="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-              {{ nsp.name.charAt(0) }}{{ nsp.name.split(' ')[1]?.charAt(0) || '' }}
+              {{ nsp.name.charAt(0) }}{{ (nsp.name.split(' ')[1] ? nsp.name.split(' ')[1].charAt(0) : '') }}
             </div>
             <div class="ml-4">
               <div class="text-sm font-medium text-gray-900">{{ nsp.name }}</div>

@@ -1,13 +1,15 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api', // Development API URL
   auth: {
-    baseUrl: 'http://localhost:3000/api/auth',
-    tokenKey: 'auth_token',
-    refreshTokenKey: 'refresh_token'
+    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth',
+    tokenKey: 'auth_token'
   },
+  api: {
+    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
+  },
+  apiUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
   charts: {
-    enableMockData: true, // Use mock data in development
-    cacheExpiration: 5 * 60 * 1000 // 5 minutes cache expiration
+    cacheExpiration: 300000,
+    enableMockData: true
   }
 };

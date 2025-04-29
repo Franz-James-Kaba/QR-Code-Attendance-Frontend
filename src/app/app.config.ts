@@ -2,7 +2,7 @@ import { provideHttpClient, withInterceptors, HttpRequest, HttpHandlerFn, HttpEv
 import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
-import { authInterceptor } from '@core/interceptors/auth/auth.interceptor';
+import { ErrorInterceptor } from '@core/interceptors/error/error.interceptor';
 import { NavigationLoadingInterceptor } from '@core/interceptors/navigation-loading/navigation-loading.interceptor';
 import { NotificationInterceptor } from '@core/interceptors/notification/notification.interceptor';
 import { provideEffects } from '@ngrx/effects';
@@ -15,19 +15,34 @@ import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
 
+const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+  const token = localStorage.getItem('auth_token');
+
+  if (token) {
+    const authReq = req.clone({
+      headers: req.headers.set('Authorization', `Bearer ${token}`)
+    });
+    return next(authReq);
+  }
+
+  return next(req);
+};
+
 const notificationInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
   const interceptor = new NotificationInterceptor();
-  
+
   const handler = {
     handle: (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => next(request)
   };
-  
+
   return interceptor.intercept(req, handler);
 };
 
-function initializeAuth(store: Store) {
+// Factory function that returns a function that initializes auth
+function initializeAuthFactory(store: Store) {
   return () => {
     store.dispatch(AuthActions.initAuth());
+    return Promise.resolve();
   };
 }
 
@@ -41,16 +56,18 @@ export const appConfig: ApplicationConfig = {
     provideStoreDevtools(),
     provideHttpClient(
       withInterceptors([
-        authInterceptor,
+        authInterceptorFn,
         notificationInterceptorFn
       ])
     ),
+    // Use APP_INITIALIZER with the correct factory pattern
     {
       provide: APP_INITIALIZER,
-      useFactory: initializeAuth,
+      useFactory: initializeAuthFactory,
       deps: [Store],
       multi: true
     },
-    NavigationLoadingInterceptor
+    NavigationLoadingInterceptor,
+    ErrorInterceptor
   ],
 };

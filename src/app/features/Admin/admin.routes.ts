@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth/auth.guard';
+import { AdminGuard } from '@core/guards/role/role.guard';
 
 import { LayoutComponent as AdminLayoutComponent } from './layouts/admin-layout/layout.component';
 
@@ -7,7 +8,7 @@ export const adminRoutes: Routes = [
   {
     path: '',
     component: AdminLayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, AdminGuard], // Add AdminGuard to ensure only admin users can access
     children: [
       {
         path: '',
@@ -22,6 +23,14 @@ export const adminRoutes: Routes = [
           title: 'Dashboard'
         }
       },
+      // {
+      //   path: 'users',
+      //   loadComponent: () => import('@Admin/features/dashboard/pages/user-management/user-management.component')
+      //     .then(m => m.UserManagementComponent),
+      //   data: {
+      //     title: 'User Management'
+      //   }
+      // },
       {
         path: 'nsps',
         data: {
@@ -54,6 +63,14 @@ export const adminRoutes: Routes = [
           }
         ]
       },
+      // {
+      //   path: 'sessions',
+      //   loadComponent: () => import('@Admin/features/dashboard/pages/session-management/session-management.component')
+      //     .then(m => m.SessionManagementComponent),
+      //   data: {
+      //     title: 'Session Management'
+      //   }
+      // },
       {
         path: 'settings',
         loadComponent: () => import('@Admin/features/dashboard/pages/settings/settings.component')

@@ -9,6 +9,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'login',
+    redirectTo: '/auth/login',
+    pathMatch: 'full'
+  },
+  {
     path: 'auth',
     component: AuthLayoutComponent,
     children: [
