@@ -36,7 +36,7 @@ export default [
     },
     rules: {
       // Core ESLint rules
-      "no-unused-vars": "warn",
+      "no-unused-vars": "error",
       "no-undef": "error",
       "no-undef-init": "error",
       "no-console": ["warn", { "allow": ["warn", "error"] }],
