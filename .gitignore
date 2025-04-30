@@ -53,3 +53,5 @@ Thumbs.db
 !/src/environments/environment.prod.ts
 .env
 .env.local
+
+.angular/
