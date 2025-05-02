@@ -66,11 +66,23 @@ export class AuthService {
     );
   }
 
-  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(
+  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<any> {
+    return this.http.post<any>(
       `${this.API_URL}/first-password-reset?email=${email}`,
       passwords
     ).pipe(
+      tap(() => {
+        // After successful password reset, we should clear the passwordResetRequired flag
+        const currentUser = this.currentUserSubject.value;
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            passwordResetRequired: false
+          };
+          localStorage.setItem('current_user', JSON.stringify(updatedUser));
+          this.currentUserSubject.next(updatedUser);
+        }
+      }),
       catchError(this.handleError)
     );
   }

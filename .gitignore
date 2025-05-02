@@ -42,14 +42,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Environment files
-# Don't ignore base environment files
-# /src/environments/environment.ts
-# /src/environments/environment.prod.ts
-
-# But do ignore specific sensitive environment files
-/src/environments/*.local.ts
-/src/environments/environment.*.ts
-!/src/environments/environment.prod.ts
-.env
-.env.local
+# Ignore environment files
+*/environments/*.ts
+src/environments/environment.prod.ts

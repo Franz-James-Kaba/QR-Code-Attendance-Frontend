@@ -26,5 +26,5 @@ export const selectOtpVerified = createSelector(selectAuthState, state => state.
 
 export const selectCurrentUserRole = createSelector(
   selectUser,
-  user => user?.role || null
+  user => user?.role ?? null
 );

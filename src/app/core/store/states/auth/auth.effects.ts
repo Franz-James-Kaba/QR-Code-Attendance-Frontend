@@ -116,9 +116,18 @@ export class AuthEffects {
           }),
           catchError(error => {
             console.error('firstTimePasswordReset error:', error);
+            // Extract the specific error message
+            let errorMessage = error.message;
+            
+            // Check for specific validation errors related to password
+            if (errorMessage.includes('password')) {
+              errorMessage = 'Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.';
+            }
+            
+            this.notificationService.error(errorMessage);
             return of(
               AuthActions.firstTimePasswordResetFailure({
-                error: error.message ?? 'Failed to update password',
+                error: errorMessage
               })
             );
           })
