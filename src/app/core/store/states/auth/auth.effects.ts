@@ -21,10 +21,29 @@ export class AuthEffects {
       ofType(AuthActions.initAuth),
       map(() => {
         const token = localStorage.getItem('auth_token');
-        if (token) {
+        const userDataStr = localStorage.getItem('auth_user');
+
+        if (token && userDataStr) {
+          try {
+            // We have both token and user data, update auth state with complete info
+            const userData = JSON.parse(userDataStr);
+            return AuthActions.loginSuccess({
+              response: {
+                token,
+                role: userData.role,
+                email: userData.email,
+                passwordResetRequired: userData.passwordResetRequired
+              }
+            });
+          } catch (e) {
+            console.error('Error parsing auth user data:', e);
+            return AuthActions.logout();
+          }
+        } else if (token) {
+          // We have only token but no user data (backward compatibility)
           return AuthActions.initAuthSuccess({ token });
         } else {
-          // If no token found, log out
+          // No token found, log out
           return AuthActions.logout();
         }
       })
@@ -57,6 +76,13 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(({ response }) => {
+          // Store user data in localStorage for persistence across page refreshes
+          localStorage.setItem('auth_user', JSON.stringify({
+            role: response.role,
+            email: response.email,
+            passwordResetRequired: response.passwordResetRequired
+          }));
+
           // Handle password reset if required
           if (response.passwordResetRequired) {
             this.router.navigate(['/auth/reset-password']);
@@ -118,12 +144,12 @@ export class AuthEffects {
             console.error('firstTimePasswordReset error:', error);
             // Extract the specific error message
             let errorMessage = error.message;
-            
+
             // Check for specific validation errors related to password
             if (errorMessage.includes('password')) {
               errorMessage = 'Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.';
             }
-            
+
             this.notificationService.error(errorMessage);
             return of(
               AuthActions.firstTimePasswordResetFailure({
@@ -154,6 +180,10 @@ export class AuthEffects {
         ofType(AuthActions.logout),
         tap(() => {
           this.authService.logout();
+          // Also clear the user data from localStorage
+          localStorage.removeItem('auth_user');
+          // Navigate back to login page
+          this.router.navigate(['/auth/login']);
           this.notificationService.info('You have been logged out');
         })
       ),

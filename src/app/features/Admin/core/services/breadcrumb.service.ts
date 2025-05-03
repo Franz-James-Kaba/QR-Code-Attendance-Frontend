@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -15,14 +15,21 @@ export class BreadcrumbService {
   private readonly breadcrumbsSubject = new BehaviorSubject<BreadcrumbItem[]>([]);
   breadcrumbs$ = this.breadcrumbsSubject.asObservable();
 
-  constructor(private readonly router: Router) {
-    // Listen to route changes to update breadcrumbs automatically
+  // Add a readonly signal for Angular signals-based components
+  private readonly breadcrumbsSignal = signal<BreadcrumbItem[]>([]);
+
+  // Public accessor for the signal
+  breadcrumbs = this.breadcrumbsSignal.asReadonly();
+
+  private readonly router = inject(Router);
+  constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       const root = this.router.routerState.snapshot.root;
       const breadcrumbs = this.createBreadcrumbs(root);
       this.breadcrumbsSubject.next(breadcrumbs);
+      this.breadcrumbsSignal.set(breadcrumbs); // Update signal when breadcrumbs change
     });
   }
 
@@ -54,6 +61,8 @@ export class BreadcrumbService {
 
   // Keep this method for manual updates when needed
   updateBreadcrumbs(items: BreadcrumbItem[] | null) {
-    this.breadcrumbsSubject.next(items ?? []);
+    const newItems = items ?? [];
+    this.breadcrumbsSubject.next(newItems);
+    this.breadcrumbsSignal.set(newItems); // Update signal as well
   }
 }

@@ -1,9 +1,10 @@
 import { BreadcrumbService } from '@Admin/services/breadcrumb.service';
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { Component, Input, Output, EventEmitter, inject, OnInit, OnDestroy } from '@angular/core';
+import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { IconComponent } from '@shared/components/icon/icon.component';
-import { filter } from 'rxjs/operators';
+import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
+import { filter, Subscription } from 'rxjs';
 
 
 interface NavItem {
@@ -16,16 +17,20 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, IconComponent],
+  imports: [CommonModule, RouterLink, IconComponent, ClickOutsideDirective],
   templateUrl: './sidebar.component.html'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   @Input() isOpen = true;
   @Input() isMinimized = false;
   @Output() toggleSidebar = new EventEmitter<void>();
+  @Output() closeSidebar = new EventEmitter<void>();
 
   private readonly router = inject(Router);
   private readonly breadcrumbService = inject(BreadcrumbService);
+  private routerSubscription: Subscription | null = null;
+
+  activeRoute = '';
 
   navItems: NavItem[] = [
     {
@@ -53,15 +58,36 @@ export class SidebarComponent {
       breadcrumbs: [{ label: 'Settings' }],
     },
   ];
-  constructor() {
-    // Update breadcrumbs on route change
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
-      const currentRoute = this.router.url;
-      const currentNavItem = this.navItems.find(item => item.route === currentRoute);
+
+  ngOnInit(): void {
+    // Set initial active route
+    this.activeRoute = this.router.url;
+
+    // Update breadcrumbs and active route on navigation
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.activeRoute = this.router.url;
+      const currentNavItem = this.navItems.find(item =>
+        this.router.url.startsWith(item.route));
+
       if (currentNavItem) {
         this.updateBreadcrumbs(currentNavItem.breadcrumbs);
       }
     });
+
+    // Set initial breadcrumbs
+    const initialNavItem = this.navItems.find(item =>
+      this.router.url.startsWith(item.route));
+    if (initialNavItem) {
+      this.updateBreadcrumbs(initialNavItem.breadcrumbs);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
   }
 
   updateBreadcrumbs(breadcrumbs: { label: string; link?: string }[]): void {
@@ -70,5 +96,16 @@ export class SidebarComponent {
 
   onToggle(): void {
     this.toggleSidebar.emit();
+  }
+
+  onClickOutside(): void {
+    // Only close the sidebar on mobile screens (will be handled by the parent component)
+    if (window.innerWidth < 768 && this.isOpen) {
+      this.closeSidebar.emit();
+    }
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.activeRoute.startsWith(route);
   }
 }

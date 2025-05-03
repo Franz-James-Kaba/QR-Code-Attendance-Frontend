@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
@@ -16,20 +16,27 @@ export interface Breadcrumb {
   styleUrl: './breadcrumb.component.scss'
 })
 export class BreadcrumbComponent implements OnInit, OnDestroy {
-  breadcrumbs: Breadcrumb[] = [];
-  routerSubscription: Subscription | undefined;
+  @Input() items: { label: string; link?: string }[] = []; // Add items input property
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
+  public breadcrumbs: Breadcrumb[] = [];
+  public routerSubscription: Subscription | undefined;
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    this.routerSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
-      });
+    // If items are provided, use them instead of generating breadcrumbs
+    if (this.items && this.items.length > 0) {
+      this.mapItemsToBreadcrumbs();
+    } else {
+      this.routerSubscription = this.router.events
+        .pipe(filter(event => event instanceof NavigationEnd))
+        .subscribe(() => {
+          this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
+        });
 
-    // Initialize breadcrumbs
-    this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
+      // Initialize breadcrumbs
+      this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
+    }
   }
 
   ngOnDestroy(): void {
@@ -38,20 +45,17 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Map external items to internal breadcrumbs format
+  private mapItemsToBreadcrumbs(): void {
+    this.breadcrumbs = this.items.map(item => ({
+      label: item.label,
+      url: item.link ?? '' // Map link to url
+    }));
+  }
+
   private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
-    // Get the current URL segment from the route's first path
-    const firstPathSegment = this.router.url.split('/')[1];
-
-    // Add the first-level section (Admin, NSP, etc.) if not already added
-    if (breadcrumbs.length === 0 && firstPathSegment) {
-      const firstSegmentLabel = this.formatRouteLabel(firstPathSegment);
-      const firstSegmentUrl = `/${firstPathSegment}`;
-
-      breadcrumbs.push({
-        label: firstSegmentLabel,
-        url: firstSegmentUrl
-      });
-    }
+    // Add the first-level section if needed
+    this.addFirstLevelBreadcrumb(breadcrumbs);
 
     // Get the route's children
     const children: ActivatedRoute[] = route.children;
@@ -61,51 +65,67 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       return breadcrumbs;
     }
 
-    // Iterate over each child
-    for (const child of children) {
-      // Get the route's URL segment
-      const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
+    // Process the first child route
+    const child = children[0];
+    const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
 
-      // Append route to the URL
-      if (routeURL !== '') {
-        url += `/${routeURL}`;
-      }
-
-      // Add breadcrumb if the route has data with a title
-      if (child.snapshot.data['title']) {
-        // Check if this breadcrumb would duplicate the last entry
-        const isDuplicate = breadcrumbs.length > 0 &&
-                            breadcrumbs[breadcrumbs.length - 1].label === child.snapshot.data['title'];
-
-        if (!isDuplicate) {
-          const breadcrumb: Breadcrumb = {
-            label: child.snapshot.data['title'],
-            url: url
-          };
-          breadcrumbs.push(breadcrumb);
-        }
-      } else if (routeURL !== '') {
-        // If no title is provided but we have a route URL, use the capitalized route URL as the label
-        const label = this.formatRouteLabel(routeURL);
-
-        // Check if this would duplicate the last entry
-        const isDuplicate = breadcrumbs.length > 0 &&
-                            breadcrumbs[breadcrumbs.length - 1].label === label;
-
-        if (!isDuplicate) {
-          const breadcrumb: Breadcrumb = {
-            label,
-            url: url
-          };
-          breadcrumbs.push(breadcrumb);
-        }
-      }
-
-      // Recursive call to process any child routes
-      return this.createBreadcrumbs(child, url, breadcrumbs);
+    // Append route to the URL if not empty
+    if (routeURL !== '') {
+      url += `/${routeURL}`;
     }
 
-    return breadcrumbs;
+    // Process breadcrumb from route data or URL
+    this.processBreadcrumbFromRoute(child, routeURL, url, breadcrumbs);
+
+    // Recursive call to process any child routes
+    return this.createBreadcrumbs(child, url, breadcrumbs);
+  }
+
+  private addFirstLevelBreadcrumb(breadcrumbs: Breadcrumb[]): void {
+    const firstPathSegment = this.router.url.split('/')[1];
+
+    if (breadcrumbs.length === 0 && firstPathSegment) {
+      const firstSegmentLabel = this.formatRouteLabel(firstPathSegment);
+      const firstSegmentUrl = `/${firstPathSegment}`;
+
+      breadcrumbs.push({
+        label: firstSegmentLabel,
+        url: firstSegmentUrl
+      });
+    }
+  }
+
+  private processBreadcrumbFromRoute(
+    route: ActivatedRoute,
+    routeURL: string,
+    url: string,
+    breadcrumbs: Breadcrumb[]
+  ): void {
+    // Process title-based breadcrumb
+    if (route.snapshot.data['title']) {
+      this.addBreadcrumbIfNotDuplicate(
+        route.snapshot.data['title'],
+        url,
+        breadcrumbs
+      );
+    }
+    // Process URL-based breadcrumb when no title is available
+    else if (routeURL !== '') {
+      const label = this.formatRouteLabel(routeURL);
+      this.addBreadcrumbIfNotDuplicate(label, url, breadcrumbs);
+    }
+  }
+
+  private addBreadcrumbIfNotDuplicate(label: string, url: string, breadcrumbs: Breadcrumb[]): void {
+    const isDuplicate = breadcrumbs.length > 0 &&
+                        breadcrumbs[breadcrumbs.length - 1].label === label;
+
+    if (!isDuplicate) {
+      breadcrumbs.push({
+        label,
+        url
+      });
+    }
   }
 
   private formatRouteLabel(route: string): string {
