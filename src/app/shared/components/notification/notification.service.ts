@@ -23,7 +23,10 @@ export class NotificationService {
    * @param options Optional configurations
    */
   success(message: string, options?: NotificationOptions): string {
-    return this.addNotification('success', message, options);
+    return this.addNotification('success', message, {
+      title: options?.title || 'Success',
+      ...options
+    });
   }
 
   /**
@@ -33,8 +36,9 @@ export class NotificationService {
    */
   error(message: string, options?: NotificationOptions): string {
     return this.addNotification('error', message, {
-      ...options,
+      title: options?.title || 'Error',
       duration: options?.duration || 8000, // Errors stay longer by default
+      ...options
     });
   }
 
@@ -44,7 +48,10 @@ export class NotificationService {
    * @param options Optional configurations
    */
   info(message: string, options?: NotificationOptions): string {
-    return this.addNotification('info', message, options);
+    return this.addNotification('info', message, {
+      title: options?.title || 'Information',
+      ...options
+    });
   }
 
   /**
@@ -53,7 +60,11 @@ export class NotificationService {
    * @param options Optional configurations
    */
   warning(message: string, options?: NotificationOptions): string {
-    return this.addNotification('warning', message, options);
+    return this.addNotification('warning', message, {
+      title: options?.title || 'Warning',
+      duration: options?.duration || 7000, // Warnings stay a bit longer by default
+      ...options
+    });
   }
 
   /**

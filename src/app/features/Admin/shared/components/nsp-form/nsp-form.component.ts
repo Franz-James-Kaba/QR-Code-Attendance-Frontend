@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/button/button.component';
 
-import { NSP } from '../nsp-table/nsp-table.component';
+import { NSPViewModel } from '../../models/nsp.model';
 
 @Component({
   selector: 'app-nsp-form',
@@ -11,98 +11,75 @@ import { NSP } from '../nsp-table/nsp-table.component';
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
   templateUrl: './nsp-form.component.html',
 })
-export class NspFormComponent implements OnInit, OnChanges {
-  @Input() initialData: NSP | null = null;
-  @Output() formSubmit = new EventEmitter<NSP>();
+export class NspFormComponent implements OnInit {
+  @Input() initialData: NSPViewModel | null = null;
+  @Input() isSubmitting = false;
+
+  @Output() formSubmit = new EventEmitter<NSPViewModel>();
   @Output() formCancel = new EventEmitter<void>();
 
-  nspForm: FormGroup;
-  isEditMode = false;
-  isSubmitting = false;
+  form!: FormGroup;
 
-  private readonly fb = inject(FormBuilder);
-
-  constructor() {
-    this.nspForm = this.createForm();
+  get isEdit(): boolean {
+    return !!this.initialData?.id;
   }
+
+  private fb = inject(FormBuilder);
 
   ngOnInit(): void {
-    this.initializeForm();
+    this.initForm();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialData'] && this.initialData) {
-      this.isEditMode = true;
-      this.patchForm();
-    } else if (!this.initialData) {
-      this.isEditMode = false;
-      this.resetForm();
-    }
-  }
-
-  createForm(): FormGroup {
-    return this.fb.group({
-      id: [{ value: '', disabled: true }],
-      name: ['', [Validators.required]],
-      stack: ['', [Validators.required]],
-      status: ['Active', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
-      program: ['', [Validators.required]],
-      joinDate: ['', [Validators.required]]
+  /**
+   * Initialize the form with default values or existing NSP data
+   */
+  private initForm(): void {
+    this.form = this.fb.group({
+      id: [this.initialData?.id ?? ''],
+      firstName: [this.initialData?.firstName ?? '', [Validators.required, Validators.minLength(3)]],
+      middleName: [this.initialData?.middleName ?? ''],
+      lastName: [this.initialData?.lastName ?? '', [Validators.required, Validators.minLength(3)]],
+      email: [this.initialData?.email ?? '', [Validators.required, Validators.email]]
     });
   }
 
-  initializeForm(): void {
-    if (this.initialData) {
-      this.isEditMode = true;
-      this.patchForm();
-    } else {
-      this.isEditMode = false;
-      this.resetForm();
-    }
-  }
-
-  patchForm(): void {
-    if (this.initialData) {
-      this.nspForm.patchValue({
-        id: this.initialData.id,
-        name: this.initialData.name,
-        stack: this.initialData.stack,
-        status: this.initialData.status,
-        email: this.initialData.email,
-        phone: this.initialData.phone,
-        program: this.initialData.program,
-        joinDate: this.initialData.joinDate
-      });
-    }
-  }
-
-  resetForm(): void {
-    this.nspForm.reset({
-      id: 'NSP-' + Math.floor(1000 + Math.random() * 9000),
-      status: 'Active'
-    });
-  }
-
+  /**
+   * Submit the form if valid
+   */
   onSubmit(): void {
-    if (this.nspForm.valid) {
-      this.isSubmitting = true;
-      const formData = this.nspForm.getRawValue();
-      
-      // Emit the form data to parent component
-      this.formSubmit.emit(formData);
-      
-      // Reset form after submission (in a real app, we'd do this after successful API response)
-      setTimeout(() => {
-        this.isSubmitting = false;
-      }, 800);
-    } else {
-      this.nspForm.markAllAsTouched();
+    if (this.form.invalid) {
+      this.markFormGroupTouched(this.form);
+      return;
     }
+
+    const formData = this.form.value as NSPViewModel;
+    this.formSubmit.emit(formData);
   }
 
+  /**
+   * Cancel form submission
+   */
   onCancel(): void {
     this.formCancel.emit();
+  }
+
+  /**
+   * Mark all form controls as touched to trigger validation messages
+   */
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if ((control as FormGroup).controls) {
+        this.markFormGroupTouched(control as FormGroup);
+      }
+    });
+  }
+
+  /**
+   * Helper method to check if a form control has a specific error
+   */
+  hasError(controlName: string, errorName: string): boolean {
+    const control = this.form.get(controlName);
+    return control !== null && control.touched && control.hasError(errorName);
   }
 }

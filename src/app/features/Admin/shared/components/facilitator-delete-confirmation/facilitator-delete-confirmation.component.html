@@ -1,0 +1,41 @@
+<!-- Delete confirmation dialog -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <!-- Dialog header -->
+    <div class="bg-red-50 p-4 flex items-start gap-4">
+      <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-red-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+
+      <!-- Confirmation message -->
+      <h3 class="text-xl font-medium text-gray-900 mb-2">Delete Facilitator</h3>
+    </div>
+
+    <div class="p-6">
+      <p class="text-gray-600 mb-6">
+        Are you sure you want to delete <span class="font-medium text-gray-900">{{ getFullName() }}</span>? 
+        This action cannot be undone and will permanently remove the facilitator from the system.
+      </p>
+
+      <!-- Action buttons -->
+      <div class="flex justify-end space-x-3">
+        <app-button
+          type="button" 
+          variant="secondary"
+          size="md"
+          (buttonClick)="onCancel()">
+          Cancel
+        </app-button>
+        <app-button 
+          type="button" 
+          variant="danger"
+          size="md"
+          (buttonClick)="onConfirm()">
+          Delete
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

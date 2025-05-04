@@ -55,7 +55,14 @@ export class NotificationInterceptor implements HttpInterceptor {
     // Skip notification for GET requests or specific endpoints
     // Customize this logic based on your app's needs
     const skipEndpoints = [
-      '/api/auth/refresh-token'
+      '/api/auth/refresh-token',
+      '/admin/create-nsp',
+      '/admin/users/',
+      '/admin/bulk-create-nsps',
+      '/admin/create-facilitator',
+      '/admin/users/facilitators',
+      '/admin/bulk-create-facilitators',
+      '/admin/create-facilitator',
     ];
 
     return (

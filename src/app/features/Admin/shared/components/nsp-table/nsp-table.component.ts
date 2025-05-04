@@ -4,13 +4,13 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 
 export interface NSP {
   id: string;
-  name: string;
-  stack: string;
-  status: 'Active' | 'Inactive' | 'On Leave' | 'Graduated';
-  email?: string;
-  phone?: string;
-  program?: string;
-  joinDate?: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  email: string;
+  role?: string;
+  passwordResetRequired?: boolean;
+  createdAt?: string;
 }
 
 @Component({
@@ -22,26 +22,17 @@ export interface NSP {
 
 export class NspTableComponent {
   @Input() nsps: NSP[] = [];
-  @Input() showSuccessMessage = false;
-  @Input() successMessage = '';
 
   @Output() edit = new EventEmitter<NSP>();
   @Output() delete = new EventEmitter<NSP>();
   @Output() create = new EventEmitter<void>();
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Inactive':
-        return 'bg-gray-100 text-gray-800';
-      case 'On Leave':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Graduated':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  getFullName(nsp: NSP): string {
+    return `${nsp.firstName} ${nsp.middleName ? nsp.middleName + ' ' : ''}${nsp.lastName}`;
+  }
+
+  getInitials(nsp: NSP): string {
+    return `${nsp.firstName.charAt(0)}${nsp.lastName.charAt(0)}`;
   }
 
   onEdit(nsp: NSP): void {
@@ -50,9 +41,5 @@ export class NspTableComponent {
 
   onDelete(nsp: NSP): void {
     this.delete.emit(nsp);
-  }
-
-  onCreateNsp(): void {
-    this.create.emit();
   }
 }
