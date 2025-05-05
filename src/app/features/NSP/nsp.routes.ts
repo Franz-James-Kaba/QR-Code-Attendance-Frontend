@@ -4,7 +4,7 @@ import { NspComponent } from '@features/NSP/nsp.component';
 
 export const nspRoutes: Routes = [
   {
-    path: 'dashboard',
+    path: '',
     component: NspComponent,
     canActivate: [AuthGuard],
     data: {
