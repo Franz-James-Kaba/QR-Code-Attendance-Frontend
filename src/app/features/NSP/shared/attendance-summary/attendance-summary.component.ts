@@ -1,34 +1,32 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { AWARD_ICON, CALENDER_ICON, CHECK_IN_ICON, CHECK_OUT_ICON } from '@app/core/data/svg-data';
 
-interface SummaryCard {
-  icon: string;
-  title: string;
-  value: string;
-  description: string;
-}
+import { IconComponent } from "../../../../shared/components/icon/icon.component";
+import { SummaryCard } from '../../models/nsp.interface';
 
 @Component({
   selector: 'app-attendance-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="grid grid-cols-2 gap-4">
       <div
         *ngFor="let card of summaryCards"
-        [ngClass]="{
-          '': card.title === 'Check In' || card.title === 'Check Out',
-          '': card.title === 'Break Time' || card.title === 'Total Days',
-        }"
-        class="w-full rounded-xl p-4 bg-[#082B49] text-white"
+        class="w-full rounded-xl p-4 bg-primary text-white"
       >
-        <div class="flex items-center mb-2">
-          <img [src]="card.icon" [alt]="card.title" class="mr-2 w-5 h-5" />
-          <span class="text-sm font-medium text-white">{{ card.title }}</span>
+        <div class="flex items-center gap-1 mb-1">
+          <app-icon
+            [path]="card.icon.path"
+            [size]="card.icon.size"
+            [viewBox]="card.icon.viewBox"
+            class="w-5 h-5"
+          />
+          <span class="text-sm font-semibold text-white">{{ card.title }}</span>
         </div>
         <div>
-          <p class="font-semibold text-base text-white">{{ card.value }}</p>
-          <p class="text-white text-xs font-normal">{{ card.description }}</p>
+          <p class="font-bold text-base text-white mb-1">{{ card.value }}</p>
+          <p class="font-normal text-10 text-white">{{ card.description }}</p>
         </div>
       </div>
     </div>
@@ -37,27 +35,27 @@ interface SummaryCard {
 export class AttendanceSummaryComponent {
  public summaryCards: SummaryCard[] = [
     {
-      icon: '../../../assets/icons/check-in.svg',
+      icon: CHECK_IN_ICON,
       title: 'Check In',
       value: '6:58 am',
       description: 'Average Check In Time',
     },
     {
-      icon: '../../../assets/icons/check-out.svg',
+      icon: CHECK_OUT_ICON,
       title: 'Check Out',
       value: '6:58 am',
       description: 'Average Check Out Time',
     },
     {
-      icon: '../../../assets/icons/break-time.svg',
-      title: 'Break Time',
-      value: '6:58 am',
-      description: 'Average Break Time',
+      icon: AWARD_ICON,
+      title: 'Check-In Position',
+      value: '12',
+      description: 'Position on Attendance Table',
     },
     {
-      icon: '../../../assets/icons/calender.svg',
+      icon: CALENDER_ICON,
       title: 'Total Days',
-      value: '28',
+      value: '16/28',
       description: 'Working Days',
     },
   ];
