@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth/auth.guard';
 import { AdminGuard } from '@core/guards/role/role.guard';
+
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
 export const adminRoutes: Routes = [
@@ -62,14 +63,14 @@ export const adminRoutes: Routes = [
           }
         ]
       },
-      // {
-      //   path: 'sessions',
-      //   loadComponent: () => import('@Admin/features/dashboard/pages/session-management/session-management.component')
-      //     .then(m => m.SessionManagementComponent),
-      //   data: {
-      //     title: 'Session Management'
-      //   }
-      // },
+      {
+        path: 'sessions',
+        loadComponent: () => import('@Admin/features/dashboard/pages/session-management/session-management.component')
+          .then(m => m.SessionManagementComponent),
+        data: {
+          title: 'Session Management'
+        }
+      },
       {
         path: 'settings',
         loadComponent: () => import('@Admin/features/dashboard/pages/settings/settings.component')

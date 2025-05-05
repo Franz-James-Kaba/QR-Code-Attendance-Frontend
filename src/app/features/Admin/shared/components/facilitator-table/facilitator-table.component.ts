@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ButtonComponent } from '@shared/components/button/button.component';
 
 import { FacilitatorViewModel } from '../../models/facilitator.model';
 
 @Component({
   selector: 'app-facilitator-table',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule],
   templateUrl: './facilitator-table.component.html',
 })
 export class FacilitatorTableComponent {

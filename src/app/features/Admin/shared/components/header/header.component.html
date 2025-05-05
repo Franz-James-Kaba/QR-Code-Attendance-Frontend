@@ -25,59 +25,64 @@
     <!-- Right side: Notification + User Badge -->
     <div class="flex items-center space-x-2">
       <!-- Notification bell -->
-      <button
-        type="button"
-        class="relative p-2 rounded-lg hover:bg-gray-100"
-        aria-label="View notifications"
-      >
-        <app-icon [path]="BELL_ICON_PATH" class="w-6 h-6 text-gray-700" />
+      <div class="relative">
+        <button
+          type="button"
+          (click)="onToggleNotifications()"
+          class="relative p-2 rounded-lg hover:bg-gray-100"
+          aria-label="View notifications"
+        >
+          <app-icon [path]="BELL_ICON_PATH" class="w-6 h-6 text-gray-700" />
 
-        <!-- Notification indicator -->
-        @if (hasNotifications) {
-          <span
-            class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"
-          ></span>
+          <!-- Notification indicator -->
+          @if (unreadCount > 0) {
+            <span
+              class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"
+            ></span>
+          }
+        </button>
+
+        <!-- Notification dropdown -->
+        @if (showNotificationDropdown) {
+          <div 
+            class="absolute right-0 mt-2 z-50"
+            clickOutside
+            (clickOutside)="onClickOutside()"
+          >
+            <app-notification-dropdown
+              (closeDropdown)="showNotificationDropdown = false"
+            ></app-notification-dropdown>
+          </div>
         }
-      </button>
+      </div>
 
       <!-- User badge - desktop -->
       <div class="relative">
         <app-user-badge
+          [userName]="currentUser().name"
+          [userRole]="currentUser().role"
+          [userAvatar]="currentUser().avatar ?? ''"
           (click)="onUserBadgeClick()"
           (keydown)="onUserBadgeKeyDown($event)"
           tabindex="0"
           role="button"
           aria-haspopup="true"
           [attr.aria-expanded]="showUserDropdown"
+          aria-label="User profile menu"
+          [clickable]="true"
           class="cursor-pointer"
         ></app-user-badge>
 
         <!-- User dropdown menu -->
         @if (showUserDropdown) {
           <div
+            class="absolute right-0 mt-2 z-50"
             clickOutside
             (clickOutside)="onClickOutside()"
-            class="absolute right-0 z-40 mt-2 w-48 bg-white rounded-lg shadow-lg py-1"
           >
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Profile
-            </a>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Settings
-            </a>
-            <div class="my-1 border-t border-gray-200"></div>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-            >
-              Sign out
-            </a>
+            <app-profile-dropdown
+              (closeDropdown)="showUserDropdown = false"
+            ></app-profile-dropdown>
           </div>
         }
       </div>

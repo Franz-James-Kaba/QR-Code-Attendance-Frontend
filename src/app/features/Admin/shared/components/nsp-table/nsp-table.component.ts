@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ButtonComponent } from '@shared/components/button/button.component';
 
 export interface NSP {
   id: string;
@@ -16,7 +15,7 @@ export interface NSP {
 @Component({
   selector: 'app-nsp-table',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule ],
   templateUrl: './nsp-table.component.html',
 })
 

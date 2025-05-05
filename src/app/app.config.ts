@@ -2,6 +2,7 @@ import { provideHttpClient, withInterceptors, HttpRequest, HttpHandlerFn, HttpEv
 import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
+import { AuthInterceptor } from '@core/interceptors/auth/auth.interceptor';
 import { ErrorInterceptor } from '@core/interceptors/error/error.interceptor';
 import { NavigationLoadingInterceptor } from '@core/interceptors/navigation-loading/navigation-loading.interceptor';
 import { NotificationInterceptor } from '@core/interceptors/notification/notification.interceptor';
@@ -16,16 +17,13 @@ import { Observable } from 'rxjs';
 import { routes } from './app.routes';
 
 const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
-  const token = localStorage.getItem('auth_token');
+  const interceptor = new AuthInterceptor();
 
-  if (token) {
-    const authReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
-    });
-    return next(authReq);
-  }
+  const handler = {
+    handle: (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => next(request)
+  };
 
-  return next(req);
+  return interceptor.intercept(req, handler);
 };
 
 const notificationInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
@@ -68,6 +66,7 @@ export const appConfig: ApplicationConfig = {
       multi: true
     },
     NavigationLoadingInterceptor,
-    ErrorInterceptor
+    ErrorInterceptor,
+    AuthInterceptor
   ],
 };

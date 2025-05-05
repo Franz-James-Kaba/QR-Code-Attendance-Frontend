@@ -132,10 +132,8 @@ export class AuthEffects {
   firstTimePasswordReset$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.firstTimePasswordReset),
-      tap(action => console.log('firstTimePasswordReset action received:', action)),
       exhaustMap(({ email, password, confirmPassword }) =>
         this.authService.firstTimePasswordReset(email, { password, confirmPassword }).pipe(
-          tap(response => console.log('firstTimePasswordReset API response:', response)),
           map(() => {
             this.notificationService.success('Password has been updated successfully');
             return AuthActions.firstTimePasswordResetSuccess();
@@ -167,7 +165,6 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.firstTimePasswordResetSuccess),
         tap(() => {
-          console.log('Password reset success, navigating to login');
           this.router.navigate(['/auth/login']);
         })
       ),
@@ -179,12 +176,30 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.logout),
         tap(() => {
+          // Get current URL to check if we're in a protected route
+          const currentUrl = this.router.url;
+          const isInProtectedRoute = currentUrl.includes('/admin') ||
+                                    currentUrl.includes('/nsp') ||
+                                    currentUrl.includes('/facilitator');
+
+          // Clear auth data
           this.authService.logout();
-          // Also clear the user data from localStorage
           localStorage.removeItem('auth_user');
-          // Navigate back to login page
-          this.router.navigate(['/auth/login']);
-          this.notificationService.info('You have been logged out');
+
+          // Navigate back to login page with return URL for better UX
+          if (isInProtectedRoute) {
+            // If in protected route, include returnUrl parameter
+            this.router.navigate(['/auth/login'], {
+              queryParams: { returnUrl: currentUrl }
+            });
+
+            // Show session expiration message if coming from a protected route
+            this.notificationService.warning('Your session has expired. Please log in again.');
+          } else {
+            // Normal logout, probably user-initiated
+            this.router.navigate(['/auth/login']);
+            this.notificationService.info('You have been logged out');
+          }
         })
       ),
     { dispatch: false }

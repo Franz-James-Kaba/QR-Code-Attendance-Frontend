@@ -15,12 +15,16 @@
         [ngClass]="{'border-red-500': hasError('firstName', 'required') || hasError('firstName', 'minlength')}"
         placeholder="John"
       >
-      <div *ngIf="hasError('firstName', 'required')" class="text-red-500 text-xs mt-1">
-        First name is required
-      </div>
-      <div *ngIf="hasError('firstName', 'minlength')" class="text-red-500 text-xs mt-1">
-        First name must be at least 3 characters
-      </div>
+      @if (hasError('firstName', 'required')) {
+        <div class="text-red-500 text-xs mt-1">
+          First name is required
+        </div>
+      }
+      @if (hasError('firstName', 'minlength')) {
+        <div class="text-red-500 text-xs mt-1">
+          First name must be at least 3 characters
+        </div>
+      }
     </div>
 
     <!-- Middle Name field -->
@@ -46,12 +50,16 @@
         [ngClass]="{'border-red-500': hasError('lastName', 'required') || hasError('lastName', 'minlength')}"
         placeholder="Doe"
       >
-      <div *ngIf="hasError('lastName', 'required')" class="text-red-500 text-xs mt-1">
-        Last name is required
-      </div>
-      <div *ngIf="hasError('lastName', 'minlength')" class="text-red-500 text-xs mt-1">
-        Last name must be at least 3 characters
-      </div>
+      @if (hasError('lastName', 'required')) {
+        <div class="text-red-500 text-xs mt-1">
+          Last name is required
+        </div>
+      }
+      @if (hasError('lastName', 'minlength')) {
+        <div class="text-red-500 text-xs mt-1">
+          Last name must be at least 3 characters
+        </div>
+      }
     </div>
 
     <!-- Email field -->
@@ -65,12 +73,16 @@
         [ngClass]="{'border-red-500': hasError('email', 'required') || hasError('email', 'email')}"
         placeholder="john.doe@example.com"
       >
-      <div *ngIf="hasError('email', 'required')" class="text-red-500 text-xs mt-1">
-        Email is required
-      </div>
-      <div *ngIf="hasError('email', 'email')" class="text-red-500 text-xs mt-1">
-        Please enter a valid email address
-      </div>
+      @if (hasError('email', 'required')) {
+        <div class="text-red-500 text-xs mt-1">
+          Email is required
+        </div>
+      }
+      @if (hasError('email', 'email')) {
+        <div class="text-red-500 text-xs mt-1">
+          Please enter a valid email address
+        </div>
+      }
     </div>
 
     <!-- Program field -->
@@ -84,9 +96,11 @@
         [ngClass]="{'border-red-500': hasError('program', 'required')}"
         placeholder="Web Development"
       >
-      <div *ngIf="hasError('program', 'required')" class="text-red-500 text-xs mt-1">
-        Program is required
-      </div>
+      @if (hasError('program', 'required')) {
+        <div class="text-red-500 text-xs mt-1">
+          Program is required
+        </div>
+      }
     </div>
 
     <!-- Form actions -->
