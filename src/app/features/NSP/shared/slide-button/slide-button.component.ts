@@ -9,10 +9,10 @@ import { IconComponent } from '../../../../shared/components/icon/icon.component
   imports: [CommonModule, IconComponent],
   template: `
     <button
-      class="w-full bg-[#065186] text-white py-4 px-6 rounded-xl shadow-(#00000026) flex items-center justify-center text-base font-bold"
+      class="w-full bg-primary text-white py-4 px-6 rounded-xl shadow-(#00000026) flex items-center justify-center text-base font-bold gap-2"
     >
-      <app-icon path="/assets/icon/check-out.svg" />
-      Slide to Check In
+      <app-icon viewBox="0 0 21 16" [size]="18" [svgwidth]="21" [svgHeight]="16" path="M15.5 9L19.5 5M19.5 5L15.5 1M19.5 5H6.5C3.73858 5 1.5 7.23858 1.5 10C1.5 12.7614 3.73858 15 6.5 15H11.5" />
+      <span>Slide to Check In</span>
     </button>
   `,
 })
