@@ -44,13 +44,6 @@ export class ActivityListComponent {
       status: 'On time'
     },
     {
-      type: 'Break Time',
-      icon: '',
-      date: 'March 21, 2025',
-      time: '12:00 pm',
-      status: 'Break time'
-    },
-    {
       type: 'Check Out',
       icon: '',
       date: 'March 21, 2025',

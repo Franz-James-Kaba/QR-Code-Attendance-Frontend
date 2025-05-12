@@ -48,6 +48,7 @@ Thumbs.db
 # /src/environments/environment.prod.ts
 
 # But do ignore specific sensitive environment files
+src/environments/
 /src/environments/*.local.ts
 /src/environments/environment.*.ts
 !/src/environments/environment.prod.ts

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CalenderComponent } from '@app/features/NSP/shared/calender/calender.component';
 
 import { ActivityListComponent } from './shared/activity-list/activity-list.component';
@@ -13,7 +13,7 @@ import { SlideButtonComponent } from './shared/slide-button/slide-button.compone
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet,
+    RouterModule,
     ProfileComponent,
     CalenderComponent,
     AttendanceSummaryComponent,

@@ -7,7 +7,7 @@ export function amaliTechEmailValidator(): ValidatorFn {
     }
 
     const email = control.value.toLowerCase();
-    const validDomains = ['@amalitech.com', '@amalitech.org', '@letterhaven.net'];
+    const validDomains = ['@amalitech.com', '@amalitech.org', '@letterhaven.net', '@letterprotect.com'];
     const isValidDomain = validDomains.some(domain => email.endsWith(domain));
 
     return isValidDomain ? null : { amaliTechEmail: true };

@@ -8,12 +8,15 @@
     fill="none"
     stroke="currentColor"
     [class]="'w-full h-full ' + iconClass"
+    [attr.width]="svgwidth"
+    [attr.height]="svgHeight"
   >
     <path
       [attr.d]="path"
       stroke-linecap="round"
       stroke-linejoin="round"
       [attr.stroke-width]="strokeWidth"
+      [attr.stroke]="strokeColor"
     />
   </svg>
 </div>
