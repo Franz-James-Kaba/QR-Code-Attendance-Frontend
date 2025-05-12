@@ -30,6 +30,7 @@
     "@ngrx/store": "^19.0.1",
     "@ngrx/store-devtools": "^19.0.1",
     "@tailwindcss/postcss": "^4.0.15",
+    "@zxing/ngx-scanner": "^19.0.0",
     "rxjs": "~7.8.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.3.0",
