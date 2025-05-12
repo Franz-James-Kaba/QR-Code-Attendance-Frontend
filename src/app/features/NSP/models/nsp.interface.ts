@@ -17,3 +17,8 @@ export interface SummaryCard {
   value: string;
   description: string;
 }
+
+export interface AverageTimeResponse {
+  message: string;
+  data: string | null;
+}
