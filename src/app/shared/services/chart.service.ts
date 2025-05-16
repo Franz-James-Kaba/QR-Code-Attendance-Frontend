@@ -6,17 +6,16 @@ import { catchError, delay, map } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
 
-
 /**
  * Service to handle chart data operations
  * In a real application, this would connect to backend APIs
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ChartService {
-  private cachedData: Record<string, { data: ChartDataSet, timestamp: number }> = {};
-  private readonly http = inject(HttpClient)
+  private cachedData: Record<string, { data: ChartDataSet; timestamp: number }> = {};
+  private readonly http = inject(HttpClient);
 
   /**
    * Gets chart data for a specific data source and time range
@@ -24,13 +23,19 @@ export class ChartService {
    * @param timeRange The time range to fetch data for
    * @param chartType The type of chart to generate data for
    */
-  getChartData(source: string, timeRange: TimeRange, chartType: ChartType = 'bar'): Observable<ChartDataSet> {
+  getChartData(
+    source: string,
+    timeRange: TimeRange,
+    chartType: ChartType = 'bar'
+  ): Observable<ChartDataSet> {
     const cacheKey = `${source}_${timeRange}_${chartType}`;
     const now = Date.now();
 
     // Check if we have valid cached data
-    if (this.cachedData[cacheKey] &&
-        (now - this.cachedData[cacheKey].timestamp) < environment.charts.cacheExpiration) {
+    if (
+      this.cachedData[cacheKey] &&
+      now - this.cachedData[cacheKey].timestamp < environment.charts.cacheExpiration
+    ) {
       return of(this.cachedData[cacheKey].data);
     }
 
@@ -67,11 +72,15 @@ export class ChartService {
   /**
    * Fetches data from the API in production
    */
-  private fetchFromApi(source: string, timeRange: TimeRange, chartType: ChartType): Observable<ChartDataSet> {
+  private fetchFromApi(
+    source: string,
+    timeRange: TimeRange,
+    chartType: ChartType
+  ): Observable<ChartDataSet> {
     const endpoint = `${environment.apiUrl}/charts/${source}?timeRange=${timeRange}`;
-    return this.http.get<any>(endpoint).pipe(
-      map(response => this.mapApiResponseToChartData(response, chartType))
-    );
+    return this.http
+      .get<any>(endpoint)
+      .pipe(map(response => this.mapApiResponseToChartData(response, chartType)));
   }
 
   /**
@@ -83,7 +92,7 @@ export class ChartService {
     try {
       const chartData: ChartDataPoint[] = apiResponse.data.map((item: any) => ({
         label: item.label,
-        values: item.values
+        values: item.values,
       }));
 
       return {
@@ -93,7 +102,7 @@ export class ChartService {
         endDate: new Date(apiResponse.endDate),
         yAxisLabels: apiResponse.yAxisLabels,
         showLegend: true,
-        type: chartType
+        type: chartType,
       };
     } catch (e) {
       console.error('Error mapping API response to chart data:', e);
@@ -116,21 +125,21 @@ export class ChartService {
       const transformedData: ChartDataPoint[] = legacyData.data.map((item: any) => ({
         label: item.day,
         values: [item.value1, item.value2],
-        tooltips: [`${item.value1}`, `${item.value2}`]
+        tooltips: [`${item.value1}`, `${item.value2}`],
       }));
 
       return {
         data: transformedData,
         series: [
           { name: legacyData.label1 || 'Series 1', color: legacyData.color1 || '#3b82f6' },
-          { name: legacyData.label2 || 'Series 2', color: legacyData.color2 || '#1f2937' }
+          { name: legacyData.label2 || 'Series 2', color: legacyData.color2 || '#1f2937' },
         ],
         startDate: legacyData.startDate || new Date(),
         endDate: legacyData.endDate || new Date(),
         yAxisLabels: legacyData.timeLabels || [],
         showLegend: true,
         animated: true,
-        type: chartType
+        type: chartType,
       };
     } catch (error) {
       console.error('Error transforming legacy data:', error);
@@ -146,19 +155,23 @@ export class ChartService {
       data: [],
       series: [
         { name: 'Series 1', color: '#3b82f6' },
-        { name: 'Series 2', color: '#1f2937' }
+        { name: 'Series 2', color: '#1f2937' },
       ],
       startDate: new Date(),
       endDate: new Date(),
       showLegend: true,
-      type: chartType
+      type: chartType,
     };
   }
 
   /**
    * Fetches mock data for development and testing
    */
-  private fetchMockData(source: string, timeRange: TimeRange, chartType: ChartType): Observable<ChartDataSet> {
+  private fetchMockData(
+    source: string,
+    timeRange: TimeRange,
+    chartType: ChartType
+  ): Observable<ChartDataSet> {
     // In a real implementation, this would make API calls to your backend
     let mockData: ChartDataSet;
 
@@ -198,7 +211,7 @@ export class ChartService {
         { label: '8:00 AM', values: [42, 12], tooltips: ['42 NSPs', '12 Facilitators'] },
         { label: '9:00 AM', values: [25, 8], tooltips: ['25 NSPs', '8 Facilitators'] },
         { label: '10:00 AM', values: [10, 4], tooltips: ['10 NSPs', '4 Facilitators'] },
-        { label: '11:00 AM', values: [5, 2], tooltips: ['5 NSPs', '2 Facilitators'] }
+        { label: '11:00 AM', values: [5, 2], tooltips: ['5 NSPs', '2 Facilitators'] },
       ];
 
       // Find maximum value for y-axis scaling
@@ -210,8 +223,7 @@ export class ChartService {
       // Create dynamic y-axis labels starting from 0
       const numberOfSteps = 5;
       const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({length: numberOfSteps + 1}, (_, i) => (i * step).toString());
-
+      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     } else if (timeRange === 'Weekly') {
       startDate = new Date(currentDate);
       startDate.setDate(startDate.getDate() - startDate.getDay());
@@ -223,7 +235,7 @@ export class ChartService {
         { label: 'Tue', values: [78, 32], tooltips: ['78 NSPs', '32 Facilitators'] },
         { label: 'Wed', values: [82, 38], tooltips: ['82 NSPs', '38 Facilitators'] },
         { label: 'Thu', values: [75, 30], tooltips: ['75 NSPs', '30 Facilitators'] },
-        { label: 'Fri', values: [70, 26], tooltips: ['70 NSPs', '26 Facilitators'] }
+        { label: 'Fri', values: [70, 26], tooltips: ['70 NSPs', '26 Facilitators'] },
       ];
 
       // Find maximum value for y-axis scaling
@@ -235,8 +247,7 @@ export class ChartService {
       // Create dynamic y-axis labels starting from 0
       const numberOfSteps = 5;
       const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({length: numberOfSteps + 1}, (_, i) => (i * step).toString());
-
+      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     } else if (timeRange === 'Monthly') {
       startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -245,7 +256,7 @@ export class ChartService {
         { label: 'Week 1', values: [320, 125], tooltips: ['320 NSPs', '125 Facilitators'] },
         { label: 'Week 2', values: [350, 138], tooltips: ['350 NSPs', '138 Facilitators'] },
         { label: 'Week 3', values: [380, 145], tooltips: ['380 NSPs', '145 Facilitators'] },
-        { label: 'Week 4', values: [365, 132], tooltips: ['365 NSPs', '132 Facilitators'] }
+        { label: 'Week 4', values: [365, 132], tooltips: ['365 NSPs', '132 Facilitators'] },
       ];
 
       // Find maximum value for y-axis scaling
@@ -257,8 +268,7 @@ export class ChartService {
       // Create dynamic y-axis labels starting from 0
       const numberOfSteps = 5;
       const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({length: numberOfSteps + 1}, (_, i) => (i * step).toString());
-
+      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     } else {
       // Yearly data
       startDate = new Date(currentDate.getFullYear(), 0, 1);
@@ -276,7 +286,7 @@ export class ChartService {
         { label: 'Sep', values: [795, 305], tooltips: ['795 NSPs', '305 Facilitators'] },
         { label: 'Oct', values: [820, 325], tooltips: ['820 NSPs', '325 Facilitators'] },
         { label: 'Nov', values: [840, 330], tooltips: ['840 NSPs', '330 Facilitators'] },
-        { label: 'Dec', values: [760, 290], tooltips: ['760 NSPs', '290 Facilitators'] }
+        { label: 'Dec', values: [760, 290], tooltips: ['760 NSPs', '290 Facilitators'] },
       ];
 
       // Find maximum value for y-axis scaling
@@ -288,21 +298,21 @@ export class ChartService {
       // Create dynamic y-axis labels starting from 0
       const numberOfSteps = 5;
       const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({length: numberOfSteps + 1}, (_, i) => (i * step).toString());
+      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     }
 
     return {
       data,
       series: [
         { name: 'NSPs', color: '#3b82f6' },
-        { name: 'Facilitators', color: '#1f2937' }
+        { name: 'Facilitators', color: '#1f2937' },
       ],
       startDate,
       endDate,
       yAxisLabels,
       showLegend: true,
       animated: true,
-      type: 'bar'
+      type: 'bar',
     };
   }
 
@@ -326,17 +336,33 @@ export class ChartService {
         { label: 'Tue', values: [5.2, 1.1], tooltips: ['5.2 hours avg stay', '±1.1h variation'] },
         { label: 'Wed', values: [4.8, 0.7], tooltips: ['4.8 hours avg stay', '±0.7h variation'] },
         { label: 'Thu', values: [5.5, 1.2], tooltips: ['5.5 hours avg stay', '±1.2h variation'] },
-        { label: 'Fri', values: [4.2, 0.9], tooltips: ['4.2 hours avg stay', '±0.9h variation'] }
+        { label: 'Fri', values: [4.2, 0.9], tooltips: ['4.2 hours avg stay', '±0.9h variation'] },
       ];
     } else if (timeRange === 'Monthly') {
       startDate = new Date('2025-02-01');
       endDate = new Date('2025-02-28');
 
       data = [
-        { label: 'Week 1', values: [4.7, 0.9], tooltips: ['4.7 hours avg stay', '±0.9h variation'] },
-        { label: 'Week 2', values: [5.1, 1.0], tooltips: ['5.1 hours avg stay', '±1.0h variation'] },
-        { label: 'Week 3', values: [4.9, 0.8], tooltips: ['4.9 hours avg stay', '±0.8h variation'] },
-        { label: 'Week 4', values: [5.3, 1.1], tooltips: ['5.3 hours avg stay', '±1.1h variation'] }
+        {
+          label: 'Week 1',
+          values: [4.7, 0.9],
+          tooltips: ['4.7 hours avg stay', '±0.9h variation'],
+        },
+        {
+          label: 'Week 2',
+          values: [5.1, 1.0],
+          tooltips: ['5.1 hours avg stay', '±1.0h variation'],
+        },
+        {
+          label: 'Week 3',
+          values: [4.9, 0.8],
+          tooltips: ['4.9 hours avg stay', '±0.8h variation'],
+        },
+        {
+          label: 'Week 4',
+          values: [5.3, 1.1],
+          tooltips: ['5.3 hours avg stay', '±1.1h variation'],
+        },
       ];
     } else {
       startDate = new Date('2025-01-01');
@@ -354,7 +380,7 @@ export class ChartService {
         { label: 'Sep', values: [5.0, 1.0], tooltips: ['5.0 hours avg stay', '±1.0h variation'] },
         { label: 'Oct', values: [5.2, 1.1], tooltips: ['5.2 hours avg stay', '±1.1h variation'] },
         { label: 'Nov', values: [4.8, 0.9], tooltips: ['4.8 hours avg stay', '±0.9h variation'] },
-        { label: 'Dec', values: [4.6, 0.8], tooltips: ['4.6 hours avg stay', '±0.8h variation'] }
+        { label: 'Dec', values: [4.6, 0.8], tooltips: ['4.6 hours avg stay', '±0.8h variation'] },
       ];
     }
 
@@ -362,14 +388,14 @@ export class ChartService {
       data,
       series: [
         { name: 'Average stay (hours)', color: '#3b82f6' },
-        { name: 'Variation (±hours)', color: '#1f2937' }
+        { name: 'Variation (±hours)', color: '#1f2937' },
       ],
       startDate,
       endDate,
       yAxisLabels,
       showLegend: true,
       animated: true,
-      type: 'line'
+      type: 'line',
     };
   }
 
@@ -383,25 +409,35 @@ export class ChartService {
     const totalParticipants = 200;
 
     // Distribution between NSPs and Facilitators
-    const nspCount = 150;  // 75% of total
-    const facilitatorCount = 50;  // 25% of total
+    const nspCount = 150; // 75% of total
+    const facilitatorCount = 50; // 25% of total
 
     const data: ChartDataPoint[] = [
-      { label: 'NSPs', values: [nspCount], tooltips: [`${nspCount} NSPs (${(nspCount/totalParticipants*100).toFixed(0)}%)`] },
-      { label: 'Facilitators', values: [facilitatorCount], tooltips: [`${facilitatorCount} Facilitators (${(facilitatorCount/totalParticipants*100).toFixed(0)}%)`] }
+      {
+        label: 'NSPs',
+        values: [nspCount],
+        tooltips: [`${nspCount} NSPs (${((nspCount / totalParticipants) * 100).toFixed(0)}%)`],
+      },
+      {
+        label: 'Facilitators',
+        values: [facilitatorCount],
+        tooltips: [
+          `${facilitatorCount} Facilitators (${((facilitatorCount / totalParticipants) * 100).toFixed(0)}%)`,
+        ],
+      },
     ];
 
     return {
       data,
       series: [
         { name: 'NSPs', color: '#3b82f6' },
-        { name: 'Facilitators', color: '#1f2937' }
+        { name: 'Facilitators', color: '#1f2937' },
       ],
       startDate: currentDate,
       endDate: currentDate,
       showLegend: true,
       animated: true,
-      type: 'pie'
+      type: 'pie',
     };
   }
 }

@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export type ModalType = 'createNsp' | 'createFacilitator' | 'editNsp' | 'editFacilitator' | null;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ModalService {
   private readonly modalVisibleSubject = new BehaviorSubject<boolean>(false);
@@ -16,7 +16,7 @@ export class ModalService {
   public modalType$: Observable<ModalType> = this.modalTypeSubject.asObservable();
   public modalData$: Observable<any> = this.modalDataSubject.asObservable();
 
-  constructor() { }
+  constructor() {}
 
   /**
    * Opens a modal with specified type and optional data

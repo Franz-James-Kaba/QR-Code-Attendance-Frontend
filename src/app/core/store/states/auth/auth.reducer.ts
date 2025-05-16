@@ -26,7 +26,7 @@ export const authReducer = createReducer(
       id: null, // These will be populated by user profile if needed
       email: response.email ?? state.email ?? '',
       firstName: '',
-      lastName: ''
+      lastName: '',
     },
     isLoading: false,
     error: null,
@@ -39,10 +39,10 @@ export const authReducer = createReducer(
   })),
 
   on(AuthActions.logout, () => ({
-    ...initialAuthState
+    ...initialAuthState,
   })),
 
-  on(AuthActions.resetPassword, (state) => ({
+  on(AuthActions.resetPassword, state => ({
     ...state,
     isLoading: true,
     error: null,
@@ -62,7 +62,7 @@ export const authReducer = createReducer(
     error,
   })),
 
-  on(AuthActions.firstTimePasswordReset, (state) => ({
+  on(AuthActions.firstTimePasswordReset, state => ({
     ...state,
     isLoading: true,
     error: null,

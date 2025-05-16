@@ -6,29 +6,27 @@ import { Observable, throwError, catchError, map } from 'rxjs';
 import { environment } from '../../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminDashboardService {
   private readonly API_URL = `${environment.admin.baseUrl}/dashboard`;
-  private readonly http = inject(HttpClient)
+  private readonly http = inject(HttpClient);
 
   /**
    * Get dashboard statistics and recent activities
    */
   getDashboardData(): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>(this.API_URL)
-      .pipe(catchError(this.handleError));
+    return this.http.get<DashboardResponse>(this.API_URL).pipe(catchError(this.handleError));
   }
 
   /**
    * Get dashboard statistics for a specific date range
    */
   getDashboardDataByDateRange(startDate: string, endDate: string): Observable<DashboardResponse> {
-    const params = new HttpParams()
-      .set('startDate', startDate)
-      .set('endDate', endDate);
+    const params = new HttpParams().set('startDate', startDate).set('endDate', endDate);
 
-    return this.http.get<DashboardResponse>(this.API_URL, { params })
+    return this.http
+      .get<DashboardResponse>(this.API_URL, { params })
       .pipe(catchError(this.handleError));
   }
 
@@ -38,10 +36,7 @@ export class AdminDashboardService {
   getRecentActivities(limit: number = 10): Observable<DashboardResponse['recentActivities']> {
     const params = new HttpParams().set('limit', limit.toString());
 
-    return this.http.get<DashboardResponse>(
-      `${this.API_URL}/recent-activities`,
-      { params }
-    ).pipe(
+    return this.http.get<DashboardResponse>(`${this.API_URL}/recent-activities`, { params }).pipe(
       map(response => response.recentActivities),
       catchError(this.handleError)
     );

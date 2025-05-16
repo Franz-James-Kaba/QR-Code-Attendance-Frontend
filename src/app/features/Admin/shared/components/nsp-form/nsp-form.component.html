@@ -20,7 +20,10 @@
       formControlName="name"
       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
     />
-    <div *ngIf="nspForm.get('name')?.invalid && nspForm.get('name')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('name')?.invalid && nspForm.get('name')?.touched"
+      class="text-red-500 text-sm"
+    >
       Name is required
     </div>
   </div>
@@ -38,7 +41,10 @@
       <option value="Backend">Backend</option>
       <option value="FullStack">FullStack</option>
     </select>
-    <div *ngIf="nspForm.get('stack')?.invalid && nspForm.get('stack')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('stack')?.invalid && nspForm.get('stack')?.touched"
+      class="text-red-500 text-sm"
+    >
       Stack is required
     </div>
   </div>
@@ -55,7 +61,10 @@
       <option value="Inactive">Inactive</option>
       <option value="On Leave">On Leave</option>
     </select>
-    <div *ngIf="nspForm.get('status')?.invalid && nspForm.get('status')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('status')?.invalid && nspForm.get('status')?.touched"
+      class="text-red-500 text-sm"
+    >
       Status is required
     </div>
   </div>
@@ -69,10 +78,16 @@
       formControlName="email"
       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
     />
-    <div *ngIf="nspForm.get('email')?.errors?.['required'] && nspForm.get('email')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('email')?.errors?.['required'] && nspForm.get('email')?.touched"
+      class="text-red-500 text-sm"
+    >
       Email is required
     </div>
-    <div *ngIf="nspForm.get('email')?.errors?.['email'] && nspForm.get('email')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('email')?.errors?.['email'] && nspForm.get('email')?.touched"
+      class="text-red-500 text-sm"
+    >
       Please enter a valid email
     </div>
   </div>
@@ -86,7 +101,10 @@
       formControlName="phone"
       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
     />
-    <div *ngIf="nspForm.get('phone')?.invalid && nspForm.get('phone')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('phone')?.invalid && nspForm.get('phone')?.touched"
+      class="text-red-500 text-sm"
+    >
       Phone is required
     </div>
   </div>
@@ -104,7 +122,10 @@
       <option value="Data Science">Data Science</option>
       <option value="Mobile Development">Mobile Development</option>
     </select>
-    <div *ngIf="nspForm.get('program')?.invalid && nspForm.get('program')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('program')?.invalid && nspForm.get('program')?.touched"
+      class="text-red-500 text-sm"
+    >
       Program is required
     </div>
   </div>
@@ -118,25 +139,20 @@
       formControlName="joinDate"
       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
     />
-    <div *ngIf="nspForm.get('joinDate')?.invalid && nspForm.get('joinDate')?.touched" class="text-red-500 text-sm">
+    <div
+      *ngIf="nspForm.get('joinDate')?.invalid && nspForm.get('joinDate')?.touched"
+      class="text-red-500 text-sm"
+    >
       Join Date is required
     </div>
   </div>
 
   <!-- Action Buttons -->
   <div class="flex justify-end space-x-3 pt-4">
-    <app-button
-      type="button" 
-      variant="secondary"
-      size="md"
-      (buttonClick)="onCancel()">
+    <app-button type="button" variant="secondary" size="md" (buttonClick)="onCancel()">
       Cancel
     </app-button>
-    <app-button
-      type="submit" 
-      variant="primary"
-      size="md"
-      [loading]="isSubmitting">
+    <app-button type="submit" variant="primary" size="md" [loading]="isSubmitting">
       {{ isEditMode ? 'Update' : 'Create' }} NSP
     </app-button>
   </div>

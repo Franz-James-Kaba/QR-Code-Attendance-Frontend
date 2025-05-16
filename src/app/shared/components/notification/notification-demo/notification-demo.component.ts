@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   template: `
     <div class="notification-demo">
       <h2>Notification Component</h2>
-      
+
       <div class="config-section">
         <h3>Configuration</h3>
         <div class="form-group">
@@ -25,7 +25,7 @@ import { FormsModule } from '@angular/forms';
             <option value="bottom-center">Bottom Center</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="theme">Theme:</label>
           <select id="theme" [(ngModel)]="theme" (change)="updateTheme()">
@@ -34,13 +34,13 @@ import { FormsModule } from '@angular/forms';
             <option value="system">System</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="duration">Duration (ms):</label>
-          <input id="duration" type="number" [(ngModel)]="duration" min="1000" step="1000">
+          <input id="duration" type="number" [(ngModel)]="duration" min="1000" step="1000" />
         </div>
       </div>
-      
+
       <div class="button-group">
         <h3>Test Notifications</h3>
         <button (click)="showSuccessNotification()">Success</button>
@@ -52,86 +52,89 @@ import { FormsModule } from '@angular/forms';
       </div>
     </div>
   `,
-  styles: [`
-    .notification-demo {
-      padding: 20px;
-      margin: 20px;
-      border-radius: 8px;
-      background-color: #f9fafb;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    h2 {
-      margin-bottom: 16px;
-      color: #111827;
-    }
-    
-    h3 {
-      margin: 16px 0 12px 0;
-      color: #374151;
-      font-size: 1.1rem;
-    }
-    
-    .config-section {
-      margin-bottom: 24px;
-      padding: 16px;
-      border-radius: 6px;
-      background-color: #f3f4f6;
-    }
-    
-    .form-group {
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-    }
-    
-    label {
-      width: 120px;
-      font-weight: 500;
-    }
-    
-    select, input {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #d1d5db;
-      background-color: #fff;
-    }
-    
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      flex-direction: column;
-    }
-    
-    .button-group button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      border: none;
-      background-color: #3b82f6;
-      color: white;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      width: fit-content;
-    }
-    
-    .button-group button:hover {
-      background-color: #2563eb;
-    }
-  `]
+  styles: [
+    `
+      .notification-demo {
+        padding: 20px;
+        margin: 20px;
+        border-radius: 8px;
+        background-color: #f9fafb;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        color: #111827;
+      }
+
+      h3 {
+        margin: 16px 0 12px 0;
+        color: #374151;
+        font-size: 1.1rem;
+      }
+
+      .config-section {
+        margin-bottom: 24px;
+        padding: 16px;
+        border-radius: 6px;
+        background-color: #f3f4f6;
+      }
+
+      .form-group {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+      }
+
+      label {
+        width: 120px;
+        font-weight: 500;
+      }
+
+      select,
+      input {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        background-color: #fff;
+      }
+
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex-direction: column;
+      }
+
+      .button-group button {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        background-color: #3b82f6;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        width: fit-content;
+      }
+
+      .button-group button:hover {
+        background-color: #2563eb;
+      }
+    `,
+  ],
 })
 export class NotificationDemoComponent {
   private notificationService = inject(NotificationService);
-  
+
   // Configuration options
   position: NotificationPosition = 'top-right';
   theme: 'light' | 'dark' | 'system' = 'system';
   duration: number = 5000;
-  
+
   // Reference to the global notification component in app.component.html
   private notificationComponent?: HTMLElement;
-  
+
   ngOnInit() {
     // Find the notification component in the DOM
     setTimeout(() => {
@@ -140,50 +143,50 @@ export class NotificationDemoComponent {
       this.updateTheme();
     });
   }
-  
+
   updatePosition() {
     if (this.notificationComponent) {
       this.notificationComponent.setAttribute('ng-reflect-position', this.position);
     }
   }
-  
+
   updateTheme() {
     if (this.notificationComponent) {
       this.notificationComponent.setAttribute('ng-reflect-theme', this.theme);
     }
   }
-  
+
   showSuccessNotification(): void {
     this.notificationService.success('Operation completed successfully!', {
-      duration: this.duration
+      duration: this.duration,
     });
   }
-  
+
   showErrorNotification(): void {
     this.notificationService.error('An error occurred while processing your request.', {
-      duration: this.duration
+      duration: this.duration,
     });
   }
-  
+
   showInfoNotification(): void {
     this.notificationService.info('Your session will expire in 5 minutes.', {
-      duration: this.duration
+      duration: this.duration,
     });
   }
-  
+
   showWarningNotification(): void {
     this.notificationService.warning('Please save your changes before leaving.', {
-      duration: this.duration
+      duration: this.duration,
     });
   }
-  
+
   showWithTitleNotification(): void {
     this.notificationService.info('This is additional information about the feature.', {
       duration: this.duration,
-      title: 'Did you know?'
+      title: 'Did you know?',
     });
   }
-  
+
   showWithActionNotification(): void {
     this.notificationService.warning('Your session is about to expire.', {
       duration: 15000, // Longer duration for action
@@ -191,7 +194,7 @@ export class NotificationDemoComponent {
       actionLabel: 'Extend Session',
       onAction: () => {
         this.notificationService.success('Session extended successfully!');
-      }
+      },
     });
   }
 }

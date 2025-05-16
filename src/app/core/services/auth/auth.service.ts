@@ -13,12 +13,11 @@ export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly API_URL = environment.auth.baseUrl;
   private readonly currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
-  private readonly http = inject(HttpClient)
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-  ) {
+  constructor() {
     // Check if user is already logged in
     this.loadStoredUser();
   }
@@ -40,48 +39,45 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
-      .pipe(
-        tap(response => {
-          // Ensure email is included in the response
-          const responseWithEmail: AuthResponse = {
-            ...response,
-            email: credentials.email // Add email from the login credentials
-          };
-          
-          localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
-          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
-          this.currentUserSubject.next(responseWithEmail);
-        }),
-        catchError(this.handleError)
-      );
-  }
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+      tap(response => {
+        // Ensure email is included in the response
+        const responseWithEmail: AuthResponse = {
+          ...response,
+          email: credentials.email, // Add email from the login credentials
+        };
 
-  resetPassword(email: string, token: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/reset-password?email=${email}&token=${token}`,
-      passwords
-    ).pipe(
+        localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
+        localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
+        this.currentUserSubject.next(responseWithEmail);
+      }),
       catchError(this.handleError)
     );
   }
 
-  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/first-password-reset?email=${email}`,
-      passwords
-    ).pipe(
-      catchError(this.handleError)
-    );
+  resetPassword(
+    email: string,
+    token: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password?email=${email}&token=${token}`, passwords)
+      .pipe(catchError(this.handleError));
+  }
+
+  firstTimePasswordReset(
+    email: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/first-password-reset?email=${email}`, passwords)
+      .pipe(catchError(this.handleError));
   }
 
   requestPasswordReset(email: string): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/reset-password-request?email=${email}`,
-      {}
-    ).pipe(
-      catchError(this.handleError)
-    );
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
+      .pipe(catchError(this.handleError));
   }
 
   logout(): void {

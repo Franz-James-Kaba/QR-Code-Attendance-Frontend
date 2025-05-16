@@ -5,15 +5,24 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 
 import { DeleteConfirmationComponent } from '../../../../shared/components/delete-confirmation/delete-confirmation.component';
 import { ModalContainerComponent } from '../../../../shared/components/modal-container/modal-container.component';
-import { NspTableComponent, NSP } from '../../../../shared/components/nsp-table/nsp-table.component';
+import {
+  NspTableComponent,
+  NSP,
+} from '../../../../shared/components/nsp-table/nsp-table.component';
 import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-nsp-overview',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, NspTableComponent, DeleteConfirmationComponent, ModalContainerComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    NspTableComponent,
+    DeleteConfirmationComponent,
+    ModalContainerComponent,
+  ],
   templateUrl: './nsp-overview.component.html',
-  styleUrls: ['./nsp-overview.component.scss']
+  styleUrls: ['./nsp-overview.component.scss'],
 })
 export class NspOverviewComponent implements OnInit {
   // Flag to control empty state or table view
@@ -41,7 +50,7 @@ export class NspOverviewComponent implements OnInit {
         this.showSuccessMessage = true;
         this.successMessage = params['message'] || 'Operation successful';
         // Hide success message after 5 seconds
-        setTimeout(() => this.showSuccessMessage = false, 5000);
+        setTimeout(() => (this.showSuccessMessage = false), 5000);
       }
     });
 
@@ -61,7 +70,7 @@ export class NspOverviewComponent implements OnInit {
         email: 'john.doe@example.com',
         phone: '+1 234 567 8901',
         program: 'Web Development',
-        joinDate: '2024-05-01'
+        joinDate: '2024-05-01',
       },
       {
         id: 'NSP-5678',
@@ -71,7 +80,7 @@ export class NspOverviewComponent implements OnInit {
         email: 'jane.smith@example.com',
         phone: '+1 234 567 8902',
         program: 'Data Science',
-        joinDate: '2024-04-15'
+        joinDate: '2024-04-15',
       },
       {
         id: 'NSP-9012',
@@ -81,8 +90,8 @@ export class NspOverviewComponent implements OnInit {
         email: 'david.johnson@example.com',
         phone: '+1 234 567 8903',
         program: 'Web Development',
-        joinDate: '2024-03-10'
-      }
+        joinDate: '2024-03-10',
+      },
     ];
 
     // Update hasRecords flag
@@ -125,7 +134,7 @@ export class NspOverviewComponent implements OnInit {
       this.successMessage = `${this.nspToDelete.name} has been successfully deleted`;
 
       // Hide success message after 5 seconds
-      setTimeout(() => this.showSuccessMessage = false, 5000);
+      setTimeout(() => (this.showSuccessMessage = false), 5000);
 
       // Close modal
       this.showDeleteModal = false;

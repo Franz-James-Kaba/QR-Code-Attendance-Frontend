@@ -1,7 +1,18 @@
-import { provideHttpClient, withInterceptors, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpEvent,
+} from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withComponentInputBinding,
+  withPreloading,
+} from '@angular/router';
 import { ErrorInterceptor } from '@core/interceptors/error/error.interceptor';
 import { NavigationLoadingInterceptor } from '@core/interceptors/navigation-loading/navigation-loading.interceptor';
 import { NotificationInterceptor } from '@core/interceptors/notification/notification.interceptor';
@@ -15,12 +26,15 @@ import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
 
-const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+const authInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
   const token = localStorage.getItem('auth_token');
 
   if (token) {
     const authReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
+      headers: req.headers.set('Authorization', `Bearer ${token}`),
     });
     return next(authReq);
   }
@@ -28,11 +42,14 @@ const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Obse
   return next(req);
 };
 
-const notificationInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+const notificationInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
   const interceptor = new NotificationInterceptor();
 
   const handler = {
-    handle: (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => next(request)
+    handle: (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => next(request),
   };
 
   return interceptor.intercept(req, handler);
@@ -54,20 +71,15 @@ export const appConfig: ApplicationConfig = {
     provideStore({ auth: authReducer }),
     provideEffects(AuthEffects),
     provideStoreDevtools(),
-    provideHttpClient(
-      withInterceptors([
-        authInterceptorFn,
-        notificationInterceptorFn
-      ])
-    ),
+    provideHttpClient(withInterceptors([authInterceptorFn, notificationInterceptorFn])),
     // Use APP_INITIALIZER with the correct factory pattern
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuthFactory,
       deps: [Store],
-      multi: true
+      multi: true,
     },
     NavigationLoadingInterceptor,
-    ErrorInterceptor
+    ErrorInterceptor,
   ],
 };

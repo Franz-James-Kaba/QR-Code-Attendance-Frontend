@@ -5,19 +5,18 @@ import {
   SessionListResponse,
   CreateSessionRequest,
   UpdateSessionRequest,
-  SessionFilter
+  SessionFilter,
 } from '@features/Admin/shared/models/session/session.model';
 import { Observable, throwError, catchError } from 'rxjs';
 
 import { environment } from '../../../../../../environments/environment';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminSessionService {
   private readonly API_URL = `${environment.admin.baseUrl}/sessions`;
-  private readonly http = inject(HttpClient)
+  private readonly http = inject(HttpClient);
 
   /**
    * Get all sessions with optional filtering
@@ -31,7 +30,8 @@ export class AdminSessionService {
       }
     });
 
-    return this.http.get<SessionListResponse>(this.API_URL, { params })
+    return this.http
+      .get<SessionListResponse>(this.API_URL, { params })
       .pipe(catchError(this.handleError));
   }
 
@@ -39,23 +39,22 @@ export class AdminSessionService {
    * Get a specific session by ID
    */
   getSessionById(id: number): Observable<Session> {
-    return this.http.get<Session>(`${this.API_URL}/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<Session>(`${this.API_URL}/${id}`).pipe(catchError(this.handleError));
   }
 
   /**
    * Create a new session
    */
   createSession(sessionData: CreateSessionRequest): Observable<Session> {
-    return this.http.post<Session>(this.API_URL, sessionData)
-      .pipe(catchError(this.handleError));
+    return this.http.post<Session>(this.API_URL, sessionData).pipe(catchError(this.handleError));
   }
 
   /**
    * Update an existing session
    */
   updateSession(sessionId: number, sessionData: UpdateSessionRequest): Observable<Session> {
-    return this.http.patch<Session>(`${this.API_URL}/${sessionId}`, sessionData)
+    return this.http
+      .patch<Session>(`${this.API_URL}/${sessionId}`, sessionData)
       .pipe(catchError(this.handleError));
   }
 
@@ -63,7 +62,8 @@ export class AdminSessionService {
    * Delete a session
    */
   deleteSession(sessionId: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${sessionId}`)
+    return this.http
+      .delete<void>(`${this.API_URL}/${sessionId}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -71,7 +71,8 @@ export class AdminSessionService {
    * Start a session (change status to ONGOING)
    */
   startSession(sessionId: number): Observable<Session> {
-    return this.http.post<Session>(`${this.API_URL}/${sessionId}/start`, {})
+    return this.http
+      .post<Session>(`${this.API_URL}/${sessionId}/start`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -79,7 +80,8 @@ export class AdminSessionService {
    * End a session (change status to COMPLETED)
    */
   endSession(sessionId: number): Observable<Session> {
-    return this.http.post<Session>(`${this.API_URL}/${sessionId}/end`, {})
+    return this.http
+      .post<Session>(`${this.API_URL}/${sessionId}/end`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -87,7 +89,8 @@ export class AdminSessionService {
    * Cancel a session (change status to CANCELLED)
    */
   cancelSession(sessionId: number): Observable<Session> {
-    return this.http.post<Session>(`${this.API_URL}/${sessionId}/cancel`, {})
+    return this.http
+      .post<Session>(`${this.API_URL}/${sessionId}/cancel`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -95,7 +98,8 @@ export class AdminSessionService {
    * Get the QR code for a session
    */
   getSessionQrCode(sessionId: number): Observable<{ qrCodeUrl: string }> {
-    return this.http.get<{ qrCodeUrl: string }>(`${this.API_URL}/${sessionId}/qr-code`)
+    return this.http
+      .get<{ qrCodeUrl: string }>(`${this.API_URL}/${sessionId}/qr-code`)
       .pipe(catchError(this.handleError));
   }
 
@@ -103,7 +107,8 @@ export class AdminSessionService {
    * Get attendance records for a session
    */
   getSessionAttendance(sessionId: number): Observable<any> {
-    return this.http.get<any>(`${this.API_URL}/${sessionId}/attendance`)
+    return this.http
+      .get<any>(`${this.API_URL}/${sessionId}/attendance`)
       .pipe(catchError(this.handleError));
   }
 

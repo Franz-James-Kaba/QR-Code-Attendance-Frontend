@@ -4,7 +4,7 @@ import {
   HttpEvent,
   HttpInterceptor,
   HttpErrorResponse,
-  HttpResponse
+  HttpResponse,
 } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -26,7 +26,7 @@ export class NotificationInterceptor implements HttpInterceptor {
     }
 
     return next.handle(request).pipe(
-      tap((event) => {
+      tap(event => {
         // Show success notification for successful responses with specific status codes
         if (event instanceof HttpResponse) {
           if (this.shouldShowSuccessNotification(event, request)) {
@@ -54,9 +54,7 @@ export class NotificationInterceptor implements HttpInterceptor {
   private shouldSkipNotification(request: HttpRequest<unknown>): boolean {
     // Skip notification for GET requests or specific endpoints
     // Customize this logic based on your app's needs
-    const skipEndpoints = [
-      '/api/auth/refresh-token'
-    ];
+    const skipEndpoints = ['/api/auth/refresh-token'];
 
     return (
       request.method === 'GET' || // Skip GET requests
@@ -136,7 +134,7 @@ export class NotificationInterceptor implements HttpInterceptor {
       case 401:
         return 'Unauthorized. Please log in again.';
       case 403:
-        return 'Forbidden. You don\'t have permission to access this resource.';
+        return "Forbidden. You don't have permission to access this resource.";
       case 404:
         return 'Resource not found.';
       case 422:

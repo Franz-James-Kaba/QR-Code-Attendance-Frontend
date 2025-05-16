@@ -8,9 +8,8 @@ describe('FacilitatorOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FacilitatorOverviewComponent]
-    })
-    .compileComponents();
+      imports: [FacilitatorOverviewComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FacilitatorOverviewComponent);
     component = fixture.componentInstance;

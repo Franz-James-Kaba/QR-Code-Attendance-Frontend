@@ -3,7 +3,10 @@
     @for (breadcrumb of breadcrumbs; track breadcrumb.url; let last = $last; let i = $index) {
       <li class="flex items-center">
         @if (!last) {
-          <a [routerLink]="breadcrumb.url" class="text-gray-600 hover:text-gray-900 transition-colors">
+          <a
+            [routerLink]="breadcrumb.url"
+            class="text-gray-600 hover:text-gray-900 transition-colors"
+          >
             {{ breadcrumb.label }}
           </a>
           <span class="mx-1 text-gray-400">&gt;</span>

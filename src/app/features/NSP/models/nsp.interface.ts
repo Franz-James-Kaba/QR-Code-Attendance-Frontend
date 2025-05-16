@@ -22,3 +22,14 @@ export interface AverageTimeResponse {
   message: string;
   data: string | null;
 }
+
+export interface CheckInResponse {
+  message: string;
+  success: boolean;
+}
+
+export interface AttendancePositionResponse {
+  success: boolean;
+  message: string;
+  position: number;
+}

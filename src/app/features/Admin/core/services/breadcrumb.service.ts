@@ -17,16 +17,18 @@ export class BreadcrumbService {
 
   constructor(private readonly router: Router) {
     // Listen to route changes to update breadcrumbs automatically
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
       const root = this.router.routerState.snapshot.root;
       const breadcrumbs = this.createBreadcrumbs(root);
       this.breadcrumbsSubject.next(breadcrumbs);
     });
   }
 
-  private createBreadcrumbs(route: ActivatedRouteSnapshot, url: string = '', breadcrumbs: BreadcrumbItem[] = []): BreadcrumbItem[] {
+  private createBreadcrumbs(
+    route: ActivatedRouteSnapshot,
+    url: string = '',
+    breadcrumbs: BreadcrumbItem[] = []
+  ): BreadcrumbItem[] {
     const children = route.children;
 
     if (children.length === 0) {
@@ -42,7 +44,7 @@ export class BreadcrumbService {
       if (child.data['breadcrumb']) {
         breadcrumbs.push({
           label: child.data['breadcrumb'],
-          link: url
+          link: url,
         });
       }
 

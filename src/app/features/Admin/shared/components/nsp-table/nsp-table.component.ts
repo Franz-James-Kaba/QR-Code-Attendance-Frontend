@@ -19,7 +19,6 @@ export interface NSP {
   imports: [CommonModule, ButtonComponent],
   templateUrl: './nsp-table.component.html',
 })
-
 export class NspTableComponent {
   @Input() nsps: NSP[] = [];
   @Input() showSuccessMessage = false;

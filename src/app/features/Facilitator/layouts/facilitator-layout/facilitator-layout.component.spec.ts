@@ -8,9 +8,8 @@ describe('FacilitatorLayoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FacilitatorLayoutComponent]
-    })
-    .compileComponents();
+      imports: [FacilitatorLayoutComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FacilitatorLayoutComponent);
     component = fixture.componentInstance;

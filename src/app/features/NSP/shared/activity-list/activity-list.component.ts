@@ -15,8 +15,7 @@ interface Activity {
   imports: [CommonModule],
   template: `
     <div class="space-y-4">
-      <div *ngFor="let activity of activities"
-           class="bg-[#E0F0FE] rounded-xl p-4">
+      <div *ngFor="let activity of activities" class="bg-[#E0F0FE] rounded-xl p-4">
         <div class="flex justify-between items-center">
           <div class="flex items-center">
             <img [src]="activity.icon" alt="" class="mr-2" />
@@ -32,7 +31,7 @@ interface Activity {
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class ActivityListComponent {
   activities: Activity[] = [
@@ -41,14 +40,14 @@ export class ActivityListComponent {
       icon: '',
       date: 'March 21, 2025',
       time: '6:58 am',
-      status: 'On time'
+      status: 'On time',
     },
     {
       type: 'Check Out',
       icon: '',
       date: 'March 21, 2025',
       time: '4:30 pm',
-      status: 'On time'
-    }
+      status: 'On time',
+    },
   ];
 }

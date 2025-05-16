@@ -21,7 +21,14 @@ import { selectAuthError, selectIsLoading } from '@core/store/states/auth/auth.s
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputFieldComponent, ButtonComponent, RouterModule, AsyncPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    InputFieldComponent,
+    ButtonComponent,
+    RouterModule,
+    AsyncPipe,
+  ],
   templateUrl: './reset-password.component.html',
 })
 export class ResetPasswordComponent implements OnInit {
@@ -83,7 +90,8 @@ export class ResetPasswordComponent implements OnInit {
 
     if (control.errors['required']) return 'This field is required';
     if (control.errors['minlength']) return 'Password must be at least 8 characters';
-    if (control.errors['pattern']) return 'Password must include uppercase, lowercase, number, and special character';
+    if (control.errors['pattern'])
+      return 'Password must include uppercase, lowercase, number, and special character';
 
     return '';
   }
@@ -104,11 +112,15 @@ export class ResetPasswordComponent implements OnInit {
           AuthActions.firstTimePasswordReset({
             email,
             password,
-            confirmPassword
+            confirmPassword,
           })
         );
       } else {
-        console.error('Missing required data:', { email, password: !!password, confirmPassword: !!confirmPassword });
+        console.error('Missing required data:', {
+          email,
+          password: !!password,
+          confirmPassword: !!confirmPassword,
+        });
       }
     } else {
       console.error('Form is invalid:', this.resetPasswordForm.errors);

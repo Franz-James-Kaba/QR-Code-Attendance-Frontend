@@ -1,9 +1,4 @@
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -20,7 +15,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // Clone the request and add the authorization header if token exists
     if (token) {
       const authReq = request.clone({
-        headers: request.headers.set('Authorization', `Bearer ${token}`)
+        headers: request.headers.set('Authorization', `Bearer ${token}`),
       });
       return next.handle(authReq);
     }
