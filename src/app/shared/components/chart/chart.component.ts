@@ -15,7 +15,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ChartDataPoint, ChartDataSet, ChartOptions, ChartType, TimeRange } from '@shared/models/chart.model';
 
-// Interface for pie chart arc segments
 interface PieChartArc {
   path: string;
   stroke: string;

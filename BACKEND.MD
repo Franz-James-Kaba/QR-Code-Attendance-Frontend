@@ -36,9 +36,14 @@ Creates a new admin user in the system.
 }
 ```
 **Response:**
-
 - Status: 200 OK
-- Body: "User created successfully"
+- Body:
+    ```json
+    {
+      "message": "User created successfully",
+      "success": true
+    }
+    ```
 
 **Notes:**
 - A temporary password will be generated and sent to the provided email.
@@ -78,7 +83,13 @@ Initiates the password reset process by sending a reset token to the user's emai
 
 **Response:**
 - Status: 200 OK
-- Body: "Password reset code sent to your email address"
+- Body:
+    ```json
+    {
+      "message": "Password reset code sent to your email address",
+      "success": true
+    }
+    ```
 
 #### Reset Password
 
@@ -101,7 +112,13 @@ Resets a user's password using the token sent to their email.
 ```
 **Response:**
 - Status: 200 OK
-- Body: "Password reset successful"
+- Body:
+    ```json
+    {
+      "message": "Password reset successful",
+      "success": true
+    }
+    ```
 
 #### First-time Password Reset
 
@@ -122,7 +139,14 @@ Allows users to reset their temporary password after first login.
 ```
 **Response:**
 - Status: 200 OK
-- Body: "Password reset successful"
+- Body:
+    ```json
+    {
+      "message": "Password reset successful",
+      "success": true
+    }
+    ```
+
 
 ### Admin Operations
 
@@ -146,7 +170,13 @@ Creates a new regular user.
 ```
 **Response:**
 - Status: 200 OK
-- Body: "User registered successfully"
+- Body:
+    ```json
+    {
+      "message": "User registered successfully",
+      "success": true
+    }
+    ```
 
 #### Create Facilitator
 
@@ -167,7 +197,14 @@ Creates a new facilitator user.
 ```
 **Response:**
 - Status: 200 OK
-- Body: "User created successfully"
+- Body:
+    ```json
+    {
+      "message": "User created successfully",
+      "success": true
+    }
+    ```
+
 
 
 #### Get User by Email
@@ -330,16 +367,14 @@ Retrieves a paginated list of all facilitators.
 
 #### Get Early Attendees
 
-**Method:** `GET api/admin/early-attendees?startDate={startDate}&endDate={endDate}&page={page}&size={size}`
+**Method:** `GET api/admin/early-attendees?date={date}`
 
-Retrieves a paginated list of attendees who checked in early within a specified date range.
+Retrieves  list of the first ten (10) attendees who checked in early on the specified date.
 
 **Query Parameters:**
 
--   `startDate`: The start date for the search range (format: YYYY-MM-DD).
--   `endDate`: The end date for the search range (format: YYYY-MM-DD).
--   `page`: The page number to retrieve (default: 0).
--   `size`: The number of attendees per page (default: 100).
+-   `date`: The start date for the search range (format: YYYY-MM-DD).
+
 
 **Response:**
 
@@ -348,42 +383,32 @@ Retrieves a paginated list of attendees who checked in early within a specified 
 -   Body:
 
     ```json
+    [
     {
-      "content": [
-        {
-          "id": 1,
-          "checkInTime": "2024-01-20T07:25:00",
-          "checkOutTime": null,
-          "userId": 123,
-          "date": "2024-01-20"
-        }
-      ],
-      "pageable": {
-        "sort": {
-          "empty": true,
-          "sorted": false,
-          "unsorted": true
-        },
-        "offset": 0,
-        "pageNumber": 0,
-        "pageSize": 100,
-        "paged": true,
-        "unpaged": false
-      },
-      "last": true,
-      "totalPages": 1,
-      "totalElements": 1,
-      "size": 100,
-      "number": 0,
-      "sort": {
-        "empty": true,
-        "sorted": false,
-        "unsorted": true
-      },
-      "first": true,
-      "numberOfElements": 1,
-      "empty": false
+        "firstName": "Test",
+        "lastName": "Another Test",
+        "role": "NSP",
+        "checkInTime": "2025-04-29T06:30:00"
+    },
+    {
+        "firstName": "Admin",
+        "lastName": "Admin",
+        "role": "NSP",
+        "checkInTime": "2025-04-29T06:30:03"
+    },
+    {
+        "firstName": "Facilitator",
+        "lastName": "Test",
+        "role": "FACILITATOR",
+        "checkInTime": "2025-04-29T06:55:34"
+    },
+    {
+        "firstName": "Internal",
+        "lastName": "Test",
+        "role": "NSP",
+        "checkInTime": "2025-04-29T07:26:48"
     }
+]
     ```
 
 #### Grant Reception Privilege
@@ -397,9 +422,14 @@ Grants reception privilege to a facilitator user.
 -   `email`: The email address of the facilitator user.
 
 **Response:**
-
--   Status: 200 OK
--   Body: `"Reception privilege granted"`
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "message": "Reception privilege granted",
+      "success": true
+    }
+    ```
 
 #### Revoke Reception Privilege
 
@@ -412,9 +442,15 @@ Revokes reception privilege from a receptionist user.
 -   `email`: The email address of the receptionist user.
 
 **Response:**
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "message": "Reception privilege revoked",
+      "success": true
+    }
+    ```
 
--   Status: 200 OK
--   Body: `"Reception privilege revoked"`
 
 
 #### Update User
@@ -461,7 +497,13 @@ Deletes a user from the system.
 
 **Response:**
 - Status: 200 OK
-- Body: "User deleted successfully"
+- Body:
+    ```json
+    {
+      "message": "User deleted successfully",
+      "success": true
+    }
+    ```
 
 ## Error Responses
 
@@ -496,6 +538,159 @@ Generates a QR code for an attendance session. This endpoint is protected and re
 }
 ```
 
+**Response:**
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "message": "QR code generated successfully",
+      "qrCodeImage": "<base64-encoded PNG image bytes>"
+    }
+    ```
+
+#### Get All Sessions
+
+**Method:** `GET /api/session`
+
+Retrieves a list of all attendance sessions.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "sessionCode": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+    "name": "Morning Session",
+    "active": true,
+    "startTime": "2025-05-03T09:00:00",
+    "endTime": "2025-05-03T17:00:00"
+  },
+  {
+    "id": 2,
+    "sessionCode": "b2c3d4e5-6789-01bc-defa-2345678901bc",
+    "name": "Afternoon Session",
+    "active": false,
+    "startTime": "2025-05-03T13:00:00",
+    "endTime": "2025-05-03T17:00:00"
+  }
+]
+```
+
+#### Get Session by ID
+
+**Method:** `GET /api/session/{sessionId}`
+
+Retrieves details of a specific session by its ID.
+
+**Path Parameters:**
+sessionId: The ID of the session.
+
+**Response:**
+
+-   Status: 200 OK
+-   Body:
+    ```json
+    {
+      "id": 1,
+      "sessionCode": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+      "name": "Morning Session",
+      "active": true,
+      "startTime": "2025-05-03T09:00:00",
+      "endTime": "2025-05-03T17:00:00"
+    }
+    ```
+
+#### Get All Inactive Sessions
+
+**Method:** `GET /api/session/inactive`
+
+Retrieves a list of all inactive sessions.
+
+**Response:**
+```json[
+  {
+    "id": 2,
+    "sessionCode": "b2c3d4e5-6789-01bc-defa-2345678901bc",
+    "name": "Afternoon Session",
+    "active": false,
+    "startTime": "2025-05-03T13:00:00",
+    "endTime": "2025-05-03T17:00:00"
+  }
+]
+```
+
+#### Get All Active Sessions
+
+**Method:** `GET /api/session/active`
+
+Retrieves a list of all active sessions.
+
+**Response:**
+
+```json[
+  {
+    "id": 1,
+    "sessionCode": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+    "name": "Morning Session",
+    "active": true,
+    "startTime": "2025-05-03T09:00:00",
+    "endTime": "2025-05-03T17:00:00"
+  }
+]
+```
+
+#### Update Session
+
+**Method:** `PUT /api/session/{sessionId}`
+
+Updates the details of a session.
+
+**Path Parameters:**
+
+sessionId: The ID of the session to update.
+
+**Request Body:**
+
+```json{
+  "name": "Updated Session Name",
+  "startTime": "2025-05-03T10:00:00",
+  "endTime": "2025-05-03T18:00:00"
+}
+```
+All fields are optional; only provided fields will be updated.
+
+**Response:**
+
+```json{
+  "message": "Session updated successfully",
+  "success": true
+}
+```
+
+
+#### Delete Session
+
+**Method:** `DELETE /api/session/{sessionId}`
+
+Deletes a session by its ID.
+
+**Path Parameters:**
+
+sessionId: The ID of the session to delete.
+
+**Response:**
+
+```json{
+  "message": "Session deleted successfully",
+  "success": true
+}
+```
+Notes:
+
+All session endpoints require the qrcode:generate authority.
+The session object fields are: id, sessionCode, name, active, startTime, endTime.
+Dates and times are in ISO 8601 format.
+
 ### Attendance Tracking
 
 These endpoints are available to users with either the 'NSP' or 'FACILITATOR' role.
@@ -514,8 +709,19 @@ Records the user's check-in time for a specific attendance session.
 
 -   Status: 200 OK
 -   Body:
-    *   `"Attendance recorded successfully"` - If the check-in was successful.
-    *   `"Attendance already recorded for today"` - If the user has already checked in today.
+    ```json
+    {
+      "message": "Attendance recorded successfully",
+      "success": true
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "Attendance already recorded for today",
+      "success": false
+    }
+    ```
 
 #### Check-Out
 
@@ -531,8 +737,92 @@ Records the user's check-out time for a specific attendance session.
 
 -   Status: 200 OK
 -   Body:
-    *   `"Checked out successfully"` - If the check-out was successful.
-    *   `"Cannot check out before minimum work period (8 hours)"` - If the user attempts to check out less than 8 hours after checking in.
+    ```json
+    {
+      "message": "Checked out successfully",
+      "success": true
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "Cannot check out before minimum work period (8 hours)",
+      "success": false
+    }
+    ```
+
+
+---
+
+### Metrics Endpoints
+
+These endpoints are available to users with the 'FACILITATOR', 'NSP', or 'ADMIN' role.
+
+#### Get Average Check-In Time (Current User)
+
+**Method:** `GET /api/metrics/average-check-in-time?startDate={startDate}&endDate={endDate}`
+
+Retrieves the average check-in time for the currently authenticated user.
+Date range is optional; if omitted, the average is calculated over all available data.
+
+**Query Parameters:**
+
+- `startDate` (optional): The start date (format: YYYY-MM-DD)
+- `endDate` (optional): The end date (format: YYYY-MM-DD)
+
+**Response:**
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "message": "Average check-in time retrieved for user: user@example.com",
+      "data": "08:45:30"
+    }
+    ```
+    - `data` is an ISO time string (`HH:mm:ss`). If no data is available, `data` may be `null`.
+
+---
+
+#### Get Average Check-Out Time (Current User)
+
+**Method:** `GET /api/metrics/average-check-out-time?startDate={startDate}&endDate={endDate}`
+
+Retrieves the average check-out time for the currently authenticated user.
+Date range is optional; if omitted, the average is calculated over all available data.
+
+**Query Parameters:**
+
+- `startDate` (optional): The start date (format: YYYY-MM-DD)
+- `endDate` (optional): The end date (format: YYYY-MM-DD)
+
+**Response:**
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "message": "Average check-out time retrieved for user: user@example.com",
+      "data": "17:15:45"
+    }
+    ```
+    - `data` is an ISO time string (`HH:mm:ss`). If no data is available, `data` may be `null`.
+
+---
+
+#### Get User Profile
+
+**Method:** `GET /api/metrics/user-info`
+
+Retrieves the profile information of the currently authenticated user.
+
+**Response:**
+- Status: 200 OK
+- Body:
+    ```json
+    {
+      "fullName": "Jane Marie Smith",
+      "role": "NSP"
+    }
+    ```
 
 
 **Error Responses:**
@@ -540,7 +830,6 @@ Records the user's check-out time for a specific attendance session.
 -   404 Not Found: "Session not found" - If the provided session code does not exist.
 -   400 Bad Request: "Session invalid or expired" - If the session is not active.
 -   404 Not Found: "No check-in record found for today" - If the user tries to check out without checking in first.
-
 
 
 
@@ -567,3 +856,157 @@ For validation errors, the response will include specific error messages for eac
 - Admin operations require specific admin privileges.
 
 
+### NSP Average Check-In Time
+
+Retrieves the average check-in time for NSPs within a specified date range.
+
+```
+GET /average-check-in-time-nsp
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Format | Description |
+|-----------|------|----------|--------|-------------|
+| startDate | Date | Yes | ISO Date (YYYY-MM-DD) | The start date of the date range |
+| endDate | Date | Yes | ISO Date (YYYY-MM-DD) | The end date of the date range |
+
+#### Responses
+
+| Status Code | Description | Response Type |
+|-------------|-------------|---------------|
+| 200 | Success | LocalTime (ISO Time format) |
+| 204 | No Content (No data available for the specified date range) | Empty |
+| 400 | Bad Request (Invalid parameters) | Error message |
+
+#### Example Request
+
+```
+GET /average-check-in-time-nsp?startDate=2025-04-01&endDate=2025-04-28
+```
+
+#### Example Response
+
+```
+"08:45:30"
+```
+
+### NSP Average Check-Out Time
+
+Retrieves the average check-out time for NSPs within a specified date range.
+
+```
+GET /average-check-out-time-nsp
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Format | Description |
+|-----------|------|----------|--------|-------------|
+| startDate | Date | Yes | ISO Date (YYYY-MM-DD) | The start date of the date range |
+| endDate | Date | Yes | ISO Date (YYYY-MM-DD) | The end date of the date range |
+
+#### Responses
+
+| Status Code | Description | Response Type |
+|-------------|-------------|---------------|
+| 200 | Success | LocalTime (ISO Time format) |
+| 204 | No Content (No data available for the specified date range) | Empty |
+| 400 | Bad Request (Invalid parameters) | Error message |
+
+#### Example Request
+
+```
+GET /average-check-out-time-nsp?startDate=2025-04-01&endDate=2025-04-28
+```
+
+#### Example Response
+
+```
+"17:15:45"
+```
+
+### Facilitator Average Check-In Time
+
+Retrieves the average check-in time for Facilitators within a specified date range.
+
+```
+GET /average-check-in-time-facilitator
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Format | Description |
+|-----------|------|----------|--------|-------------|
+| startDate | Date | Yes | ISO Date (YYYY-MM-DD) | The start date of the date range |
+| endDate | Date | Yes | ISO Date (YYYY-MM-DD) | The end date of the date range |
+
+#### Responses
+
+| Status Code | Description | Response Type |
+|-------------|-------------|---------------|
+| 200 | Success | LocalTime (ISO Time format) |
+| 204 | No Content (No data available for the specified date range) | Empty |
+| 400 | Bad Request (Invalid parameters) | Error message |
+
+#### Example Request
+
+```
+GET /average-check-in-time-facilitator?startDate=2025-04-01&endDate=2025-04-28
+```
+
+#### Example Response
+
+```
+"09:00:15"
+```
+
+### Facilitator Average Check-Out Time
+
+Retrieves the average check-out time for Facilitators within a specified date range.
+
+```
+GET /average-check-out-time-facilitator
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Format                | Description                      |
+|-----------|------|----------|-----------------------|----------------------------------|
+| startDate | Date | Yes      | ISO Date (YYYY-MM-DD) | The start date of the date range |
+| endDate   | Date | Yes      | ISO Date (YYYY-MM-DD) | The end date of the date range   |
+
+#### Responses
+
+| Status Code | Description                                                 | Response Type               |
+|-------------|-------------------------------------------------------------|-----------------------------|
+| 200         | Success                                                     | LocalTime (ISO Time format) |
+| 204         | No Content (No data available for the specified date range) | Empty                       |
+| 400         | Bad Request (Invalid parameters)                            | Error message               |
+
+#### Example Request
+
+```
+GET /average-check-out-time-facilitator?startDate=2025-04-01&endDate=2025-04-28
+```
+
+#### Example Response
+
+```
+"16:45:20"
+```
+
+## Error Handling
+
+All endpoints follow the same error handling pattern:
+
+- If the date parameters are invalid (e.g., endDate before startDate), a 400 Bad Request response is returned with an appropriate error message.
+- If no data is available for the specified date range, a 204 No Content response is returned.
+- Internal server errors will result in a 500 Internal Server Error response.
+
+## Implementation Notes
+
+- All time values are returned as ISO-formatted time strings (HH:MM:SS).
+- Date parameters must be provided in ISO date format (YYYY-MM-DD).
+- The date range is inclusive of both the start and end dates.
+- Time calculations are handled by the underlying metricsService.
