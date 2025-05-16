@@ -18,6 +18,7 @@ export class InputFieldComponent implements ControlValueAccessor, OnInit {
   @Input() disabled = false;
   @Input() showPasswordToggle = false;
   @Input() validateAmaliTechEmail = false;
+  @Input() errorMessage?: string;
   value: string = '';
   isPassword = false;
   showPassword = false;
@@ -79,7 +80,11 @@ export class InputFieldComponent implements ControlValueAccessor, OnInit {
     return this.type;
   }
 
-  get errorMessage(): string | null {
+  get calculatedErrorMessage(): string | null {
+    // If an error message is explicitly provided via input, use that first
+    if (this.errorMessage) return this.errorMessage;
+
+    // Otherwise, calculate based on control errors
     if (this.ngControl?.errors && this.touched) {
       const errors = this.ngControl.errors;
       if (errors['required']) return 'This field is required';

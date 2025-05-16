@@ -7,11 +7,10 @@ describe('NspComponent', () => {
   let component: NspComponent;
   let fixture: ComponentFixture<NspComponent>;
 
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NspComponent],
-    }).compileComponents()
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NspComponent);
     component = fixture.componentInstance;

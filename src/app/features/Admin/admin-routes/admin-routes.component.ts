@@ -5,6 +5,6 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-admin-routes',
   standalone: true,
   imports: [RouterOutlet],
-  template: '<router-outlet></router-outlet>'
+  template: '<router-outlet></router-outlet>',
 })
 export class AdminRoutesComponent {}

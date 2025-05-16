@@ -19,10 +19,10 @@
 ## 📖 Project Overview
 
 This application follows a modern Angular architecture, incorporating:
-✅ **Angular 19**: Standalone components & lazy-loaded modules\
-✅ **NgRx**: State management for authentication & other features\
-✅ **Tailwind CSS**: Utility-first styling\
-✅ **Jest**: Unit testing framework\
+✅ **Angular 19**: Standalone components & lazy-loaded modules
+✅ **NgRx**: State management for authentication & other features
+✅ **Tailwind CSS**: Utility-first styling
+✅ **Jest**: Unit testing framework
 ✅ **Role-Based Routing**: Admin, NSP, and Facilitator interfaces
 
 ---
@@ -60,8 +60,8 @@ npm start
 
 Use these mock accounts to test different user roles:
 
-| Role                                   | Email                       | Password          |
-| -------------------------------------- | --------------------------- | ----------------- |
+| Role                                         | Email                         | Password            |
+| -------------------------------------------- | ----------------------------- | ------------------- |
 | **Admin**                              | `admin@amalitech.com`       | `Admin@123`       |
 | **NSP**                                | `nsp@amalitech.com`         | `Nsp@123`         |
 | **Facilitator**                        | `facilitator@amalitech.com` | `Facilitator@123` |
@@ -146,16 +146,16 @@ Then update the `nsp.routes.ts` file:
 
 ## 🎨 Styling Guidelines
 
-✅ Use **Tailwind CSS** utility classes for styling\
-✅ Follow the **BEM methodology** within SCSS files\
+✅ Use **Tailwind CSS** utility classes for styling
+✅ Follow the **BEM methodology** within SCSS files
 ✅ Maintain a **consistent color scheme & design pattern**
 
 ---
 
 ## 📊 Component Library
 
-| Component      | Description                              |
-| -------------- | ---------------------------------------- |
+| Component            | Description                              |
+| -------------------- | ---------------------------------------- |
 | **Button**     | Multi-variant button with loading states |
 | **InputField** | Form input with validation support       |
 | **Loading**    | Loading indicators for various contexts  |
@@ -166,9 +166,9 @@ Then update the `nsp.routes.ts` file:
 
 ## 🔄 Git Workflow
 
-✅ **Create feature branches:** `git checkout -b feature/your-feature-name`\
-✅ **Make small, focused commits**\
-✅ **Write descriptive commit messages**\
+✅ **Create feature branches:** `git checkout -b feature/your-feature-name`
+✅ **Make small, focused commits**
+✅ **Write descriptive commit messages**
 ✅ **Submit pull requests for review**
 
 ---
@@ -218,7 +218,26 @@ npm run format:fix
 
 ---
 
+## 🔌 API Integration
+
+### Base URL
+
+The backend API is hosted at:
+
+```
+http://54.172.108.21
+```
+
+Use this base URL for all API requests as documented in the [BACKEND.MD](./BACKEND.MD) file.
+
+Example API endpoint:
+
+```
+http://54.172.108.21/api/auth/login
+```
+
+---
+
 ## 📚 More Info
 
 For additional Angular CLI commands, visit the **[Angular CLI Documentation](https://angular.io/cli)**. 🚀
-

@@ -1,5 +1,5 @@
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
-import { PersonnelTableComponent } from "@Admin/shared/components/personnel-table/personnel-table.component";
+import { PersonnelTableComponent } from '@Admin/shared/components/personnel-table/personnel-table.component';
 import { Attendee } from '@Admin/shared/models/attendee.interface';
 import { QuickAccessItem } from '@Admin/shared/models/quick-access-item.interface';
 import { CommonModule } from '@angular/common';
@@ -16,12 +16,12 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    ButtonComponent, 
-    ChartComponent, 
-    StatCardComponent, 
+    CommonModule,
+    ButtonComponent,
+    ChartComponent,
+    StatCardComponent,
     PersonnelTableComponent,
-    ModalContainerComponent
+    ModalContainerComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     tooltipEnabled: true,
     height: 300,
     barWidth: 20,
-    barGap: 4
+    barGap: 4,
   };
 
   stayingTimeChartOptions: ChartOptions = {
@@ -56,14 +56,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     tooltipEnabled: true,
     height: 300,
     lineThickness: 2,
-    pointRadius: 4
+    pointRadius: 4,
   };
 
   programDistributionOptions: ChartOptions = {
     showTimeRangeSelector: false,
     height: 250,
     responsive: true,
-    tooltipEnabled: true
+    tooltipEnabled: true,
   };
 
   private readonly chartService = inject(ChartService);
@@ -83,34 +83,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadAttendanceChartData(): void {
     this.attendanceChartLoading = true;
 
-    this.chartService.getChartData('attendance', this.selectedAttendanceTimeRange, 'bar')
+    this.chartService
+      .getChartData('attendance', this.selectedAttendanceTimeRange, 'bar')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: data => {
           this.attendanceChartData = data;
           this.attendanceChartLoading = false;
         },
-        error: (err) => {
+        error: err => {
           console.error('Error loading attendance chart data:', err);
           this.attendanceChartLoading = false;
-        }
+        },
       });
   }
 
   loadStayingTimeChartData(): void {
     this.stayingTimeChartLoading = true;
 
-    this.chartService.getChartData('staying-time', this.selectedStayingTimeRange, 'line')
+    this.chartService
+      .getChartData('staying-time', this.selectedStayingTimeRange, 'line')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: data => {
           this.stayingTimeChartData = data;
           this.stayingTimeChartLoading = false;
         },
-        error: (err) => {
+        error: err => {
           console.error('Error loading staying time chart data:', err);
           this.stayingTimeChartLoading = false;
-        }
+        },
       });
   }
 
@@ -118,17 +120,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.programDistributionLoading = true;
 
     // Use the chart service to fetch program distribution data
-    this.chartService.getChartData('program-distribution', 'Monthly', 'pie')
+    this.chartService
+      .getChartData('program-distribution', 'Monthly', 'pie')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: data => {
           this.programDistributionData = data;
           this.programDistributionLoading = false;
         },
-        error: (err) => {
+        error: err => {
           console.error('Error loading program distribution data:', err);
           this.programDistributionLoading = false;
-        }
+        },
       });
   }
 

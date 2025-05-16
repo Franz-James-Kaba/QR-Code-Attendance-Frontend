@@ -23,3 +23,5 @@ export const selectAuthStep = createSelector(selectAuthState, state => state.cur
 export const selectEmail = createSelector(selectAuthState, state => state.email);
 
 export const selectOtpVerified = createSelector(selectAuthState, state => state.otpVerified);
+
+export const selectCurrentUserRole = createSelector(selectUser, user => user?.role || null);

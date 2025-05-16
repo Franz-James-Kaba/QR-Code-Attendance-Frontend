@@ -3,13 +3,18 @@
   <!-- Header: Time range selector and date display -->
   <div class="chart-header flex flex-row justify-between items-center mb-6">
     <!-- Time range selector -->
-    <div *ngIf="options.showTimeRangeSelector !== false" class="bg-white rounded-tr-lg rounded-br-lg flex border border-gray-200 overflow-hidden">
-      <button *ngFor="let range of timeRanges"
+    <div
+      *ngIf="options.showTimeRangeSelector !== false"
+      class="bg-white rounded-tr-lg rounded-br-lg flex border border-gray-200 overflow-hidden"
+    >
+      <button
+        *ngFor="let range of timeRanges"
         type="button"
         class="px-6 py-2 transition-colors focus:outline-none border-r border-gray-200"
         [class.active-time-range]="selectedTimeRange === range"
         [class.inactive-time-range]="selectedTimeRange !== range"
-        (click)="selectedTimeRange = range; onTimeRangeChange()">
+        (click)="selectedTimeRange = range; onTimeRangeChange()"
+      >
         {{ range }}
       </button>
     </div>
@@ -37,7 +42,10 @@
             <!-- Y-axis labels column -->
             <div class="sticky left-0 z-10 bg-white w-12" [style.height.px]="chartHeight">
               <div class="flex flex-col justify-between h-full pr-3">
-                <div *ngFor="let label of yAxisLabels.slice().reverse()" class="flex items-center h-5 text-xs text-gray-500 whitespace-nowrap">
+                <div
+                  *ngFor="let label of yAxisLabels.slice().reverse()"
+                  class="flex items-center h-5 text-xs text-gray-500 whitespace-nowrap"
+                >
                   {{ label }}
                 </div>
               </div>
@@ -48,7 +56,10 @@
               <div class="relative" [style.height.px]="chartHeight" [style.width]="'100%'">
                 <!-- Chart grid lines -->
                 <div class="absolute inset-0 flex flex-col justify-between">
-                  <div *ngFor="let label of yAxisLabels.slice().reverse()" class="w-full h-0 border-t border-gray-200"></div>
+                  <div
+                    *ngFor="let label of yAxisLabels.slice().reverse()"
+                    class="w-full h-0 border-t border-gray-200"
+                  ></div>
                 </div>
 
                 <!-- Bars container -->
@@ -58,17 +69,30 @@
                     <ng-container *ngFor="let item of chartData; let itemIndex = index">
                       <div class="bar-column-wrapper" [style.flex]="'1'">
                         <div class="bar-column flex justify-center h-full">
-                          <div class="flex flex-row items-end justify-center" [style.gap.px]="barGap">
+                          <div
+                            class="flex flex-row items-end justify-center"
+                            [style.gap.px]="barGap"
+                          >
                             <!-- Bar for each series -->
                             <ng-container *ngFor="let value of item.values; let valueIndex = index">
-                              <div class="bar-item rounded-t cursor-pointer bar-animate"
+                              <div
+                                class="bar-item rounded-t cursor-pointer bar-animate"
                                 [style.width]="getBarWidthPx()"
-                                [style.background-color]="dataSet?.series?.[valueIndex]?.color || '#3b82f6'"
+                                [style.background-color]="
+                                  dataSet?.series?.[valueIndex]?.color || '#3b82f6'
+                                "
                                 @barAnimation
                                 [style.height]="getBarHeightValue(value, itemIndex, valueIndex)"
-                                (mouseenter)="showTooltip($event, item.label, dataSet?.series?.[valueIndex]?.name || '', value)"
-                                (mouseleave)="hideTooltip()">
-                              </div>
+                                (mouseenter)="
+                                  showTooltip(
+                                    $event,
+                                    item.label,
+                                    dataSet?.series?.[valueIndex]?.name || '',
+                                    value
+                                  )
+                                "
+                                (mouseleave)="hideTooltip()"
+                              ></div>
                             </ng-container>
                           </div>
                         </div>
@@ -78,8 +102,12 @@
                 </div>
 
                 <!-- Floating tooltip for chart area -->
-                <div *ngIf="tooltipVisible" class="chart-tooltip"
-                     [style.left.px]="tooltipX" [style.top.px]="tooltipY">
+                <div
+                  *ngIf="tooltipVisible"
+                  class="chart-tooltip"
+                  [style.left.px]="tooltipX"
+                  [style.top.px]="tooltipY"
+                >
                   <div class="tooltip-content">
                     <div class="font-semibold">{{ tooltipLabel }}</div>
                     <div class="flex justify-between">
@@ -90,7 +118,10 @@
                 </div>
 
                 <!-- No data message -->
-                <div *ngIf="chartData.length === 0" class="absolute inset-0 flex items-center justify-center">
+                <div
+                  *ngIf="chartData.length === 0"
+                  class="absolute inset-0 flex items-center justify-center"
+                >
                   <p class="text-gray-500">No data available</p>
                 </div>
               </div>
@@ -132,7 +163,8 @@
                   [attr.y1]="(i / (yAxisLabels.length - 1)) * 100"
                   x2="100"
                   [attr.y2]="(i / (yAxisLabels.length - 1)) * 100"
-                  class="grid-line" />
+                  class="grid-line"
+                />
               </ng-container>
 
               <!-- Data lines for each series -->
@@ -145,7 +177,8 @@
                   [attr.stroke-width]="lineThickness"
                   [attr.stroke-linejoin]="'round'"
                   [attr.stroke-linecap]="'round'"
-                  @lineAnimation />
+                  @lineAnimation
+                />
               </ng-container>
 
               <!-- Data points for each series -->
@@ -161,16 +194,28 @@
                     [attr.stroke-width]="0.1"
                     [attr.cursor]="'pointer'"
                     @pointAnimation
-                    (mouseenter)="showTooltip($event, item.label, dataSet?.series?.[seriesIndex]?.name || '', value)"
-                    (mouseleave)="hideTooltip()" />
+                    (mouseenter)="
+                      showTooltip(
+                        $event,
+                        item.label,
+                        dataSet?.series?.[seriesIndex]?.name || '',
+                        value
+                      )
+                    "
+                    (mouseleave)="hideTooltip()"
+                  />
                 </ng-container>
               </ng-container>
             </svg>
 
             <!-- Floating tooltip for line chart -->
-            <div *ngIf="tooltipVisible && isLineChart()" class="chart-tooltip"
-                 [style.left.px]="tooltipX" [style.top.px]="tooltipY"
-                 [style.pointer-events]="'none'">
+            <div
+              *ngIf="tooltipVisible && isLineChart()"
+              class="chart-tooltip"
+              [style.left.px]="tooltipX"
+              [style.top.px]="tooltipY"
+              [style.pointer-events]="'none'"
+            >
               <div class="tooltip-content">
                 <div class="font-semibold">{{ tooltipLabel }}</div>
                 <div class="flex justify-between">
@@ -193,11 +238,14 @@
 
     <!-- PIE CHART implementation -->
     <ng-container *ngIf="isPieChart()">
-      <div class="pie-chart-container flex flex-col items-center justify-center" [style.height.px]="chartHeight">
+      <div
+        class="pie-chart-container flex flex-col items-center justify-center"
+        [style.height.px]="chartHeight"
+      >
         <!-- SVG container for pie chart -->
         <svg class="pie-chart-svg" width="100%" height="100%" viewBox="0 0 100 100">
           <!-- Background circle -->
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f1f1" stroke-width="10"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f1f1" stroke-width="10" />
 
           <!-- Dynamic pie segments -->
           <ng-container *ngIf="chartData.length > 0">
@@ -217,8 +265,12 @@
         </svg>
 
         <!-- Floating tooltip for pie chart -->
-        <div *ngIf="tooltipVisible && isPieChart()" class="chart-tooltip"
-             [style.left.px]="tooltipX" [style.top.px]="tooltipY">
+        <div
+          *ngIf="tooltipVisible && isPieChart()"
+          class="chart-tooltip"
+          [style.left.px]="tooltipX"
+          [style.top.px]="tooltipY"
+        >
           <div class="tooltip-content">
             <div class="font-semibold">{{ tooltipLabel }}</div>
             <div class="flex justify-between">
@@ -236,19 +288,31 @@
     </ng-container>
 
     <!-- Chart Legend with toggle functionality -->
-    <div *ngIf="dataSet?.showLegend !== false && dataSet?.series?.length" class="chart-legend mt-6 flex justify-center items-center gap-6">
-      <div *ngFor="let series of dataSet?.series; let i = index"
-           class="legend-item flex items-center cursor-pointer"
-           [class.inactive]="!visibleSeries[i]"
-           (click)="toggleSeries(i)"
-           (keyup.enter)="toggleSeries(i)"
-           tabindex="0">
+    <div
+      *ngIf="dataSet?.showLegend !== false && dataSet?.series?.length"
+      class="chart-legend mt-6 flex justify-center items-center gap-6"
+    >
+      <div
+        *ngFor="let series of dataSet?.series; let i = index"
+        class="legend-item flex items-center cursor-pointer"
+        [class.inactive]="!visibleSeries[i]"
+        (click)="toggleSeries(i)"
+        (keyup.enter)="toggleSeries(i)"
+        tabindex="0"
+      >
         <div class="custom-radio mr-2">
           <div class="radio-outer" [style.borderColor]="series.color || '#3b82f6'">
-            <div class="radio-inner" [style.background-color]="series.color || '#3b82f6'" [class.active]="visibleSeries[i]"></div>
+            <div
+              class="radio-inner"
+              [style.background-color]="series.color || '#3b82f6'"
+              [class.active]="visibleSeries[i]"
+            ></div>
           </div>
         </div>
-        <div class="color-indicator w-3 h-3 rounded mr-2" [style.background-color]="series.color || '#3b82f6'"></div>
+        <div
+          class="color-indicator w-3 h-3 rounded mr-2"
+          [style.background-color]="series.color || '#3b82f6'"
+        ></div>
         <span class="text-sm text-gray-600">{{ series.name }}</span>
       </div>
     </div>

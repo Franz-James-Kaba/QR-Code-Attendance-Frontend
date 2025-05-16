@@ -1,7 +1,4 @@
-<header
-  class="py-4 px-6 transition-all duration-200"
-  [ngClass]="{'shadow-md': isScrolled}"
->
+<header class="py-4 px-6 transition-all duration-200" [ngClass]="{ 'shadow-md': isScrolled }">
   <div class="flex items-center justify-between">
     <!-- Left section with toggle and breadcrumb -->
     <div class="flex items-center space-x-4">
@@ -12,10 +9,7 @@
         (click)="onToggleSidebar()"
         aria-label="Toggle sidebar"
       >
-        <app-icon
-          [path]="MENU_ICON_PATH"
-          [size]="24"
-        ></app-icon>
+        <app-icon [path]="MENU_ICON_PATH" [size]="24"></app-icon>
       </button>
 
       <!-- Breadcrumb navigation -->
@@ -31,10 +25,7 @@
           class="text-gray-600 hover:text-gray-900 focus:outline-none relative"
           aria-label="Notifications"
         >
-          <app-icon
-            [path]="BELL_ICON_PATH"
-            [size]="24"
-          ></app-icon>
+          <app-icon [path]="BELL_ICON_PATH" [size]="24"></app-icon>
 
           <!-- Notification indicator -->
           @if (hasNotifications) {

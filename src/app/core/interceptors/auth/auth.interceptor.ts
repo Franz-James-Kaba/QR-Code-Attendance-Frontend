@@ -1,39 +1,26 @@
-import {
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn,
-  HttpEvent,
-  HttpErrorResponse,
-} from '@angular/common/http';
-import { inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AuthService } from '@core/services/auth/auth.service';
-import { AuthActions } from '@core/store/states/auth/auth.actions';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
-export const authInterceptor: HttpInterceptorFn = (
-  request: HttpRequest<unknown>,
-  next: HttpHandlerFn
-): Observable<HttpEvent<unknown>> => {
-  const authService = inject(AuthService);
-  const store = inject(Store);
-  const token = authService.getToken();
+import { environment } from '../../../../environments/environment';
 
-  if (token) {
-    request = request.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  constructor() {}
+
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    // Get the auth token from localStorage
+    const token = localStorage.getItem(environment.auth.tokenKey);
+
+    // Clone the request and add the authorization header if token exists
+    if (token) {
+      const authReq = request.clone({
+        headers: request.headers.set('Authorization', `Bearer ${token}`),
+      });
+      return next.handle(authReq);
+    }
+
+    // If no token, proceed with the original request
+    return next.handle(request);
   }
-
-  return next(request).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        store.dispatch(AuthActions.logout());
-      }
-      return throwError(() => error);
-    })
-  );
-};
+}

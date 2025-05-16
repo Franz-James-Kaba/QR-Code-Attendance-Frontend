@@ -4,23 +4,42 @@ export const AuthStep = {
   RESET_PASSWORD: 'RESET_PASSWORD',
 } as const;
 
-export type AuthStep = typeof AuthStep[keyof typeof AuthStep];
+export type AuthStep = (typeof AuthStep)[keyof typeof AuthStep];
+
+export type UserRole = 'ADMIN' | 'FACILITATOR' | 'NSP' | 'RECEPTIONIST';
 
 export interface User {
-  id: string;
+  id: string | null;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
-  role: string;
+  role: UserRole;
+  createdAt?: string;
 }
 
 export interface AuthResponse {
-  user: User;
   token: string;
   passwordResetRequired: boolean;
+  role: UserRole;
+  email: string; // Added email property to fix the type error
 }
 
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface ResetPasswordRequest {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface CreateUserRequest {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  email: string;
 }
 
 export interface AuthState {

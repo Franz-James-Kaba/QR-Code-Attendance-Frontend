@@ -21,11 +21,41 @@ interface Facilitator {
 export class FacilitatorOverviewComponent implements OnInit {
   // Mock data for facilitators (in a real app, this would come from a service)
   facilitators = [
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com', program: 'Web Development', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', program: 'Data Science', status: 'Active' },
-    { id: 3, name: 'Mark Johnson', email: 'mark.johnson@example.com', program: 'UI/UX Design', status: 'Inactive' },
-    { id: 4, name: 'Sarah Wilson', email: 'sarah.wilson@example.com', program: 'Cloud Computing', status: 'Active' },
-    { id: 5, name: 'David Miller', email: 'david.miller@example.com', program: 'Mobile Development', status: 'Active' },
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      program: 'Web Development',
+      status: 'Active',
+    },
+    {
+      id: 2,
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      program: 'Data Science',
+      status: 'Active',
+    },
+    {
+      id: 3,
+      name: 'Mark Johnson',
+      email: 'mark.johnson@example.com',
+      program: 'UI/UX Design',
+      status: 'Inactive',
+    },
+    {
+      id: 4,
+      name: 'Sarah Wilson',
+      email: 'sarah.wilson@example.com',
+      program: 'Cloud Computing',
+      status: 'Active',
+    },
+    {
+      id: 5,
+      name: 'David Miller',
+      email: 'david.miller@example.com',
+      program: 'Mobile Development',
+      status: 'Active',
+    },
   ];
 
   // Inject services

@@ -1,27 +1,14 @@
 import { createReducer, on } from '@ngrx/store';
-import { AuthState, AuthStep } from '@shared/models/auth/auth.model';
+import { initialAuthState } from '@shared/models/auth/auth.model';
 
 import { AuthActions } from './auth.actions';
 
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  passwordResetRequired: false,
-  isLoading: false,
-  error: null,
-  successMessage: null,
-  currentStep: AuthStep.EMAIL,
-  email: null,
-  otpVerified: false,
-};
-
 export const authReducer = createReducer(
-  initialState,
+  initialAuthState,
 
   on(AuthActions.initAuthSuccess, (state, { token }) => ({
     ...state,
     token: token,
-    // You may not have user data at this point, just the token
   })),
 
   on(AuthActions.login, state => ({
@@ -32,9 +19,15 @@ export const authReducer = createReducer(
 
   on(AuthActions.loginSuccess, (state, { response }) => ({
     ...state,
-    user: response.user,
     token: response.token,
     passwordResetRequired: response.passwordResetRequired,
+    user: {
+      role: response.role,
+      id: null, // These will be populated by user profile if needed
+      email: response.email ?? state.email ?? '',
+      firstName: '',
+      lastName: '',
+    },
     isLoading: false,
     error: null,
   })),
@@ -45,22 +38,63 @@ export const authReducer = createReducer(
     error,
   })),
 
-  on(AuthActions.logout, () => initialState),
+  on(AuthActions.logout, () => ({
+    ...initialAuthState,
+  })),
+
+  on(AuthActions.resetPassword, state => ({
+    ...state,
+    isLoading: true,
+    error: null,
+  })),
 
   on(AuthActions.resetPasswordSuccess, state => ({
     ...state,
     passwordResetRequired: false,
+    isLoading: false,
     error: null,
+    successMessage: 'Password has been reset successfully',
   })),
 
   on(AuthActions.resetPasswordFailure, (state, { error }) => ({
     ...state,
+    isLoading: false,
+    error,
+  })),
+
+  on(AuthActions.firstTimePasswordReset, state => ({
+    ...state,
+    isLoading: true,
+    error: null,
+  })),
+
+  on(AuthActions.firstTimePasswordResetSuccess, state => ({
+    ...state,
+    passwordResetRequired: false,
+    isLoading: false,
+    error: null,
+    successMessage: 'Password has been reset successfully',
+  })),
+
+  on(AuthActions.firstTimePasswordResetFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
     error,
   })),
 
   on(AuthActions.clearError, state => ({
     ...state,
     error: null,
+  })),
+
+  on(AuthActions.setSuccessMessage, (state, { message }) => ({
+    ...state,
+    successMessage: message,
+  })),
+
+  on(AuthActions.clearSuccessMessage, state => ({
+    ...state,
+    successMessage: null,
   })),
 
   on(AuthActions.forgotPassword, state => ({
@@ -73,6 +107,7 @@ export const authReducer = createReducer(
     ...state,
     isLoading: false,
     error: null,
+    successMessage: 'Password reset instructions sent to your email',
   })),
 
   on(AuthActions.forgotPasswordFailure, (state, { error }) => ({
@@ -84,6 +119,11 @@ export const authReducer = createReducer(
   on(AuthActions.setAuthStep, (state, { step }) => ({
     ...state,
     currentStep: step,
+  })),
+
+  on(AuthActions.setEmail, (state, { email }) => ({
+    ...state,
+    email,
   })),
 
   on(AuthActions.verifyOtpSuccess, state => ({

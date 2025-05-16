@@ -1,16 +1,17 @@
 <div class="flex items-center justify-between py-2">
-  <div class="flex items-center">
-    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-      <img src="assets/profile-pic.png" alt="Profile" class="h-10 w-10 rounded-full" />
-    </div>
-    <div>
-      <h1 class="font-medium text-gray-800">Franz-James</h1>
-      <p class="text-sm text-gray-500">QA Engineer</p>
-    </div>
-  </div>
+  <app-user-badge
+    userAvatar="https://avatar.iran.liara.run/public/19"
+    userName="Franz-James"
+    userRole="QA Engineer"
+  />
   <div>
     <button class="p-2">
-      <img src="../../../assets/icons/Bell.svg" alt="Notifications icon">
+      <app-icon
+        [path]="bellIcon.path"
+        [viewBox]="bellIcon.viewBox"
+        [size]="bellIcon.size"
+        strokeColor="nspText"
+      />
     </button>
   </div>
 </div>

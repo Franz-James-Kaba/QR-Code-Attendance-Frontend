@@ -4,8 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-facilitator-layout',
   imports: [],
   templateUrl: './facilitator-layout.component.html',
-  styleUrl: './facilitator-layout.component.scss'
+  styleUrl: './facilitator-layout.component.scss',
 })
-export class FacilitatorLayoutComponent {
-
-}
+export class FacilitatorLayoutComponent {}

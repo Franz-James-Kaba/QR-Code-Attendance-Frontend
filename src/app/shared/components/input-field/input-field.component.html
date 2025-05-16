@@ -20,9 +20,9 @@
       (input)="onInputChange($event)"
       (blur)="markAsTouched()"
       class="block w-full rounded-sm border-gray-700 border focus:border-gray-900 focus:ring-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed p-2.5"
-      [class.border-red-500]="errorMessage"
-      [attr.aria-invalid]="!!errorMessage"
-      [attr.aria-describedby]="errorMessage ? name + '-error' : null"
+      [class.border-red-500]="calculatedErrorMessage"
+      [attr.aria-invalid]="!!calculatedErrorMessage"
+      [attr.aria-describedby]="calculatedErrorMessage ? name + '-error' : null"
       autocomplete="on"
     />
 
@@ -47,9 +47,9 @@
     }
   </div>
 
-  @if (errorMessage) {
+  @if (calculatedErrorMessage) {
     <div [id]="name + '-error'" class="mt-1 text-xs text-red-600" role="alert">
-      {{ errorMessage }}
+      {{ calculatedErrorMessage }}
     </div>
   }
 </div>

@@ -3,19 +3,19 @@ import {
   HttpClient,
   HttpErrorResponse,
   provideHttpClient,
-  withInterceptors
+  withInterceptors,
 } from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
-  provideHttpClientTesting
+  provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '@core/services/auth/auth.service';
 import { AuthActions } from '@core/store/states/auth/auth.actions';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
-import { authInterceptor } from './auth.interceptor';
+import { AuthInterceptor } from './auth.interceptor';
 
 describe('authInterceptor', () => {
   let httpClient: HttpClient;
@@ -28,17 +28,17 @@ describe('authInterceptor', () => {
   beforeEach(() => {
     // Create mock auth service
     const authServiceMock = {
-      getToken: jest.fn()
+      getToken: jest.fn(),
     } as unknown as jest.Mocked<AuthService>;
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClient(withInterceptors([AuthInterceptor])),
         provideHttpClientTesting(),
         provideMockStore(),
-        { provide: AuthService, useValue: authServiceMock }
-      ]
+        { provide: AuthService, useValue: authServiceMock },
+      ],
     });
 
     httpClient = TestBed.inject(HttpClient);
@@ -96,7 +96,7 @@ describe('authInterceptor', () => {
         // Assert
         expect(error.status).toBe(401);
         expect(store.dispatch).toHaveBeenCalledWith(AuthActions.logout());
-      }
+      },
     });
 
     // Simulate a 401 response
@@ -113,7 +113,7 @@ describe('authInterceptor', () => {
       error: (error: HttpErrorResponse) => {
         expect(error.status).toBe(500);
         expect(store.dispatch).not.toHaveBeenCalled();
-      }
+      },
     });
 
     // Simulate a 500 response

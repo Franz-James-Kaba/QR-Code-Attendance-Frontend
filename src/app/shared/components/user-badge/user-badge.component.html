@@ -2,7 +2,7 @@
   [ngClass]="[
     avatarOnly ? '' : 'flex items-center gap-2',
     clickable ? 'cursor-pointer' : '',
-    customClass
+    customClass,
   ]"
   (click)="onBadgeClick()"
   onkeypress="onBadgeClick()"
@@ -12,16 +12,13 @@
       <img
         [src]="userAvatar"
         alt="{{ userName }}'s avatar"
-        [ngClass]="[
-          sizeClasses,
-          'rounded-full object-cover border border-gray-200'
-        ]"
+        [ngClass]="[sizeClasses, 'rounded-full object-cover border border-gray-200']"
       />
     } @else {
       <div
         [ngClass]="[
           sizeClasses,
-          'rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold'
+          'rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold',
         ]"
       >
         {{ userName.charAt(0).toUpperCase() }}
@@ -33,10 +30,10 @@
       <span
         [ngClass]="[
           statusClasses,
-          'absolute bottom-0 right-0 block rounded-full border-2 border-white'
+          'absolute bottom-0 right-0 block rounded-full border-2 border-white',
         ]"
-        [style.width.px]="size === 'sm' ? 8 : (size === 'md' ? 10 : 12)"
-        [style.height.px]="size === 'sm' ? 8 : (size === 'md' ? 10 : 12)"
+        [style.width.px]="size === 'sm' ? 8 : size === 'md' ? 10 : 12"
+        [style.height.px]="size === 'sm' ? 8 : size === 'md' ? 10 : 12"
         aria-hidden="true"
       ></span>
     }

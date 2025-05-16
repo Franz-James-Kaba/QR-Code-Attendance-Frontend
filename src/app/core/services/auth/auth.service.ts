@@ -1,141 +1,136 @@
-import { Injectable } from '@angular/core';
-import {
-  MOCK_USERS,
-  MockStorage,
-  generateAuthResponse,
-  API_ERRORS,
-  VALID_OTP
-} from '@core/data/mock-data';
-import { AuthResponse, LoginCredentials } from '@shared/models/auth/auth.model';
-import { Observable, throwError, Observer } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { environment } from '@environments/environment';
+import { AuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = 'api/auth';
-  private currentUserEmail: string | null = null;
+  private readonly TOKEN_KEY = environment.auth.tokenKey;
+  private readonly API_URL = environment.auth.baseUrl;
+  private readonly currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor() {}
+  constructor() {
+    // Check if user is already logged in
+    this.loadStoredUser();
+  }
+
+  // Load user from localStorage when service initializes
+  private loadStoredUser(): void {
+    const token = this.getToken();
+    const userStr = localStorage.getItem('current_user');
+
+    if (token && userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        this.currentUserSubject.next(userData);
+      } catch (e) {
+        console.error('Error parsing stored user data', e);
+        this.logout();
+      }
+    }
+  }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    const { email, password } = credentials;
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+      tap(response => {
+        // Ensure email is included in the response
+        const responseWithEmail: AuthResponse = {
+          ...response,
+          email: credentials.email, // Add email from the login credentials
+        };
 
-    // Simulate network delay
-    return new Observable<AuthResponse>((observer: Observer<AuthResponse>) => {
-      // Add delay to simulate network
-      setTimeout(() => {
-        // Check if user exists
-        const user = MOCK_USERS[email];
-
-        if (!user) {
-          observer.error(new Error(API_ERRORS.invalidCredentials));
-          return;
-        }
-
-        // Validate password
-        if (user.password !== password) {
-          observer.error(new Error(API_ERRORS.invalidCredentials));
-          return;
-        }
-
-        // Store current user email for other operations
-        this.currentUserEmail = email;
-
-        // Generate auth response
-        const response = generateAuthResponse(user);
-        observer.next(response);
-        observer.complete();
-      }, 800 + Math.random() * 800);
-    });
+        localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
+        localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
+        this.currentUserSubject.next(responseWithEmail);
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  resetPassword(oldPassword: string, newPassword: string): Observable<void> {
-    if (!this.currentUserEmail) {
-      return throwError(() => new Error('No active user session'));
-    }
-
-    return new Observable<void>((observer: Observer<void>) => {
-      setTimeout(() => {
-        const user = MOCK_USERS[this.currentUserEmail!];
-
-        // If resetting with old password, verify it
-        if (oldPassword && oldPassword !== user.password) {
-          observer.error(new Error(API_ERRORS.oldPasswordIncorrect));
-          return;
-        }
-
-        // Update the password
-        MOCK_USERS[this.currentUserEmail!].password = newPassword;
-
-        // Mark password reset as completed
-        MockStorage.completePasswordReset(this.currentUserEmail!);
-
-        // Update user state
-        MOCK_USERS[this.currentUserEmail!].passwordResetRequired = false;
-
-        observer.next();
-        observer.complete();
-      }, 1000 + Math.random() * 500);
-    });
+  resetPassword(
+    email: string,
+    token: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password?email=${email}&token=${token}`, passwords)
+      .pipe(catchError(this.handleError));
   }
 
-  verifyOtp(otp: string): Observable<void> {
-    if (!this.currentUserEmail) {
-      return throwError(() => new Error('No email provided for OTP verification'));
-    }
-
-    return new Observable<void>((observer: Observer<void>) => {
-      setTimeout(() => {
-        // Simplify for now - just check against valid OTP
-        if (otp === VALID_OTP) {
-          observer.next();
-          observer.complete();
-        } else {
-          observer.error(new Error(API_ERRORS.invalidOtp));
-        }
-      }, 800);
-    });
+  firstTimePasswordReset(
+    email: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/first-password-reset?email=${email}`, passwords)
+      .pipe(catchError(this.handleError));
   }
 
-  forgotPassword(email: string): Observable<void> {
-    return new Observable<void>((observer: Observer<void>) => {
-      setTimeout(() => {
-        // Check if user exists
-        if (!MOCK_USERS[email]) {
-          // For security reasons, don't reveal if email exists or not
-          // Just pretend we sent an email
-          observer.next();
-          observer.complete();
-          return;
-        }
-
-        // Store email for later verification
-        this.currentUserEmail = email;
-
-        // Generate and store OTP
-        MockStorage.storeOtp(email);
-        MockStorage.recordPasswordResetRequest(email);
-
-        observer.next();
-        observer.complete();
-      }, 1000);
-    });
+  requestPasswordReset(email: string): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
+      .pipe(catchError(this.handleError));
   }
 
   logout(): void {
-    this.currentUserEmail = null;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem('current_user');
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  // Helper method to get current user role - useful for testing different flows
-  getCurrentUserRole(): string | null {
-    if (!this.currentUserEmail) return null;
-    const user = MOCK_USERS[this.currentUserEmail];
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  hasPasswordResetRequired(): boolean {
+    const user = this.currentUserSubject.value;
+    return user ? user.passwordResetRequired : false;
+  }
+
+  getCurrentUserRole(): UserRole | null {
+    const user = this.currentUserSubject.value;
     return user ? user.role : null;
+  }
+
+  getCurrentUserEmail(): string | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.email : null;
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      if (error.status === 401) {
+        errorMessage = 'Invalid credentials. Please check your email and password.';
+      } else if (error.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (error.status === 404) {
+        errorMessage = 'The requested resource was not found.';
+      } else if (error.error && typeof error.error === 'string') {
+        errorMessage = error.error;
+      } else if (error.error?.message) {
+        errorMessage = error.error.message;
+      }
+    }
+
+    return throwError(() => new Error(errorMessage));
   }
 }
