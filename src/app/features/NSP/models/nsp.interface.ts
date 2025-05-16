@@ -27,3 +27,9 @@ export interface CheckInResponse {
   message: string;
   success: boolean;
 }
+
+export interface AttendancePositionResponse {
+  success: boolean;
+  message: string;
+  position: number;
+}
