@@ -6,7 +6,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-badge.component.html',
-  styleUrl: './user-badge.component.scss'
+  styleUrl: './user-badge.component.scss',
 })
 export class UserBadgeComponent {
   @Input() userName: string = 'User';
@@ -25,7 +25,7 @@ export class UserBadgeComponent {
     const sizes = {
       sm: 'w-6 h-6 text-xs',
       md: 'w-8 h-8 text-sm',
-      lg: 'w-10 h-10 text-base'
+      lg: 'w-10 h-10 text-base',
     };
     return sizes[this.size];
   }
@@ -34,7 +34,7 @@ export class UserBadgeComponent {
     const sizes = {
       sm: 'text-xs',
       md: 'text-xs',
-      lg: 'text-sm'
+      lg: 'text-sm',
     };
     return sizes[this.size];
   }
@@ -43,7 +43,7 @@ export class UserBadgeComponent {
     const sizes = {
       sm: 'text-xs',
       md: 'text-sm',
-      lg: 'text-base'
+      lg: 'text-base',
     };
     return sizes[this.size];
   }
@@ -55,7 +55,7 @@ export class UserBadgeComponent {
       online: 'bg-green-500',
       offline: 'bg-gray-400',
       away: 'bg-yellow-500',
-      busy: 'bg-red-500'
+      busy: 'bg-red-500',
     };
 
     return statusColors[this.status];

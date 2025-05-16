@@ -1,11 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import {
-  MOCK_USERS,
-  MockStorage,
-  API_ERRORS,
-  VALID_OTP
-} from '@core/data/mock-data';
+import { MOCK_USERS, MockStorage, API_ERRORS, VALID_OTP } from '@core/data/mock-data';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from './auth.service';
@@ -16,7 +11,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [AuthService],
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
     });
     service = TestBed.inject(AuthService);
 
@@ -36,7 +31,7 @@ describe('AuthService', () => {
       // Arrange
       const credentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
 
       // Act - using modern Promise approach
@@ -52,11 +47,11 @@ describe('AuthService', () => {
       expect(result.token).toBeDefined();
     }));
 
-   it('should return error with invalid email', fakeAsync(async () => {
+    it('should return error with invalid email', fakeAsync(async () => {
       // Arrange
       const credentials = {
         email: 'nonexistent@amalitech.com',
-        password: 'RandomPassword'
+        password: 'RandomPassword',
       };
 
       // Act & Assert
@@ -72,7 +67,7 @@ describe('AuthService', () => {
       // Arrange
       const credentials = {
         email: 'admin@amalitech.com',
-        password: 'WrongPassword'
+        password: 'WrongPassword',
       };
 
       // Act & Assert
@@ -86,7 +81,7 @@ describe('AuthService', () => {
       // Arrange
       const credentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
 
       // Act
@@ -104,7 +99,7 @@ describe('AuthService', () => {
       // Arrange - first login to set current user
       const loginCredentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
       const newPassword = 'NewPassword@123';
 
@@ -116,7 +111,9 @@ describe('AuthService', () => {
       jest.spyOn(MockStorage, 'completePasswordReset');
 
       // Act
-      const resetPromise = firstValueFrom(service.resetPassword(loginCredentials.password, newPassword));
+      const resetPromise = firstValueFrom(
+        service.resetPassword(loginCredentials.password, newPassword)
+      );
       tick(2000);
       await resetPromise;
 
@@ -130,7 +127,7 @@ describe('AuthService', () => {
       // Arrange - first login to set current user
       const loginCredentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
       const wrongOldPassword = 'WrongOldPassword';
       const newPassword = 'NewPassword@123';
@@ -248,7 +245,7 @@ describe('AuthService', () => {
       // Arrange - set up user session and token
       const credentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
       localStorage.setItem('auth_token', 'mock-token');
 
@@ -306,7 +303,7 @@ describe('AuthService', () => {
       // Arrange
       const credentials = {
         email: 'admin@amalitech.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
       };
       const expectedRole = MOCK_USERS[credentials.email].role;
 

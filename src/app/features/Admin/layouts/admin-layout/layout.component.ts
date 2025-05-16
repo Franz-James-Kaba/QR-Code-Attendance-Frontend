@@ -9,7 +9,7 @@ import { SidebarComponent } from '../../shared/components/sidebar/sidebar.compon
   selector: 'app-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent],
-  templateUrl: './layout.component.html'
+  templateUrl: './layout.component.html',
 })
 export class LayoutComponent {
   isSidebarOpen = signal(true);

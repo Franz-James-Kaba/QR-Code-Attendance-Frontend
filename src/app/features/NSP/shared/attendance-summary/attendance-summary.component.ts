@@ -31,5 +31,5 @@ import { SummaryCard } from '../../models/nsp.interface';
   `,
 })
 export class AttendanceSummaryComponent {
-  @Input() public attendanceSummary!: SummaryCard[]
+  @Input() public attendanceSummary!: SummaryCard[];
 }

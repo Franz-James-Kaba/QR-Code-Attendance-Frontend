@@ -20,7 +20,7 @@ interface FacilitatorData {
 })
 export class FacilitatorFormComponent {
   private readonly fb = inject(FormBuilder);
-  
+
   @Input() initialData: FacilitatorData | null = null;
   @Output() formSubmit = new EventEmitter<FacilitatorData>();
   @Output() formCancel = new EventEmitter<void>();
@@ -35,7 +35,7 @@ export class FacilitatorFormComponent {
       phone: ['', [Validators.required]],
       program: ['', [Validators.required]],
       role: ['facilitator', [Validators.required]],
-      status: ['active', [Validators.required]]
+      status: ['active', [Validators.required]],
     });
 
     // If we have initial data, populate the form
@@ -48,16 +48,16 @@ export class FacilitatorFormComponent {
     if (this.facilitatorForm.valid) {
       this.isSubmitting = true;
       const formData = this.facilitatorForm.value;
-      
+
       // Emit the form data to parent component
       this.formSubmit.emit(formData);
-      
+
       // Reset form after submission (in a real app, we'd do this after successful API response)
       setTimeout(() => {
         this.isSubmitting = false;
         this.facilitatorForm.reset({
           role: 'facilitator',
-          status: 'active'
+          status: 'active',
         });
       }, 800);
     } else {

@@ -13,15 +13,17 @@ export const adminRoutes: Routes = [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('@Admin/features/dashboard/pages/dashboard/dashboard.component')
-          .then(m => m.DashboardComponent),
+        loadComponent: () =>
+          import('@Admin/features/dashboard/pages/dashboard/dashboard.component').then(
+            m => m.DashboardComponent
+          ),
         data: {
-          title: 'Dashboard'
-        }
+          title: 'Dashboard',
+        },
       },
       // {
       //   path: 'users',
@@ -34,34 +36,38 @@ export const adminRoutes: Routes = [
       {
         path: 'nsps',
         data: {
-          title: 'NSP Management'
+          title: 'NSP Management',
         },
         children: [
           {
             path: '',
-            loadComponent: () => import('@app/features/Admin/features/dashboard/pages/nsp-overview/nsp-overview.component')
-              .then(m => m.NspOverviewComponent),
+            loadComponent: () =>
+              import(
+                '@app/features/Admin/features/dashboard/pages/nsp-overview/nsp-overview.component'
+              ).then(m => m.NspOverviewComponent),
             data: {
-              title: 'NSP Overview'
-            }
-          }
-        ]
+              title: 'NSP Overview',
+            },
+          },
+        ],
       },
       {
         path: 'facilitators',
         data: {
-          title: 'Facilitator Management'
+          title: 'Facilitator Management',
         },
         children: [
           {
             path: '',
-            loadComponent: () => import('@app/features/Admin/features/dashboard/pages/facilitator-overview/facilitator-overview.component')
-              .then(m => m.FacilitatorOverviewComponent),
+            loadComponent: () =>
+              import(
+                '@app/features/Admin/features/dashboard/pages/facilitator-overview/facilitator-overview.component'
+              ).then(m => m.FacilitatorOverviewComponent),
             data: {
-              title: 'Facilitator Overview'
-            }
-          }
-        ]
+              title: 'Facilitator Overview',
+            },
+          },
+        ],
       },
       // {
       //   path: 'sessions',
@@ -73,17 +79,19 @@ export const adminRoutes: Routes = [
       // },
       {
         path: 'settings',
-        loadComponent: () => import('@Admin/features/dashboard/pages/settings/settings.component')
-          .then(m => m.SettingsComponent),
+        loadComponent: () =>
+          import('@Admin/features/dashboard/pages/settings/settings.component').then(
+            m => m.SettingsComponent
+          ),
         data: {
-          title: 'Settings'
-        }
+          title: 'Settings',
+        },
       },
       {
         path: '**',
-        loadComponent: () => import('@shared/components/not-found/not-found.component')
-          .then(m => m.NotFoundComponent)
-      }
-    ]
-  }
+        loadComponent: () =>
+          import('@shared/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+      },
+    ],
+  },
 ];

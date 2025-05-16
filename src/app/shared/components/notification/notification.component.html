@@ -2,13 +2,14 @@
 <div class="notification-container">
   @for (notification of (notifications$ | async) || []; track notification.id; let i = $index) {
     @if (i < maxVisibleNotifications) {
-      <app-notification-item 
+      <app-notification-item
         [notification]="notification"
-        (remove)="removeNotification(notification.id)">
+        (remove)="removeNotification(notification.id)"
+      >
       </app-notification-item>
     }
   }
-  
+
   <!-- Show count of hidden notifications if any -->
   @if (((notifications$ | async) || []).length > maxVisibleNotifications) {
     <div class="more-notifications">

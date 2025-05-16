@@ -1,7 +1,7 @@
 <!-- Col 1: Header with greeting and action buttons -->
 <section class="flex justify-between items-center mb-6">
   <div>
-    <h1 class="text-2xl font-bold text-gray-800">Hi, {{userName}}</h1>
+    <h1 class="text-2xl font-bold text-gray-800">Hi, {{ userName }}</h1>
     <p class="text-sm text-gray-600">This is the summary of your dashboard</p>
   </div>
   <div class="flex flex-row items-center space-x-3">
@@ -16,7 +16,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="onCreateNsp()">
+      (buttonClick)="onCreateNsp()"
+    >
       Create NSP
     </app-button>
     <app-button
@@ -31,7 +32,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="onCreateFacilitator()">
+      (buttonClick)="onCreateFacilitator()"
+    >
       Create Facilitator
     </app-button>
   </div>
@@ -44,7 +46,8 @@
     value="112"
     title="Total number of NSPs"
     iconPath="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-    detailsLink="#">
+    detailsLink="#"
+  >
   </app-stat-card>
 
   <!-- Facilitator Stats Card -->
@@ -52,9 +55,10 @@
     value="16"
     title="Total number of Facilitators"
     iconPath="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0"
-    detailsLink="#">
+    detailsLink="#"
+  >
   </app-stat-card>
-  
+
   <!-- Empty third column -->
   <div class="hidden md:block"></div>
 </section>
@@ -69,7 +73,8 @@
       [options]="attendanceChartOptions"
       [isLoading]="attendanceChartLoading"
       chartType="bar"
-      (timeRangeChanged)="onAttendanceTimeRangeChange($event)">
+      (timeRangeChanged)="onAttendanceTimeRangeChange($event)"
+    >
     </app-chart>
   </div>
   <div class="bg-white rounded-lg shadow-md p-4">
@@ -79,7 +84,8 @@
       [dataSet]="programDistributionData"
       [options]="programDistributionOptions"
       [isLoading]="programDistributionLoading"
-      chartType="pie">
+      chartType="pie"
+    >
     </app-chart>
   </div>
 </section>
@@ -94,7 +100,8 @@
       [options]="stayingTimeChartOptions"
       [isLoading]="stayingTimeChartLoading"
       chartType="line"
-      (timeRangeChanged)="onStayingTimeRangeChange($event)">
+      (timeRangeChanged)="onStayingTimeRangeChange($event)"
+    >
     </app-chart>
   </div>
   <div class="col-span-1 bg-white rounded-lg shadow-md p-4">
@@ -103,16 +110,30 @@
       @for (attendee of earlyAttendees; track attendee.name) {
         <div class="flex items-center p-3 rounded-lg hover:bg-gray-50">
           <div class="rounded-full bg-green-100 p-3 mr-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
             </svg>
           </div>
           <div>
-            <p class="font-medium text-gray-800">{{attendee.name}}</p>
-            <p class="text-sm text-gray-500">{{attendee.program}}</p>
+            <p class="font-medium text-gray-800">{{ attendee.name }}</p>
+            <p class="text-sm text-gray-500">{{ attendee.program }}</p>
           </div>
           <div class="ml-auto">
-            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">{{attendee.time}}</span>
+            <span
+              class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
+              >{{ attendee.time }}</span
+            >
           </div>
         </div>
       }

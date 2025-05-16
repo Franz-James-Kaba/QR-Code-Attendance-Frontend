@@ -13,13 +13,16 @@ export interface Breadcrumb {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './breadcrumb.component.html',
-  styleUrl: './breadcrumb.component.scss'
+  styleUrl: './breadcrumb.component.scss',
 })
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   breadcrumbs: Breadcrumb[] = [];
   routerSubscription: Subscription | undefined;
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.routerSubscription = this.router.events
@@ -38,7 +41,11 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
+  private createBreadcrumbs(
+    route: ActivatedRoute,
+    url: string = '',
+    breadcrumbs: Breadcrumb[] = []
+  ): Breadcrumb[] {
     // Get the current URL segment from the route's first path
     const firstPathSegment = this.router.url.split('/')[1];
 
@@ -49,7 +56,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
 
       breadcrumbs.push({
         label: firstSegmentLabel,
-        url: firstSegmentUrl
+        url: firstSegmentUrl,
       });
     }
 
@@ -74,13 +81,14 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       // Add breadcrumb if the route has data with a title
       if (child.snapshot.data['title']) {
         // Check if this breadcrumb would duplicate the last entry
-        const isDuplicate = breadcrumbs.length > 0 &&
-                            breadcrumbs[breadcrumbs.length - 1].label === child.snapshot.data['title'];
+        const isDuplicate =
+          breadcrumbs.length > 0 &&
+          breadcrumbs[breadcrumbs.length - 1].label === child.snapshot.data['title'];
 
         if (!isDuplicate) {
           const breadcrumb: Breadcrumb = {
             label: child.snapshot.data['title'],
-            url: url
+            url: url,
           };
           breadcrumbs.push(breadcrumb);
         }
@@ -89,13 +97,13 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         const label = this.formatRouteLabel(routeURL);
 
         // Check if this would duplicate the last entry
-        const isDuplicate = breadcrumbs.length > 0 &&
-                            breadcrumbs[breadcrumbs.length - 1].label === label;
+        const isDuplicate =
+          breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].label === label;
 
         if (!isDuplicate) {
           const breadcrumb: Breadcrumb = {
             label,
-            url: url
+            url: url,
           };
           breadcrumbs.push(breadcrumb);
         }

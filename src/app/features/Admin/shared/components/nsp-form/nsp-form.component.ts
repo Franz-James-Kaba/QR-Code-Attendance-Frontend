@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/button/button.component';
 
@@ -49,7 +58,7 @@ export class NspFormComponent implements OnInit, OnChanges {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required]],
       program: ['', [Validators.required]],
-      joinDate: ['', [Validators.required]]
+      joinDate: ['', [Validators.required]],
     });
   }
 
@@ -73,7 +82,7 @@ export class NspFormComponent implements OnInit, OnChanges {
         email: this.initialData.email,
         phone: this.initialData.phone,
         program: this.initialData.program,
-        joinDate: this.initialData.joinDate
+        joinDate: this.initialData.joinDate,
       });
     }
   }
@@ -81,7 +90,7 @@ export class NspFormComponent implements OnInit, OnChanges {
   resetForm(): void {
     this.nspForm.reset({
       id: 'NSP-' + Math.floor(1000 + Math.random() * 9000),
-      status: 'Active'
+      status: 'Active',
     });
   }
 
@@ -89,10 +98,10 @@ export class NspFormComponent implements OnInit, OnChanges {
     if (this.nspForm.valid) {
       this.isSubmitting = true;
       const formData = this.nspForm.getRawValue();
-      
+
       // Emit the form data to parent component
       this.formSubmit.emit(formData);
-      
+
       // Reset form after submission (in a real app, we'd do this after successful API response)
       setTimeout(() => {
         this.isSubmitting = false;

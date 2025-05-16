@@ -17,7 +17,7 @@ export const AuthActions = {
       email: string;
       token: string;
       password: string;
-      confirmPassword: string
+      confirmPassword: string;
     }>()
   ),
   resetPasswordSuccess: createAction('[Auth] Reset Password Success'),
@@ -28,11 +28,14 @@ export const AuthActions = {
     props<{
       email: string;
       password: string;
-      confirmPassword: string
+      confirmPassword: string;
     }>()
   ),
   firstTimePasswordResetSuccess: createAction('[Auth] First Time Password Reset Success'),
-  firstTimePasswordResetFailure: createAction('[Auth] First Time Password Reset Failure', props<{ error: string }>()),
+  firstTimePasswordResetFailure: createAction(
+    '[Auth] First Time Password Reset Failure',
+    props<{ error: string }>()
+  ),
 
   clearError: createAction('[Auth] Clear Error'),
   setSuccessMessage: createAction('[Auth] Set Success Message', props<{ message: string }>()),

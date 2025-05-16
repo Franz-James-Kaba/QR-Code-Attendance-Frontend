@@ -5,7 +5,6 @@ import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/ro
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { filter } from 'rxjs/operators';
 
-
 interface NavItem {
   label: string;
   icon: string;
@@ -17,7 +16,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, IconComponent],
-  templateUrl: './sidebar.component.html'
+  templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
   @Input() isOpen = true;

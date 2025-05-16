@@ -8,12 +8,12 @@ export const nspRoutes: Routes = [
     component: NspComponent,
     canActivate: [AuthGuard],
     data: {
-      title: 'NSP'
-    }
+      title: 'NSP',
+    },
   },
   {
     path: '**',
-    loadComponent: () => import('@shared/components/not-found/not-found.component')
-      .then(m => m.NotFoundComponent)
-  }
+    loadComponent: () =>
+      import('@shared/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];

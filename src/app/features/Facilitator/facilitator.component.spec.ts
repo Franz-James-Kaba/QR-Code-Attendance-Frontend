@@ -11,9 +11,8 @@ describe('FacilitatorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FacilitatorComponent ]
-    })
-    .compileComponents();
+      declarations: [FacilitatorComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

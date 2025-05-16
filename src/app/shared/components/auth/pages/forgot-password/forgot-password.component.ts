@@ -144,7 +144,7 @@ export class ForgotPasswordComponent implements OnInit {
                 email,
                 token,
                 password,
-                confirmPassword
+                confirmPassword,
               })
             );
           }

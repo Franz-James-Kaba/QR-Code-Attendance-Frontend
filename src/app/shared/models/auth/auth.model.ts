@@ -4,7 +4,7 @@ export const AuthStep = {
   RESET_PASSWORD: 'RESET_PASSWORD',
 } as const;
 
-export type AuthStep = typeof AuthStep[keyof typeof AuthStep];
+export type AuthStep = (typeof AuthStep)[keyof typeof AuthStep];
 
 export type UserRole = 'ADMIN' | 'FACILITATOR' | 'NSP' | 'RECEPTIONIST';
 

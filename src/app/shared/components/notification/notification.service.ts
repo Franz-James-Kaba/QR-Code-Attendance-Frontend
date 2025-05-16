@@ -1,19 +1,23 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Notification, NotificationOptions, NotificationType } from '../../models/notification/notification.model';
+import {
+  Notification,
+  NotificationOptions,
+  NotificationType,
+} from '../../models/notification/notification.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
   private readonly defaultOptions: NotificationOptions = {
     duration: 5000, // 5 seconds
     autoClose: true,
-    showProgress: true
+    showProgress: true,
   };
 
   private notifications$ = new BehaviorSubject<Notification[]>([]);
-  
+
   // Public observable that components can subscribe to
   public notifications: Observable<Notification[]> = this.notifications$.asObservable();
 
@@ -75,14 +79,18 @@ export class NotificationService {
   /**
    * Add a notification to the notifications array
    */
-  private addNotification(type: NotificationType, message: string, options?: NotificationOptions): string {
+  private addNotification(
+    type: NotificationType,
+    message: string,
+    options?: NotificationOptions
+  ): string {
     const id = this.generateId();
     const notification: Notification = {
       id,
       type,
       message,
       ...this.defaultOptions,
-      ...options
+      ...options,
     };
 
     // Add new notification to the array

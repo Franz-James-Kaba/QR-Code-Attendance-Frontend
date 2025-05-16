@@ -8,9 +8,8 @@ describe('NspOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NspOverviewComponent]
-    })
-    .compileComponents();
+      imports: [NspOverviewComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NspOverviewComponent);
     component = fixture.componentInstance;

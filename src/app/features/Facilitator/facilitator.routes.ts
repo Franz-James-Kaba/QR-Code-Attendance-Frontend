@@ -9,13 +9,13 @@ export const facilitatorRoutes: Routes = [
     component: FacilitatorLayoutComponent,
     canActivate: [AuthGuard],
     data: {
-      title: 'Facilitator'
+      title: 'Facilitator',
     },
     children: [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       // {
       //   path: 'dashboard',
@@ -43,9 +43,9 @@ export const facilitatorRoutes: Routes = [
       // },
       {
         path: '**',
-        loadComponent: () => import('@shared/components/not-found/not-found.component')
-          .then(m => m.NotFoundComponent)
-      }
-    ]
-  }
+        loadComponent: () =>
+          import('@shared/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+      },
+    ],
+  },
 ];
