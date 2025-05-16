@@ -10,9 +10,9 @@
   <div class="flex-1 px-4 py-6 overflow-auto bg-nspBg rounded-t-[32px] rounded-r-[32px]">
     <div class="mb-6">
       <h2 class="text-lg font-medium text-nspText mb-4">Attendance Summary</h2>
-      <app-attendance-summary />
+      <app-attendance-summary [attendanceSummary]="attendanceSummary()" />
     </div>
-    <div class="">
+    <div>
       <div class="flex justify-between items-center mt-6 mb-4">
         <h2 class="text-base font-bold text-nspText">Today's Activity</h2>
         <a routerLink="" class="font-normal text-sm text-primary">View All</a>
@@ -20,7 +20,46 @@
       <app-activity-list />
     </div>
   </div>
-  <div class="flex-none px-4 py-4 bg-nspBg">
-    <app-slide-button />
+  <div class="flex-none px-4 py-4 bg-transparent">
+    <app-slide-button (scanRequested)="startQRScanner()" />
   </div>
 </div>
+
+@if (isScanning()) {
+  <div class="fixed inset-0 bg-black z-50">
+    <zxing-scanner
+      [enable]="isScanning()"
+      [torch]="false"
+      [formats]="allowedFormats"
+      (scanSuccess)="onScanSuccess($event)"
+      (scanError)="onScanError($event)"
+      [previewFitMode]="'cover'"
+      class="w-full h-full"
+    ></zxing-scanner>
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div class="w-64 h-64 border-opacity-50 rounded-lg relative">
+        <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 rounded-sm border-white"></div>
+        <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 rounded-sm border-white"></div>
+        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 rounded-sm border-white"></div>
+        <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 rounded-sm border-white"></div>
+      </div>
+    </div>
+    <button
+      (click)="stopQRScanner()"
+      class="absolute top-12 right-4 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-white"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+  </div>
+}
