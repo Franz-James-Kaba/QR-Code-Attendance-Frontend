@@ -33,3 +33,11 @@ export interface AttendancePositionResponse {
   message: string;
   position: number;
 }
+
+export interface DashboardState {
+  selectedDate: Date | null;
+  calendarDates: CalendarDate[];
+  attendanceSummary: SummaryCard[];
+  loading: boolean;
+  error: string | null;
+}
