@@ -1,124 +1,284 @@
 import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { CalendarDate } from '@app/features/NSP/models/nsp.interface';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { selectDate } from '@store/actions/attendance.actions';
 
 import { CalenderComponent } from './calender.component';
+
+interface ScrollIntoViewOptions {
+  behavior?: 'auto' | 'smooth';
+  block?: 'start' | 'center' | 'end' | 'nearest';
+  inline?: 'start' | 'center' | 'end' | 'nearest';
+}
+
+interface MockElement extends HTMLElement {
+  scrollIntoView: jest.Mock<void, [ScrollIntoViewOptions | boolean]>;
+}
 
 describe('CalenderComponent', () => {
   let component: CalenderComponent;
   let fixture: ComponentFixture<CalenderComponent>;
+  let store: MockStore;
+  let mockScrollIntoView: jest.Mock<void, [ScrollIntoViewOptions | boolean]>;
+  let mockQuerySelectorAll: jest.Mock;
+
+  const mockCurrentDate = new Date(2025, 4, 18);
+  const originalDate = Date;
 
   beforeEach(async () => {
-    jest.spyOn(document, 'getElementById').mockImplementation(id => {
+    mockScrollIntoView = jest.fn();
+    mockQuerySelectorAll = jest.fn().mockReturnValue([]);
+
+    jest.spyOn(document, 'getElementById').mockImplementation((id: string): MockElement | null => {
       if (id === 'active-date') {
-        return { scrollIntoView: jest.fn() } as any;
+        return { scrollIntoView: mockScrollIntoView } as MockElement;
       }
       return null;
     });
 
+    type DateArgs =
+      | []
+      | [number | string | Date]
+      | [number, number]
+      | [number, number, number]
+      | [number, number, number, number]
+      | [number, number, number, number, number]
+      | [number, number, number, number, number, number]
+      | [number, number, number, number, number, number, number];
+
+    jest.spyOn(window, 'Date').mockImplementation((...args: DateArgs): Date => {
+      if (args.length === 0) {
+        return new originalDate(mockCurrentDate);
+      }
+      if (args.length === 1) {
+        return new originalDate(args[0]);
+      }
+      if (args.length === 2) {
+        return new originalDate(args[0], args[1]);
+      }
+      if (args.length === 3) {
+        return new originalDate(args[0], args[1], args[2]);
+      }
+      if (args.length === 4) {
+        return new originalDate(args[0], args[1], args[2], args[3]);
+      }
+      if (args.length === 5) {
+        return new originalDate(args[0], args[1], args[2], args[3], args[4]);
+      }
+      if (args.length === 6) {
+        return new originalDate(args[0], args[1], args[2], args[3], args[4], args[5]);
+      }
+      return new originalDate(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+    });
+
+    Object.defineProperty(navigator, 'language', {
+      value: 'en-US',
+      configurable: true,
+    });
+
+    jest.spyOn(document, 'querySelectorAll').mockImplementation(mockQuerySelectorAll);
+
     await TestBed.configureTestingModule({
       imports: [CommonModule, CalenderComponent],
+      providers: [provideMockStore()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CalenderComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    store = TestBed.inject(MockStore);
+
+    jest.spyOn(store, 'dispatch');
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
+  describe('ngOnInit', () => {
+    it('should initialize dates for May 2025 with correct properties', () => {
+      fixture.detectChanges();
+
+      const expectedLength = 31;
+      expect(component.dates.length).toBe(expectedLength);
+      expect(component.currentDay).toBe(18);
+
+      expect(component.dates[0]).toEqual({
+        day: 1,
+        name: 'Thu',
+        active: false,
+        selectable: true,
+      });
+      expect(component.dates[17]).toEqual({
+        day: 18,
+        name: 'Sun',
+        active: true,
+        selectable: true,
+      });
+      expect(component.dates[18]).toEqual({
+        day: 19,
+        name: 'Mon',
+        active: false,
+        selectable: false,
+      });
+    });
   });
 
-  it('should initialize dates for the current month', () => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  describe('ngAfterViewInit', () => {
+    it('should scroll to active date if present', fakeAsync(() => {
+      fixture.detectChanges();
+      component.ngAfterViewInit();
+      tick();
 
-    expect(component.dates.length).toBe(daysInMonth);
-    expect(component.dates[0].day).toBe(1);
-    expect(component.dates[component.dates.length - 1].day).toBe(daysInMonth);
-    expect(component.dates[component.currentDay - 1].active).toBe(true);
-    expect(component.dates[component.currentDay].selectable).toBe(false);
+      expect(document.getElementById).toHaveBeenCalledWith('active-date');
+      expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', inline: 'center' });
+    }));
+
+    it('should not call scrollIntoView if no active date', fakeAsync(() => {
+      jest.spyOn(document, 'getElementById').mockReturnValue(null);
+      fixture.detectChanges();
+      component.ngAfterViewInit();
+      tick();
+
+      expect(document.getElementById).toHaveBeenCalledWith('active-date');
+      expect(mockScrollIntoView).toHaveBeenCalledTimes(0);
+    }));
   });
 
-  it('should emit selected date when a selectable date is clicked', () => {
-    jest.spyOn(component.daySelected, 'emit');
-    const selectableDate = component.dates.find(date => date.selectable);
+  describe('selectDate', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
 
-    if (selectableDate) {
-      component.selectDate(selectableDate);
-      const expectedDate = new Date(new Date().getFullYear(), new Date().getMonth(), selectableDate.day);
-      expect(component.daySelected.emit).toHaveBeenCalledWith(expectedDate);
-      expect(component.dates.find(date => date.day === selectableDate.day)?.active).toBe(true);
-    }
+    it('should update active date and dispatch selectDate action for selectable date', ()=>{
+      const selectedDate: CalendarDate = { day: 15, name: 'Thu', active: false, selectable: true };
+      component.selectDate(selectedDate);
+
+      expect(component.dates[14].active).toBe(true);
+      expect(component.dates[17].active).toBe(false);
+      expect(component.dates[0].active).toBe(false);
+
+      const expectedDate = new Date(2025, 4, 15);
+      expect(store.dispatch).toHaveBeenCalledWith(selectDate({ date: expectedDate }));
+    });
+
+    it('should not update dates or dispatch action for non-selectable date', () => {
+      const selectedDate: CalendarDate = { day: 19, name: 'Mon', active: false, selectable: false };
+      component.selectDate(selectedDate);
+
+      expect(component.dates[17].active).toBe(true);
+      expect(component.dates[18].active).toBe(false);
+      expect(store.dispatch).toHaveBeenCalledTimes(0);
+    });
   });
 
-  it('should not emit or change active state for non-selectable date', () => {
-    jest.spyOn(component.daySelected, 'emit');
-    const nonSelectableDate = component.dates.find(date => !date.selectable);
+  describe('onKeyDown', () => {
+    let mockFocus: jest.Mock<void, []>;
 
-    if (nonSelectableDate) {
-      component.selectDate(nonSelectableDate);
-      expect(component.daySelected.emit).not.toHaveBeenCalled();
-      expect(component.dates.find(date => date.day === nonSelectableDate.day)?.active).toBe(false);
-    }
-  });
+    beforeEach(() => {
+      fixture.detectChanges();
+      mockFocus = jest.fn();
+      const mockElements = Array.from({ length: 31 }, () => ({ focus: mockFocus }));
+      mockQuerySelectorAll.mockReturnValue(mockElements);
+    });
 
-  it('should scroll to active date after view initialization', () => {
-    const scrollIntoViewSpy = jest.fn();
-    jest.spyOn(document, 'getElementById').mockReturnValueOnce({
-      scrollIntoView: scrollIntoViewSpy,
-    } as any);
+    it('should navigate to previous selectable date on ArrowLeft', () => {
+      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
+      jest.spyOn(event, 'preventDefault');
+      component.onKeyDown(event, 17);
 
-    component.ngAfterViewInit();
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.dates[16].active).toBe(true);
+      expect(component.dates[17].active).toBe(false);
+      expect(mockFocus).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        selectDate({ date: new Date(2025, 4, 17) })
+      );
+    });
 
-    expect(document.getElementById).toHaveBeenCalledWith('active-date');
-    expect(scrollIntoViewSpy).toHaveBeenCalledWith({ behavior: 'smooth', inline: 'center' });
-  });
-
-  it('should handle ArrowRight key to select next selectable date', () => {
-    jest.spyOn(component.daySelected, 'emit');
-    const currentIndex = component.dates.findIndex(date => date.active);
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex < component.dates.length && component.dates[nextIndex].selectable) {
-      const mockElement = { focus: jest.fn() };
-      jest.spyOn(document, 'querySelectorAll').mockReturnValue([null, mockElement] as any);
-
+    it('should navigate to next selectable date on ArrowRight', () => {
+      component.dates = component.dates.map(date => ({
+        ...date,
+        active: date.day === 15,
+      }));
       const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-      component.onKeyDown(event, currentIndex);
+      jest.spyOn(event, 'preventDefault');
+      component.onKeyDown(event, 14);
 
-      expect(component.dates[nextIndex].active).toBe(true);
-      expect(mockElement.focus).toHaveBeenCalled();
-      expect(component.daySelected.emit).toHaveBeenCalled();
-    }
-  });
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.dates[15].active).toBe(true);
+      expect(component.dates[14].active).toBe(false);
+      expect(mockFocus).toHaveBeenCalledTimes(1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        selectDate({ date: new Date(2025, 4, 16) })
+      );
+    });
 
-  it('should not change selection if arrow keys target non-selectable date', () => {
-    jest.spyOn(component.daySelected, 'emit');
-    const currentIndex = component.dates.findIndex(date => date.active);
-    const nextIndex = currentIndex + 1;
+    it('should not navigate if previous date is out of bounds', () => {
+      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
+      jest.spyOn(event, 'preventDefault');
+      component.onKeyDown(event, 0);
 
-    if (nextIndex < component.dates.length && !component.dates[nextIndex].selectable) {
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.dates[0].active).toBe(false);
+      expect(mockFocus).toHaveBeenCalledTimes(0);
+      expect(store.dispatch).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not navigate if next date is not selectable', () => {
       const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-      component.onKeyDown(event, currentIndex);
+      jest.spyOn(event, 'preventDefault');
+      component.onKeyDown(event, 17);
 
-      expect(component.dates[nextIndex].active).toBe(false);
-      expect(component.daySelected.emit).not.toHaveBeenCalled();
-    }
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(component.dates[17].active).toBe(true);
+      expect(component.dates[18].active).toBe(false);
+      expect(mockFocus).toHaveBeenCalledTimes(0);
+      expect(store.dispatch).toHaveBeenCalledTimes(0);
+    });
   });
 
-  it('should prevent default behavior for arrow key events', () => {
-    const preventDefaultSpy = jest.fn();
-    const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+  describe('template rendering', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
 
-    component.onKeyDown(event, 0);
+    it('should render correct number of date elements', () => {
+      const listItems = fixture.nativeElement.querySelectorAll('li[role="button"]');
+      expect(listItems.length).toBe(31);
+    });
 
-    expect(preventDefaultSpy).toHaveBeenCalled();
+    it('should apply correct classes and attributes for active date', () => {
+      const activeItem = fixture.nativeElement.querySelector('#active-date');
+      expect(activeItem).toBeTruthy();
+      expect(activeItem.classList.contains('bg-primary')).toBe(true);
+      expect(activeItem.classList.contains('text-white')).toBe(true);
+      expect(activeItem.getAttribute('aria-pressed')).toBe('true');
+      expect(activeItem.getAttribute('tabindex')).toBe('0');
+      expect(activeItem.textContent).toContain('18');
+      expect(activeItem.textContent).toContain('Sun');
+    });
+
+    it('should apply correct classes for current day when not active', () => {
+      component.dates = component.dates.map(date => ({
+        ...date,
+        active: date.day === 15,
+      }));
+      fixture.detectChanges();
+
+      const currentDayItem = fixture.nativeElement.querySelectorAll('li[role="button"]')[17];
+      expect(currentDayItem.classList.contains('border')).toBe(true);
+      expect(currentDayItem.classList.contains('border-primary')).toBe(true);
+      expect(currentDayItem.getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('should apply correct classes and attributes for non-selectable date', () => {
+      const nonSelectableItem = fixture.nativeElement.querySelectorAll('li[role="button"]')[18];
+      expect(nonSelectableItem.classList.contains('cursor-not-allowed')).toBe(true);
+      expect(nonSelectableItem.classList.contains('opacity-50')).toBe(true);
+      expect(nonSelectableItem.getAttribute('aria-disabled')).toBe('true');
+      expect(nonSelectableItem.getAttribute('tabindex')).toBe('-1');
+    });
   });
 });
