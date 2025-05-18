@@ -1,14 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  Output,
-  AfterViewInit,
-  HostListener,
-} from '@angular/core';
-
-import { CalendarDate } from '../../models/nsp.interface';
+import { Component, OnInit, AfterViewInit, HostListener, inject } from '@angular/core';
+import { CalendarDate } from '@app/features/NSP/models/nsp.interface';
+import { Store } from '@ngrx/store';
+import { selectDate } from '@store/actions/attendance.actions';
 
 @Component({
   selector: 'app-calender',
@@ -16,35 +10,35 @@ import { CalendarDate } from '../../models/nsp.interface';
   imports: [CommonModule],
   template: `
     <ul class="flex space-x-3 py-2 overflow-x-auto" role="list">
-      <li
-        *ngFor="let date of dates; let i = index"
-        (click)="date.selectable ? selectDate(date) : null"
-        (keydown)="onKeyDown($event, i)"
-        [attr.id]="date.active ? 'active-date' : null"
-        [ngClass]="{
-          'bg-primary text-white': date.active,
-          'bg-lightGray text-nspText': !date.active,
-          'cursor-pointer': date.selectable,
-          'cursor-not-allowed opacity-50': !date.selectable,
-          'border border-primary': date.day === currentDay && !date.active,
-        }"
-        class="flex flex-col items-center rounded-xl py-2 px-4 min-w-[3.75rem]"
-        role="button"
-        [attr.aria-pressed]="date.active"
-        [attr.aria-disabled]="!date.selectable"
-        [tabindex]="date.selectable ? 0 : -1"
-      >
-        <span class="font-normal text-xl">{{ date.day }}</span>
-        <span class="text-sm">{{ date.name }}</span>
-      </li>
+      @for (date of dates; track $index) {
+        <li
+          (click)="date.selectable ? selectDate(date) : null"
+          (keydown)="onKeyDown($event, $index)"
+          [attr.id]="date.active ? 'active-date' : null"
+          [ngClass]="{
+            'bg-primary text-white': date.active,
+            'bg-lightGray text-nspText': !date.active,
+            'cursor-pointer': date.selectable,
+            'cursor-not-allowed opacity-50': !date.selectable,
+            'border border-primary': date.day === currentDay && !date.active,
+          }"
+          class="flex flex-col items-center rounded-xl py-2 px-4 min-w-[3.75rem]"
+          role="button"
+          [attr.aria-pressed]="date.active"
+          [attr.aria-disabled]="!date.selectable"
+          [tabindex]="date.selectable ? 0 : -1"
+        >
+          <span class="font-normal text-xl">{{ date.day }}</span>
+          <span class="text-sm">{{ date.name }}</span>
+        </li>
+      }
     </ul>
   `,
 })
 export class CalenderComponent implements OnInit, AfterViewInit {
-  @Output() daySelected = new EventEmitter<Date>();
-
   public dates: CalendarDate[] = [];
   public currentDay = new Date().getDate();
+  private store: Store = inject(Store);
 
   ngOnInit() {
     this.initializeDates();
@@ -90,7 +84,7 @@ export class CalenderComponent implements OnInit, AfterViewInit {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
     const selectedDate = new Date(currentYear, currentMonth, selected.day);
-    this.daySelected.emit(selectedDate);
+    this.store.dispatch(selectDate({ date: selectedDate }));
   }
 
   @HostListener('keydown', ['$event'])

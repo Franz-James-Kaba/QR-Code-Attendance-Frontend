@@ -4,10 +4,9 @@ import { AuthService } from '@core/services/auth/auth.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthStep } from '@shared/models/auth/auth.model';
 import { NotificationService } from '@shared/services/notification.service';
+import { AuthActions } from '@store/actions/auth.actions';
 import { of } from 'rxjs';
 import { map, catchError, exhaustMap, tap } from 'rxjs/operators';
-
-import { AuthActions } from './auth.actions';
 
 @Injectable()
 export class AuthEffects {
@@ -106,10 +105,8 @@ export class AuthEffects {
   firstTimePasswordReset$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.firstTimePasswordReset),
-      tap(action => console.log('firstTimePasswordReset action received:', action)),
       exhaustMap(({ email, password, confirmPassword }) =>
         this.authService.firstTimePasswordReset(email, { password, confirmPassword }).pipe(
-          tap(response => console.log('firstTimePasswordReset API response:', response)),
           map(() => {
             this.notificationService.success('Password has been updated successfully');
             return AuthActions.firstTimePasswordResetSuccess();
@@ -132,7 +129,6 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.firstTimePasswordResetSuccess),
         tap(() => {
-          console.log('Password reset success, navigating to login');
           this.router.navigate(['/auth/login']);
         })
       ),

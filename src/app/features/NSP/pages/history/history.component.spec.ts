@@ -1,18 +1,17 @@
-/* tslint:disable:no-unused-variable */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NspComponent } from './nsp.component';
+import { HistoryComponent } from './history.component';
 
-describe('NspComponent', () => {
-  let component: NspComponent;
-  let fixture: ComponentFixture<NspComponent>;
+describe('HistoryComponent', () => {
+  let component: HistoryComponent;
+  let fixture: ComponentFixture<HistoryComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NspComponent],
+      imports: [HistoryComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NspComponent);
+    fixture = TestBed.createComponent(HistoryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

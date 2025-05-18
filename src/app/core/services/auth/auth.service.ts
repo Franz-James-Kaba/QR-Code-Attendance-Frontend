@@ -2,9 +2,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { AuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { ExtendedAuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -12,25 +12,26 @@ import { catchError, tap } from 'rxjs/operators';
 export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly API_URL = environment.auth.baseUrl;
-  private readonly currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
+  private readonly currentUserSubject = new BehaviorSubject<ExtendedAuthResponse | null>(null);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  currentUser$ = this.currentUserSubject.asObservable();
+
+  public currentUser$ = this.currentUserSubject.asObservable();
+  public checkedIn$ = this.currentUser$.pipe(map(user => user?.checkedIn ?? false));
 
   constructor() {
-    // Check if user is already logged in
     this.loadStoredUser();
   }
 
-  // Load user from localStorage when service initializes
   private loadStoredUser(): void {
     const token = this.getToken();
     const userStr = localStorage.getItem('current_user');
 
     if (token && userStr) {
       try {
-        const userData = JSON.parse(userStr);
+        const userData: ExtendedAuthResponse = JSON.parse(userStr);
         this.currentUserSubject.next(userData);
+        this.fetchUserProfile();
       } catch (e) {
         console.error('Error parsing stored user data', e);
         this.logout();
@@ -38,24 +39,64 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
-      tap(response => {
-        // Ensure email is included in the response
-        const responseWithEmail: AuthResponse = {
-          ...response,
-          email: credentials.email, // Add email from the login credentials
-        };
+  private fetchUserProfile(): void {
+    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    this.http
+      .get<{
+        firstName: string;
+        middleName: string | null;
+        lastName: string;
+        role: string;
+        checkedIn: boolean;
+      }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
+      .pipe(
+        tap(profile => {
+          const currentUser = this.currentUserSubject.value;
+          if (currentUser) {
+            const validRole: UserRole = this.isValidUserRole(profile.role)
+              ? profile.role
+              : currentUser.role || 'NSP';
+            const updatedUser: ExtendedAuthResponse = {
+              ...currentUser,
+              firstName: profile.firstName,
+              lastName: profile.lastName,
+              role: validRole,
+              checkedIn: profile.checkedIn,
+              email: currentUser.email ?? null,
+            };
+            localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            this.currentUserSubject.next(updatedUser);
+          }
+        }),
+        catchError(error => {
+          console.error('Error fetching user profile:', error);
+          return throwError(() => new Error('Failed to load user profile'));
+        })
+      )
+      .subscribe();
+  }
 
+  private isValidUserRole(role: string): role is UserRole {
+    return ['ADMIN', 'FACILITATOR', 'NSP', 'RECEPTIONIST'].includes(role);
+  }
+
+  public login(credentials: LoginCredentials): Observable<ExtendedAuthResponse> {
+    return this.http.post<ExtendedAuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+      tap(response => {
+        const responseWithEmail: ExtendedAuthResponse = {
+          ...response,
+          email: credentials.email ?? null,
+        };
         localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
         localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
         this.currentUserSubject.next(responseWithEmail);
+        this.fetchUserProfile();
       }),
       catchError(this.handleError)
     );
   }
 
-  resetPassword(
+  public resetPassword(
     email: string,
     token: string,
     passwords: { password: string; confirmPassword: string }
@@ -65,7 +106,7 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
-  firstTimePasswordReset(
+  public firstTimePasswordReset(
     email: string,
     passwords: { password: string; confirmPassword: string }
   ): Observable<string> {
@@ -74,38 +115,38 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
-  requestPasswordReset(email: string): Observable<string> {
+  public requestPasswordReset(email: string): Observable<string> {
     return this.http
       .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
       .pipe(catchError(this.handleError));
   }
 
-  logout(): void {
+  public logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem('current_user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
 
-  getToken(): string | null {
+  public getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  isLoggedIn(): boolean {
+  public isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  hasPasswordResetRequired(): boolean {
+  public hasPasswordResetRequired(): boolean {
     const user = this.currentUserSubject.value;
     return user ? user.passwordResetRequired : false;
   }
 
-  getCurrentUserRole(): UserRole | null {
+  public getCurrentUserRole(): UserRole | null {
     const user = this.currentUserSubject.value;
     return user ? user.role : null;
   }
 
-  getCurrentUserEmail(): string | null {
+  public getCurrentUserEmail(): string | null {
     const user = this.currentUserSubject.value;
     return user ? user.email : null;
   }
@@ -114,10 +155,8 @@ export class AuthService {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.status === 401) {
         errorMessage = 'Invalid credentials. Please check your email and password.';
       } else if (error.status === 403) {
