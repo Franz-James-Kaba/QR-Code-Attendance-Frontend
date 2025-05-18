@@ -151,7 +151,7 @@ describe('CalenderComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should update active date and dispatch selectDate action for selectable date', ()=>{
+    it('should update active date and dispatch selectDate action for selectable date', () => {
       const selectedDate: CalendarDate = { day: 15, name: 'Thu', active: false, selectable: true };
       component.selectDate(selectedDate);
 
@@ -192,9 +192,7 @@ describe('CalenderComponent', () => {
       expect(component.dates[16].active).toBe(true);
       expect(component.dates[17].active).toBe(false);
       expect(mockFocus).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(
-        selectDate({ date: new Date(2025, 4, 17) })
-      );
+      expect(store.dispatch).toHaveBeenCalledWith(selectDate({ date: new Date(2025, 4, 17) }));
     });
 
     it('should navigate to next selectable date on ArrowRight', () => {
@@ -210,9 +208,7 @@ describe('CalenderComponent', () => {
       expect(component.dates[15].active).toBe(true);
       expect(component.dates[14].active).toBe(false);
       expect(mockFocus).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(
-        selectDate({ date: new Date(2025, 4, 16) })
-      );
+      expect(store.dispatch).toHaveBeenCalledWith(selectDate({ date: new Date(2025, 4, 16) }));
     });
 
     it('should not navigate if previous date is out of bounds', () => {

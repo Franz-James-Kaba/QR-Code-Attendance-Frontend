@@ -67,10 +67,13 @@ export class DashboardComponent {
   }
 
   private initializeSubscriptions(): void {
-    this.store.select(selectAttendanceSummary).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(summary => {
-      this.attendanceSummary = summary ?? [];
-      this.isLoading = false;
-    });
+    this.store
+      .select(selectAttendanceSummary)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(summary => {
+        this.attendanceSummary = summary ?? [];
+        this.isLoading = false;
+      });
 
     this.authService.checkedIn$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(checkedIn => {
       this.isCheckedIn = checkedIn;

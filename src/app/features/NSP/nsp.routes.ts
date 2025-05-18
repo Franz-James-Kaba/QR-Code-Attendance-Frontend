@@ -9,7 +9,7 @@ export const nspRoutes: Routes = [
       title: 'NSP',
     },
     loadComponent: () =>
-          import('@features/NSP/pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      import('@features/NSP/pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
     children: [
       {
         path: 'history',
@@ -27,7 +27,9 @@ export const nspRoutes: Routes = [
           title: 'NSP - Leaderboard',
         },
         loadComponent: () =>
-          import('@features/NSP/pages/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent),
+          import('@features/NSP/pages/leaderboard/leaderboard.component').then(
+            m => m.LeaderboardComponent
+          ),
       },
     ],
   },

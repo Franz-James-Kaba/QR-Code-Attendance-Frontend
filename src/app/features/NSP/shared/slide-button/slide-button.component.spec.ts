@@ -64,14 +64,17 @@ describe('SlideButtonComponent', () => {
   });
 
   it('should render icon with correct properties', () => {
-    const icon = fixture.debugElement.query(By.css('app-icon')).componentInstance as MockIconComponent;
+    const icon = fixture.debugElement.query(By.css('app-icon'))
+      .componentInstance as MockIconComponent;
     expect(icon).toBeTruthy();
 
     expect(icon.viewBox).toBe('0 0 21 16');
     expect(icon.size).toBe(18);
     expect(icon.svgwidth).toBe(21);
     expect(icon.svgHeight).toBe(16);
-    expect(icon.path).toBe('M15.5 9L19.5 5M19.5 5L15.5 1M19.5 5H6.5C3.73858 5 1.5 7.23858 1.5 10C1.5 12.7614 3.73858 15 6.5 15H11.5');
+    expect(icon.path).toBe(
+      'M15.5 9L19.5 5M19.5 5L15.5 1M19.5 5H6.5C3.73858 5 1.5 7.23858 1.5 10C1.5 12.7614 3.73858 15 6.5 15H11.5'
+    );
   });
 
   it('should display "Slide to Check In" when isCheckedIn is false', () => {

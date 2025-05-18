@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  HostListener,
-  inject,
-} from '@angular/core';
+import { Component, OnInit, AfterViewInit, HostListener, inject } from '@angular/core';
 import { CalendarDate } from '@app/features/NSP/models/nsp.interface';
 import { Store } from '@ngrx/store';
 import { selectDate } from '@store/actions/attendance.actions';

@@ -1,6 +1,14 @@
 import { initialState } from '@app/features/NSP/models/nsp.interface';
 import { createReducer, on } from '@ngrx/store';
-import { checkInFailure, checkInSuccess, checkOutFailure, checkOutSuccess, loadAttendanceSummaryFailure, loadAttendanceSummarySuccess, selectDate } from '@store/actions/attendance.actions';
+import {
+  checkInFailure,
+  checkInSuccess,
+  checkOutFailure,
+  checkOutSuccess,
+  loadAttendanceSummaryFailure,
+  loadAttendanceSummarySuccess,
+  selectDate,
+} from '@store/actions/attendance.actions';
 
 export const dashboardReducer = createReducer(
   initialState,
@@ -17,7 +25,7 @@ export const dashboardReducer = createReducer(
     ...state,
     error,
   })),
-  on(checkInSuccess, (state) => ({
+  on(checkInSuccess, state => ({
     ...state,
     isCheckedIn: true,
     error: null,
@@ -26,7 +34,7 @@ export const dashboardReducer = createReducer(
     ...state,
     error,
   })),
-  on(checkOutSuccess, (state) => ({
+  on(checkOutSuccess, state => ({
     ...state,
     isCheckedIn: false,
     error: null,

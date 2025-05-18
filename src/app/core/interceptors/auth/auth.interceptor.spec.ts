@@ -4,10 +4,7 @@ import {
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '@core/services/auth/auth.service';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';

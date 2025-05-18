@@ -130,14 +130,15 @@ describe('ProfileComponent', () => {
   }));
 
   it('should render bell icon with correct properties', () => {
-    const iconElement = fixture.debugElement.query(By.css('app-icon')).componentInstance as MockIconComponent;
+    const iconElement = fixture.debugElement.query(By.css('app-icon'))
+      .componentInstance as MockIconComponent;
     expect(iconElement).toBeTruthy();
 
     expect(iconElement.path).toBe(BELL_ICON.path);
     expect(iconElement.viewBox).toBe(BELL_ICON.viewBox);
     expect(iconElement.size).toBe(BELL_ICON.size);
     expect(iconElement.strokeColor).toBe('nspText');
-  })
+  });
 
   it('should use AuthService currentUser$ observable', () => {
     expect(mockAuthService.currentUser$).toBe(component.user$);

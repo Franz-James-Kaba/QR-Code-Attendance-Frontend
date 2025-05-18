@@ -17,10 +17,7 @@ import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 export class DashboardService {
   private readonly http: HttpClient = inject(HttpClient);
 
-  private getAverageTimeData(
-    endpoint: string,
-    endDate?: string
-  ): Observable<AverageTimeResponse> {
+  private getAverageTimeData(endpoint: string, endDate?: string): Observable<AverageTimeResponse> {
     let params = new HttpParams();
 
     if (endDate) {
@@ -41,27 +38,27 @@ export class DashboardService {
   }
 
   private getAttendancePosition(): Observable<SummaryCard> {
-    return this.http.get<AttendancePositionResponse>(
-      `${environment.api.baseUrl}/attendance/position`
-    ).pipe(
-      map(response => ({
-        icon: AWARD_ICON,
-        title: 'Check-In Position',
-        value: response.position.toString(),
-        description: 'Position on Attendance Table',
-      })),
-      catchError(error => {
-        if (error.status === 404) {
-          return of({
-            icon: AWARD_ICON,
-            title: 'Check-In Position',
-            value: 'N/A',
-            description: 'Not checked in today',
-          });
-        }
-        throw error;
-      })
-    );
+    return this.http
+      .get<AttendancePositionResponse>(`${environment.api.baseUrl}/attendance/position`)
+      .pipe(
+        map(response => ({
+          icon: AWARD_ICON,
+          title: 'Check-In Position',
+          value: response.position.toString(),
+          description: 'Position on Attendance Table',
+        })),
+        catchError(error => {
+          if (error.status === 404) {
+            return of({
+              icon: AWARD_ICON,
+              title: 'Check-In Position',
+              value: 'N/A',
+              description: 'Not checked in today',
+            });
+          }
+          throw error;
+        })
+      );
   }
 
   public getAttendanceSummaryData(date?: Date): Observable<SummaryCard[]> {

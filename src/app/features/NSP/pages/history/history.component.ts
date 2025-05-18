@@ -4,8 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-history',
   imports: [],
   templateUrl: './history.component.html',
-  styleUrl: './history.component.scss'
+  styleUrl: './history.component.scss',
 })
-export class HistoryComponent {
-
-}
+export class HistoryComponent {}

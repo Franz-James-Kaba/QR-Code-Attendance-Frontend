@@ -28,7 +28,6 @@ import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
 
-
 const authInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
