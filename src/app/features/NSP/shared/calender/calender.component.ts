@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  EventEmitter,
   OnInit,
-  Output,
   AfterViewInit,
   HostListener,
+  inject,
 } from '@angular/core';
-
-import { CalendarDate } from '../../models/nsp.interface';
+import { CalendarDate } from '@app/features/NSP/models/nsp.interface';
+import { Store } from '@ngrx/store';
+import { selectDate } from '@store/actions/attendance.actions';
 
 @Component({
   selector: 'app-calender',
@@ -42,10 +42,9 @@ import { CalendarDate } from '../../models/nsp.interface';
   `,
 })
 export class CalenderComponent implements OnInit, AfterViewInit {
-  @Output() daySelected = new EventEmitter<Date>();
-
   public dates: CalendarDate[] = [];
   public currentDay = new Date().getDate();
+  private store: Store = inject(Store);
 
   ngOnInit() {
     this.initializeDates();
@@ -91,7 +90,7 @@ export class CalenderComponent implements OnInit, AfterViewInit {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
     const selectedDate = new Date(currentYear, currentMonth, selected.day);
-    this.daySelected.emit(selectedDate);
+    this.store.dispatch(selectDate({ date: selectedDate }));
   }
 
   @HostListener('keydown', ['$event'])
