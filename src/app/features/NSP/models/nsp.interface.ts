@@ -35,9 +35,15 @@ export interface AttendancePositionResponse {
 }
 
 export interface DashboardState {
-  selectedDate: Date | null;
-  calendarDates: CalendarDate[];
+  selectedDate: Date | undefined;
+  isCheckedIn: boolean;
   attendanceSummary: SummaryCard[];
-  loading: boolean;
   error: string | null;
 }
+
+export const initialState: DashboardState = {
+  selectedDate: new Date(),
+  isCheckedIn: false,
+  attendanceSummary: [],
+  error: null,
+};
