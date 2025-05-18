@@ -19,12 +19,15 @@ import { NotificationInterceptor } from '@core/interceptors/notification/notific
 import { provideEffects } from '@ngrx/effects';
 import { provideStore, Store } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { AuthActions } from '@store/states/auth/auth.actions';
-import { AuthEffects } from '@store/states/auth/auth.effects';
-import { authReducer } from '@store/states/auth/auth.reducer';
+import { AuthActions } from '@store/actions/auth.actions';
+import { DashboardEffects } from '@store/effects/attendance.effects';
+import { AuthEffects } from '@store/effects/auth.effects';
+import { dashboardReducer } from '@store/reducers/attendance.reducers';
+import { authReducer } from '@store/reducers/auth.reducer';
 import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
+
 
 const authInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -68,9 +71,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
-    provideStore({ auth: authReducer }),
-    provideEffects(AuthEffects),
-    provideStoreDevtools(),
+    provideStore({ auth: authReducer, dashboard: dashboardReducer }),
+    provideEffects([AuthEffects, DashboardEffects]),
+    provideStoreDevtools({ maxAge: 25, logOnly: false }),
     provideHttpClient(withInterceptors([authInterceptorFn, notificationInterceptorFn])),
     // Use APP_INITIALIZER with the correct factory pattern
     {
