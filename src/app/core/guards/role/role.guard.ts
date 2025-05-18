@@ -2,12 +2,8 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { UserRole } from '@shared/models/auth/auth.model';
+import { selectCurrentUserRole, selectIsAuthenticated } from '@store/selectors/auth.selectors';
 import { map, take, switchMap } from 'rxjs/operators';
-
-import {
-  selectCurrentUserRole,
-  selectIsAuthenticated,
-} from '../../store/states/auth/auth.selectors';
 
 export const RoleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return (route, state) => {
