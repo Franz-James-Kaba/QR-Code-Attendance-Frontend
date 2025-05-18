@@ -54,3 +54,5 @@ src/environments/
 !/src/environments/environment.prod.ts
 .env
 .env.local
+
+.angular/
