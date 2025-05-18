@@ -10,7 +10,11 @@
   <div class="flex-1 px-4 py-6 overflow-auto bg-nspBg rounded-t-[32px] rounded-r-[32px]">
     <div class="mb-6">
       <h2 class="text-lg font-medium text-nspText mb-4">Attendance Summary</h2>
-      <app-attendance-summary [attendanceSummary]="attendanceSummary()" />
+      @if (isLoading) {
+        <p>Loading...</p>
+      } @else {
+        <app-attendance-summary [attendanceSummary]="attendanceSummary" />
+      }
     </div>
     <div>
       <div class="flex justify-between items-center mt-6 mb-4">
@@ -20,15 +24,18 @@
       <app-activity-list />
     </div>
   </div>
-  <div class="flex-none px-4 py-4 bg-transparent">
-    <app-slide-button (scanRequested)="startQRScanner()" />
+  <div class="flex-none px-4 py-4 bg-nspBg">
+    <app-slide-button
+      [isCheckedIn]="isCheckedIn"
+      (scanRequested)="startQRScanner()"
+    />
   </div>
 </div>
 
-@if (isScanning()) {
+@if (isScanning) {
   <div class="fixed inset-0 bg-black z-50">
     <zxing-scanner
-      [enable]="isScanning()"
+      [enable]="isScanning"
       [torch]="false"
       [formats]="allowedFormats"
       (scanSuccess)="onScanSuccess($event)"
