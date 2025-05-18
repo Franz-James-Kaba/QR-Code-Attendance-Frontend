@@ -1,21 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgZone, signal } from '@angular/core';
+import { Component, NgZone, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@app/core/services/auth/auth.service';
+import { SummaryCard } from '@app/features/NSP/models/nsp.interface';
+import { ActivityListComponent } from '@app/features/NSP/shared/activity-list/activity-list.component';
+import { AttendanceSummaryComponent } from '@app/features/NSP/shared/attendance-summary/attendance-summary.component';
+import { CalenderComponent } from '@app/features/NSP/shared/calender/calender.component';
+import { ProfileComponent } from '@app/features/NSP/shared/profile/profile.component';
+import { SlideButtonComponent } from '@app/features/NSP/shared/slide-button/slide-button.component';
+import { Store } from '@ngrx/store';
+import { checkIn, checkOut, loadAttendanceSummary } from '@store/actions/attendance.actions';
+import { selectAttendanceSummary } from '@store/selectors/attendance.selectors';
 import { BarcodeFormat } from '@zxing/library';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 
-import { DashboardService } from '../../logic/services/dashboard/dashboard.service';
-import { SummaryCard } from '../../models/nsp.interface';
-import { ActivityListComponent } from '../../shared/activity-list/activity-list.component';
-import { AttendanceSummaryComponent } from '../../shared/attendance-summary/attendance-summary.component';
-import { CalenderComponent } from '../../shared/calender/calender.component';
-import { ProfileComponent } from '../../shared/profile/profile.component';
-import { SlideButtonComponent } from '../../shared/slide-button/slide-button.component';
-
-
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -49,72 +51,57 @@ import { SlideButtonComponent } from '../../shared/slide-button/slide-button.com
   ],
 })
 export class DashboardComponent {
-  public isScanning = signal(false);
-  public allowedFormats = [BarcodeFormat.QR_CODE];
-  public attendanceSummary = signal<SummaryCard[]>([]);
+  private readonly store = inject(Store);
+  private readonly ngZone = inject(NgZone);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly dashboardService: DashboardService
-  ) {
-    this.loadAttendanceSummary();
+  public isScanning = false;
+  public allowedFormats = [BarcodeFormat.QR_CODE];
+  public attendanceSummary: SummaryCard[] = [];
+  public isCheckedIn = false;
+  public isLoading = true;
+
+  constructor() {
+    this.initializeSubscriptions();
   }
 
-  private loadAttendanceSummary(): void {
-    this.dashboardService
-      .getAttendanceSummaryData()
-      .pipe(takeUntilDestroyed())
-      .subscribe({
-        next: (summary: SummaryCard[]) => {
-          this.ngZone.run(() => {
-            this.attendanceSummary.set(summary);
-          });
-        },
-        error: (error: unknown) => {
-          this.ngZone.run(() => {
-            console.error('Error loading attendance summary:', error);
-          });
-        },
-      });
+  private initializeSubscriptions(): void {
+    this.store.select(selectAttendanceSummary).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(summary => {
+      this.attendanceSummary = summary ?? [];
+      this.isLoading = false;
+    });
+
+    this.authService.checkedIn$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(checkedIn => {
+      this.isCheckedIn = checkedIn;
+    });
+
+    this.store.dispatch(loadAttendanceSummary());
   }
 
   public startQRScanner(): void {
-    this.isScanning.set(true);
+    this.isScanning = true;
   }
 
   public stopQRScanner(): void {
-    this.isScanning.set(false);
+    this.isScanning = false;
   }
 
   public onScanSuccess(result: string): void {
-    this.stopQRScanner();
-    this.checkIn(result);
+    this.ngZone.run(() => {
+      this.stopQRScanner();
+      if (this.isCheckedIn) {
+        this.store.dispatch(checkOut({ sessionCode: result }));
+      } else {
+        this.store.dispatch(checkIn({ sessionCode: result }));
+      }
+    });
   }
 
   public onScanError(error: unknown): void {
     console.error('Scan error:', error);
     this.ngZone.run(() => {
       this.stopQRScanner();
-    });
-  }
-
-  public checkIn(sessionCode: string): void {
-    this.ngZone.run(() => {
-      this.dashboardService
-        .checkIn(sessionCode)
-        .pipe(takeUntilDestroyed())
-        .subscribe({
-          next: () => {
-            this.ngZone.run(() => {
-              this.loadAttendanceSummary();
-            });
-          },
-          error: (error: unknown) => {
-            this.ngZone.run(() => {
-              console.error('Check-in error:', error);
-            });
-          },
-        });
     });
   }
 }
