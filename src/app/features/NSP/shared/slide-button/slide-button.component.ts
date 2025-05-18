@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
-
-import { IconComponent } from '../../../../shared/components/icon/icon.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { IconComponent } from '@app/shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-slide-button',
@@ -19,11 +18,12 @@ import { IconComponent } from '../../../../shared/components/icon/icon.component
         [svgHeight]="16"
         path="M15.5 9L19.5 5M19.5 5L15.5 1M19.5 5H6.5C3.73858 5 1.5 7.23858 1.5 10C1.5 12.7614 3.73858 15 6.5 15H11.5"
       />
-      <span>Slide to Check In</span>
+      <span>{{ isCheckedIn ? 'Slide to Check Out' : 'Slide to Check In' }}</span>
     </button>
   `,
 })
 export class SlideButtonComponent {
+  @Input() isCheckedIn = false;
   @Output() scanRequested = new EventEmitter<void>();
 
   public startScan(): void {

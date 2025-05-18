@@ -6,9 +6,8 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { selectIsAuthenticated } from '@store/selectors/auth.selectors';
 import { Observable, of, firstValueFrom } from 'rxjs';
-
-import { selectIsAuthenticated } from '../../store/states/auth/auth.selectors';
 
 import { AuthGuard } from './auth.guard';
 

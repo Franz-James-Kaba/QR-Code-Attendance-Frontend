@@ -7,10 +7,9 @@ import {
   CheckInResponse,
   SummaryCard,
 } from '@app/features/NSP/models/nsp.interface';
+import { formatTime } from '@app/shared/utils/format-date.util';
 import { environment } from '@environments/environment';
-import { forkJoin, map, Observable } from 'rxjs';
-
-import { formatTime } from './../../../../../shared/utils/format-date.util';
+import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -18,16 +17,8 @@ import { formatTime } from './../../../../../shared/utils/format-date.util';
 export class DashboardService {
   private readonly http: HttpClient = inject(HttpClient);
 
-  private getAverageTimeData(
-    endpoint: string,
-    startDate?: string,
-    endDate?: string
-  ): Observable<AverageTimeResponse> {
+  private getAverageTimeData(endpoint: string, endDate?: string): Observable<AverageTimeResponse> {
     let params = new HttpParams();
-
-    if (startDate) {
-      params = params.set('startDate', startDate);
-    }
 
     if (endDate) {
       params = params.set('endDate', endDate);
@@ -38,29 +29,43 @@ export class DashboardService {
     });
   }
 
-  private getAverageCheckInData(
-    startDate?: string,
-    endDate?: string
-  ): Observable<AverageTimeResponse> {
-    return this.getAverageTimeData('average-check-in-time', startDate, endDate);
+  private getAverageCheckInData(endDate?: string): Observable<AverageTimeResponse> {
+    return this.getAverageTimeData('average-check-in-time', endDate);
   }
 
-  private getAverageCheckOutData(
-    startDate?: string,
-    endDate?: string
-  ): Observable<AverageTimeResponse> {
-    return this.getAverageTimeData('average-check-out-time', startDate, endDate);
+  private getAverageCheckOutData(endDate?: string): Observable<AverageTimeResponse> {
+    return this.getAverageTimeData('average-check-out-time', endDate);
   }
 
-  private getAttendancePosition(): Observable<AttendancePositionResponse> {
-    return this.http.get<AttendancePositionResponse>(
-      `${environment.api.baseUrl}/attendance/position`
-    );
+  private getAttendancePosition(): Observable<SummaryCard> {
+    return this.http
+      .get<AttendancePositionResponse>(`${environment.api.baseUrl}/attendance/position`)
+      .pipe(
+        map(response => ({
+          icon: AWARD_ICON,
+          title: 'Check-In Position',
+          value: response.position.toString(),
+          description: 'Position on Attendance Table',
+        })),
+        catchError(error => {
+          if (error.status === 404) {
+            return of({
+              icon: AWARD_ICON,
+              title: 'Check-In Position',
+              value: 'N/A',
+              description: 'Not checked in today',
+            });
+          }
+          throw error;
+        })
+      );
   }
 
-  public getAttendanceSummaryData(): Observable<SummaryCard[]> {
+  public getAttendanceSummaryData(date?: Date): Observable<SummaryCard[]> {
+    const endDate = date ? date.toISOString().split('T')[0] : undefined;
+
     return forkJoin([
-      this.getAverageCheckInData().pipe(
+      this.getAverageCheckInData(endDate).pipe(
         map(response => ({
           icon: CHECK_IN_ICON,
           title: 'Check In',
@@ -68,7 +73,7 @@ export class DashboardService {
           description: 'Average Check In Time',
         }))
       ),
-      this.getAverageCheckOutData().pipe(
+      this.getAverageCheckOutData(endDate).pipe(
         map(response => ({
           icon: CHECK_OUT_ICON,
           title: 'Check Out',
@@ -76,14 +81,7 @@ export class DashboardService {
           description: 'Average Check Out Time',
         }))
       ),
-      this.getAttendancePosition().pipe(
-        map(response => ({
-          icon: AWARD_ICON,
-          title: 'Check-In Position',
-          value: response.position.toString(),
-          description: 'Position on Attendance Table',
-        }))
-      ),
+      this.getAttendancePosition(),
     ]).pipe(
       map(([checkIn, checkOut, position]) => [
         checkIn,
@@ -102,6 +100,13 @@ export class DashboardService {
   public checkIn(sessionCode: string): Observable<CheckInResponse> {
     return this.http.post<CheckInResponse>(
       `${environment.api.baseUrl}/attendance/check-in?session-code=${encodeURIComponent(sessionCode)}`,
+      {}
+    );
+  }
+
+  public checkOut(sessionCode: string): Observable<CheckInResponse> {
+    return this.http.put<CheckInResponse>(
+      `${environment.api.baseUrl}/attendance/check-out?session-code=${encodeURIComponent(sessionCode)}`,
       {}
     );
   }

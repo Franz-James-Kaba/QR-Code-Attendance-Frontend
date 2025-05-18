@@ -15,8 +15,8 @@ import { AuthService } from '@core/services/auth/auth.service';
 import { Store } from '@ngrx/store';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
-import { AuthActions } from '@core/store/states/auth/auth.actions';
-import { selectAuthError, selectIsLoading } from '@core/store/states/auth/auth.selectors';
+import { AuthActions } from '@store/actions/auth.actions';
+import { selectAuthError, selectIsLoading } from '@store/selectors/auth.selectors';
 
 @Component({
   selector: 'app-reset-password',

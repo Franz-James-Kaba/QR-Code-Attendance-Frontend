@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { AuthStep } from '@shared/models/auth/auth.model';
-import { AuthActions } from '@store/states/auth/auth.actions';
+import { AuthActions } from '@store/actions/auth.actions';
 
 import { ForgotPasswordComponent } from './forgot-password.component';
 

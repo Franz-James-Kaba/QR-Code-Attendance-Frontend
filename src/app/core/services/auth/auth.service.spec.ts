@@ -1,319 +1,669 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { MOCK_USERS, MockStorage, API_ERRORS, VALID_OTP } from '@core/data/mock-data';
-import { firstValueFrom } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { environment } from '@environments/environment';
+import { ExtendedAuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
 import { AuthService } from './auth.service';
 
+interface AuthServiceWithPrivate {
+  loadStoredUser: () => void;
+  fetchUserProfile: () => void;
+  currentUserSubject: BehaviorSubject<ExtendedAuthResponse | null>;
+  handleError: (error: HttpErrorResponse) => Observable<never>;
+}
+
+interface PartialHttpClient {
+  get: jest.Mock;
+  post: jest.Mock;
+}
+
+interface PartialRouter {
+  navigate: jest.Mock;
+}
+
+interface LocalStorageMock {
+  getItem: jest.Mock<string | null, [string]>;
+  setItem: jest.Mock<void, [string, string]>;
+  removeItem: jest.Mock<void, [string]>;
+  clear: jest.Mock<void, []>;
+}
+
 describe('AuthService', () => {
   let service: AuthService;
+  let httpClient: jest.Mocked<HttpClient>;
+  let router: jest.Mocked<Router>;
+  let localStorageMock: LocalStorageMock;
+  let currentUserSubject: BehaviorSubject<ExtendedAuthResponse | null>;
+
+  const mockEnvironment = {
+    auth: {
+      tokenKey: 'auth_token',
+      baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth',
+    },
+    api: {
+      baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
+    },
+  };
+
+  const mockUser: ExtendedAuthResponse = {
+    token: 'mock-token',
+    email: 'test@example.com',
+    role: 'NSP',
+    passwordResetRequired: false,
+    firstName: 'Jane',
+    lastName: 'Smith',
+    checkedIn: true,
+  };
+
+  const mockProfileResponse = {
+    firstName: 'Jane',
+    middleName: null,
+    lastName: 'Smith',
+    role: 'NSP',
+    checkedIn: true,
+  };
+
+  const mockCredentials: LoginCredentials = {
+    email: 'test@example.com',
+    password: 'password123',
+  };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [AuthService],
-      imports: [HttpClientTestingModule],
+    const httpClientMock: PartialHttpClient = {
+      get: jest.fn(),
+      post: jest.fn(),
+    };
+    httpClient = httpClientMock as unknown as jest.Mocked<HttpClient>;
+
+    const routerMock: PartialRouter = {
+      navigate: jest.fn(),
+    };
+    router = routerMock as unknown as jest.Mocked<Router>;
+
+    let store: { [key: string]: string } = {};
+    localStorageMock = {
+      getItem: jest.fn((key: string) => store[key] || null),
+      setItem: jest.fn((key: string, value: string) => {
+        store[key] = value;
+      }),
+      removeItem: jest.fn((key: string) => {
+        delete store[key];
+      }),
+      clear: jest.fn(() => {
+        store = {};
+      }),
+    };
+
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
     });
-    service = TestBed.inject(AuthService);
 
-    localStorage.clear();
-
-    jest.spyOn(MockStorage, 'storeOtp').mockClear();
-    jest.spyOn(MockStorage, 'recordPasswordResetRequest').mockClear();
-    jest.spyOn(MockStorage, 'completePasswordReset').mockClear();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: HttpClient, useValue: httpClient },
+        { provide: Router, useValue: router },
+        { provide: environment, useValue: mockEnvironment },
+      ],
+    });
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  afterEach(() => {
+    jest.clearAllMocks();
+    localStorageMock.clear();
+  });
+
+  describe('constructor', () => {
+    it('should call loadStoredUser', () => {
+      const loadStoredUserSpy: jest.SpyInstance<void, [], AuthService> = jest.spyOn(
+        AuthService.prototype as unknown as AuthServiceWithPrivate,
+        'loadStoredUser'
+      );
+      service = TestBed.inject(AuthService);
+      expect(loadStoredUserSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('loadStoredUser', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
+
+    it('should load user and fetch profile if token and user data exist', fakeAsync(() => {
+      localStorageMock.getItem
+        .mockReturnValueOnce('mock-token')
+        .mockReturnValueOnce(JSON.stringify(mockUser));
+      const fetchUserProfileSpy = jest.spyOn(
+        service as unknown as AuthServiceWithPrivate,
+        'fetchUserProfile'
+      );
+      httpClient.get.mockReturnValue(of(mockProfileResponse));
+
+      (service as unknown as AuthServiceWithPrivate).loadStoredUser();
+      tick();
+
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('auth_token');
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('current_user');
+      expect(currentUserSubject.getValue()).toEqual(mockUser);
+      expect(fetchUserProfileSpy).toHaveBeenCalled();
+    }));
+
+    it('should call logout if JSON parsing fails', () => {
+      localStorageMock.getItem
+        .mockReturnValueOnce('mock-token')
+        .mockReturnValueOnce('invalid-json');
+      const logoutSpy = jest.spyOn(service, 'logout');
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      (service as unknown as AuthServiceWithPrivate).loadStoredUser();
+
+      expect(logoutSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error parsing stored user data',
+        expect.any(Error)
+      );
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should do nothing if no token or user data', () => {
+      localStorageMock.getItem.mockReturnValue(null);
+      const fetchUserProfileSpy = jest.spyOn(
+        service as unknown as AuthServiceWithPrivate,
+        'fetchUserProfile'
+      );
+
+      (service as unknown as AuthServiceWithPrivate).loadStoredUser();
+
+      expect(fetchUserProfileSpy).not.toHaveBeenCalled();
+      expect(currentUserSubject.getValue()).toBeNull();
+    });
+  });
+
+  describe('fetchUserProfile', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
+
+    it('should update user with profile data and valid role', fakeAsync(() => {
+      httpClient.get.mockReturnValue(of(mockProfileResponse));
+      currentUserSubject.next(mockUser);
+      localStorageMock.getItem.mockReturnValue('mock-token');
+
+      let emittedUser: ExtendedAuthResponse | null = null;
+      const subscription = service.currentUser$.subscribe(user => {
+        emittedUser = user;
+      });
+
+      (service as unknown as AuthServiceWithPrivate).fetchUserProfile();
+      tick();
+      flushMicrotasks();
+
+      expect(emittedUser).toEqual({
+        ...mockUser,
+        firstName: 'Jane',
+        lastName: 'Smith',
+        role: 'NSP',
+        checkedIn: true,
+        email: 'test@example.com',
+      });
+      expect(httpClient.get).toHaveBeenCalledWith(
+        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/metrics/user-info',
+        { headers: { Authorization: 'Bearer mock-token' } }
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'current_user',
+        JSON.stringify(emittedUser)
+      );
+
+      subscription.unsubscribe();
+    }));
+
+    it('should use fallback role if invalid', fakeAsync(() => {
+      const invalidProfile = { ...mockProfileResponse, role: 'INVALID' };
+      httpClient.get.mockReturnValue(of(invalidProfile));
+      currentUserSubject.next(mockUser);
+      localStorageMock.getItem.mockReturnValue('mock-token');
+
+      let emittedUser: ExtendedAuthResponse | null = null;
+      const subscription = service.currentUser$.subscribe(user => {
+        emittedUser = user;
+      });
+
+      (service as unknown as AuthServiceWithPrivate).fetchUserProfile();
+      tick();
+      flushMicrotasks();
+
+      expect(emittedUser).not.toBeNull();
+      expect(emittedUser!.role).toBe('NSP');
+
+      subscription.unsubscribe();
+    }));
   });
 
   describe('login', () => {
-    it('should successfully login with valid credentials', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
 
-      // Act - using modern Promise approach
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-      const result = await loginPromise;
+    it('should handle login error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 401 });
+      httpClient.post.mockReturnValue(throwError(() => error));
 
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.user).toBeDefined();
-      expect(result.user.email).toBe(credentials.email);
-      expect(result.user.role).toBe(MOCK_USERS[credentials.email].role);
-      expect(result.token).toBeDefined();
-    }));
+      let caughtError: Error | null = null;
+      const subscription = service.login(mockCredentials).subscribe({
+        error: (err: Error) => {
+          caughtError = err;
+        },
+      });
 
-    it('should return error with invalid email', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'nonexistent@amalitech.com',
-        password: 'RandomPassword',
-      };
+      tick();
+      flushMicrotasks();
 
-      // Act & Assert
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-
-      await expect(loginPromise).rejects.toEqual(
-        expect.objectContaining({ message: API_ERRORS.invalidCredentials })
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe(
+        'Invalid credentials. Please check your email and password.'
       );
-    }));
+      expect(localStorageMock.setItem).not.toHaveBeenCalled();
+      expect(currentUserSubject.getValue()).toBeNull();
 
-    it('should return error with invalid password', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'WrongPassword',
-      };
-
-      // Act & Assert
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-
-      await expect(loginPromise).rejects.toThrow(API_ERRORS.invalidCredentials);
-    }));
-
-    it('should set internal user email on successful login', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
-
-      // Act
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-      await loginPromise;
-
-      // Assert
-      expect(service.getCurrentUserRole()).toBe(MOCK_USERS[credentials.email].role);
-    }));
-  });
-
-  describe('resetPassword', () => {
-    it('should successfully reset password with valid data', fakeAsync(async () => {
-      // Arrange - first login to set current user
-      const loginCredentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
-      const newPassword = 'NewPassword@123';
-
-      // Set up user session
-      await firstValueFrom(service.login(loginCredentials));
-      tick(2000);
-
-      // Mock the MockStorage static method
-      jest.spyOn(MockStorage, 'completePasswordReset');
-
-      // Act
-      const resetPromise = firstValueFrom(
-        service.resetPassword(loginCredentials.password, newPassword)
-      );
-      tick(2000);
-      await resetPromise;
-
-      // Assert
-      expect(MockStorage.completePasswordReset).toHaveBeenCalledWith(loginCredentials.email);
-      expect(MOCK_USERS[loginCredentials.email].password).toBe(newPassword);
-      expect(MOCK_USERS[loginCredentials.email].passwordResetRequired).toBe(false);
-    }));
-
-    it('should return error when old password is incorrect', fakeAsync(async () => {
-      // Arrange - first login to set current user
-      const loginCredentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
-      const wrongOldPassword = 'WrongOldPassword';
-      const newPassword = 'NewPassword@123';
-
-      // Set up user session
-      await firstValueFrom(service.login(loginCredentials));
-      tick(2000);
-
-      // Act & Assert
-      const resetPromise = firstValueFrom(service.resetPassword(wrongOldPassword, newPassword));
-      tick(2000);
-
-      await expect(resetPromise).rejects.toThrow(API_ERRORS.oldPasswordIncorrect);
-      expect(MOCK_USERS[loginCredentials.email].password).toBe(loginCredentials.password); // Password unchanged
-    }));
-
-    it('should return error when there is no active user session', fakeAsync(async () => {
-      // Arrange
-      const newPassword = 'NewPassword@123';
-
-      // Act & Assert
-      const resetPromise = firstValueFrom(service.resetPassword('', newPassword));
-      tick(2000);
-
-      await expect(resetPromise).rejects.toThrow('No active user session');
-    }));
-  });
-
-  describe('verifyOtp', () => {
-    it('should successfully verify valid OTP', fakeAsync(async () => {
-      // Arrange - first set up user email with forgotPassword
-      const email = 'admin@amalitech.com';
-
-      // Set up user session
-      await firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-
-      // Act
-      const verifyPromise = firstValueFrom(service.verifyOtp(VALID_OTP));
-      tick(1000);
-      await verifyPromise;
-
-      // Assert - if no error is thrown, the test passes
-      expect(true).toBeTruthy();
-    }));
-
-    it('should return error with invalid OTP', fakeAsync(async () => {
-      // Arrange - first set up user email
-      const email = 'admin@amalitech.com';
-      const invalidOtp = '999999'; // Not the VALID_OTP
-
-      // Set up user session
-      await firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-
-      // Act & Assert
-      const verifyPromise = firstValueFrom(service.verifyOtp(invalidOtp));
-      tick(1000);
-
-      await expect(verifyPromise).rejects.toThrow(API_ERRORS.invalidOtp);
-    }));
-
-    it('should return error when no email is provided for OTP verification', fakeAsync(async () => {
-      // Arrange - no user email set
-
-      // Act & Assert
-      const verifyPromise = firstValueFrom(service.verifyOtp(VALID_OTP));
-      tick(1000);
-
-      await expect(verifyPromise).rejects.toThrow('No email provided for OTP verification');
-    }));
-  });
-
-  describe('forgotPassword', () => {
-    it('should successfully process forgot password for existing user', fakeAsync(async () => {
-      // Arrange
-      const email = 'admin@amalitech.com';
-
-      // Mock the MockStorage static methods
-      jest.spyOn(MockStorage, 'storeOtp');
-      jest.spyOn(MockStorage, 'recordPasswordResetRequest');
-
-      // Act
-      const forgotPromise = firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-      await forgotPromise;
-
-      // Assert
-      expect(MockStorage.storeOtp).toHaveBeenCalledWith(email);
-      expect(MockStorage.recordPasswordResetRequest).toHaveBeenCalledWith(email);
-    }));
-
-    it('should not reveal if email does not exist', fakeAsync(async () => {
-      // Arrange
-      const nonExistentEmail = 'nonexistent@amalitech.com';
-
-      // Mock the MockStorage static methods
-      jest.spyOn(MockStorage, 'storeOtp');
-      jest.spyOn(MockStorage, 'recordPasswordResetRequest');
-
-      // Act
-      const forgotPromise = firstValueFrom(service.forgotPassword(nonExistentEmail));
-      tick(2000);
-      await forgotPromise;
-
-      // Assert - request should succeed even for non-existent emails
-      // but the storage methods should NOT be called
-      expect(MockStorage.storeOtp).not.toHaveBeenCalled();
-      expect(MockStorage.recordPasswordResetRequest).not.toHaveBeenCalled();
+      subscription.unsubscribe();
     }));
   });
 
   describe('logout', () => {
-    it('should clear user session and token on logout', fakeAsync(async () => {
-      // Arrange - set up user session and token
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
-      localStorage.setItem('auth_token', 'mock-token');
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
 
-      await firstValueFrom(service.login(credentials));
-      tick(2000);
+    it('should clear storage and navigate to login', () => {
+      currentUserSubject.next(mockUser);
+      localStorageMock.getItem.mockReturnValue('mock-token');
 
-      // Verify user role is set before logout
-      expect(service.getCurrentUserRole()).toBe(MOCK_USERS[credentials.email].role);
-      expect(localStorage.getItem('auth_token')).toBe('mock-token');
-
-      // Act
       service.logout();
 
-      // Assert
-      expect(service.getCurrentUserRole()).toBeNull();
-      expect(localStorage.getItem('auth_token')).toBeNull();
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_token');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('current_user');
+      expect(currentUserSubject.getValue()).toBeNull();
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    });
+  });
+
+  describe('resetPassword', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+    });
+
+    it('should reset password successfully', fakeAsync(() => {
+      httpClient.post.mockReturnValue(of('Password reset successful'));
+      const email = 'test@example.com';
+      const token = 'reset-token';
+      const passwords = { password: 'newpass', confirmPassword: 'newpass' };
+
+      let result: string | null = null;
+      const subscription = service.resetPassword(email, token, passwords).subscribe(res => {
+        result = res;
+      });
+
+      tick();
+      flushMicrotasks();
+
+      expect(result).toBe('Password reset successful');
+      expect(httpClient.post).toHaveBeenCalledWith(
+        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/reset-password?email=test@example.com&token=reset-token',
+        passwords
+      );
+
+      subscription.unsubscribe();
+    }));
+
+    it('should handle reset password error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 403 });
+      httpClient.post.mockReturnValue(throwError(() => error));
+
+      let caughtError: Error | null = null;
+      const subscription = service
+        .resetPassword('test@example.com', 'token', {
+          password: 'newpass',
+          confirmPassword: 'newpass',
+        })
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+
+      tick();
+      flushMicrotasks();
+
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('You do not have permission to perform this action.');
+
+      subscription.unsubscribe();
+    }));
+  });
+
+  describe('firstTimePasswordReset', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+    });
+
+    it('should reset first-time password', fakeAsync(() => {
+      httpClient.post.mockReturnValue(of('Password reset successful'));
+      const email = 'test@example.com';
+      const passwords = { password: 'newpass', confirmPassword: 'newpass' };
+
+      let result: string | null = null;
+      const subscription = service.firstTimePasswordReset(email, passwords).subscribe(res => {
+        result = res;
+      });
+
+      tick();
+      flushMicrotasks();
+
+      expect(result).toBe('Password reset successful');
+      expect(httpClient.post).toHaveBeenCalledWith(
+        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/first-password-reset?email=test@example.com',
+        passwords
+      );
+
+      subscription.unsubscribe();
+    }));
+
+    it('should handle first-time reset error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 404 });
+      httpClient.post.mockReturnValue(throwError(() => error));
+
+      let caughtError: Error | null = null;
+      const subscription = service
+        .firstTimePasswordReset('test@example.com', {
+          password: 'newpass',
+          confirmPassword: 'newpass',
+        })
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+
+      tick();
+      flushMicrotasks();
+
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('The requested resource was not found.');
+
+      subscription.unsubscribe();
+    }));
+  });
+
+  describe('requestPasswordReset', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+    });
+
+    it('should request password reset', fakeAsync(() => {
+      httpClient.post.mockReturnValue(of('Reset link sent'));
+
+      let result: string | null = null;
+      const subscription = service.requestPasswordReset('test@example.com').subscribe(res => {
+        result = res;
+      });
+
+      tick();
+      flushMicrotasks();
+
+      expect(result).toBe('Reset link sent');
+      expect(httpClient.post).toHaveBeenCalledWith(
+        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/reset-password-request?email=test@example.com',
+        {}
+      );
+
+      subscription.unsubscribe();
+    }));
+
+    it('should handle request error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ error: { message: 'Invalid email' } });
+      httpClient.post.mockReturnValue(throwError(() => error));
+
+      let caughtError: Error | null = null;
+      const subscription = service.requestPasswordReset('test@example.com').subscribe({
+        error: (err: Error) => {
+          caughtError = err;
+        },
+      });
+
+      tick();
+      flushMicrotasks();
+
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('Invalid email');
+
+      subscription.unsubscribe();
     }));
   });
 
   describe('getToken', () => {
-    it('should retrieve token from localStorage', () => {
-      // Arrange
-      const mockToken = 'mock-auth-token';
-      localStorage.setItem('auth_token', mockToken);
-
-      // Act
-      const result = service.getToken();
-
-      // Assert
-      expect(result).toBe(mockToken);
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
     });
 
-    it('should return null when no token exists', () => {
-      // Arrange - ensure localStorage is empty
-      localStorage.removeItem('auth_token');
+    it('should return token from localStorage', () => {
+      localStorageMock.getItem.mockReturnValue('mock-token');
+      expect(service.getToken()).toBe('mock-token');
+      expect(localStorageMock.getItem).toHaveBeenCalledWith('auth_token');
+    });
 
-      // Act
-      const result = service.getToken();
+    it('should return null if no token', () => {
+      localStorageMock.getItem.mockReturnValue(null);
+      expect(service.getToken()).toBeNull();
+    });
+  });
 
-      // Assert
-      expect(result).toBeNull();
+  describe('isLoggedIn', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+    });
+
+    it('should return true if token exists', () => {
+      localStorageMock.getItem.mockReturnValue('mock-token');
+      expect(service.isLoggedIn()).toBe(true);
+    });
+
+    it('should return false if no token', () => {
+      localStorageMock.getItem.mockReturnValue(null);
+      expect(service.isLoggedIn()).toBe(false);
+    });
+  });
+
+  describe('hasPasswordResetRequired', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
+
+    it('should return true if password reset is required', () => {
+      currentUserSubject.next({ ...mockUser, passwordResetRequired: true });
+      expect(service.hasPasswordResetRequired()).toBe(true);
+    });
+
+    it('should return false if no user or not required', () => {
+      currentUserSubject.next(null);
+      expect(service.hasPasswordResetRequired()).toBe(false);
+      currentUserSubject.next({ ...mockUser, passwordResetRequired: false });
+      expect(service.hasPasswordResetRequired()).toBe(false);
     });
   });
 
   describe('getCurrentUserRole', () => {
-    it('should return null when no user is logged in', () => {
-      // Act
-      const result = service.getCurrentUserRole();
-
-      // Assert
-      expect(result).toBeNull();
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
     });
 
-    it('should return correct role for logged in user', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123',
-      };
-      const expectedRole = MOCK_USERS[credentials.email].role;
+    it('should return user role', () => {
+      currentUserSubject.next(mockUser);
+      expect(service.getCurrentUserRole()).toBe('NSP');
+    });
 
-      // Act
-      await firstValueFrom(service.login(credentials));
-      tick(2000);
-      const result = service.getCurrentUserRole();
+    it('should return null if no user', () => {
+      currentUserSubject.next(null);
+      expect(service.getCurrentUserRole()).toBeNull();
+    });
+  });
 
-      // Assert
-      expect(result).toBe(expectedRole);
+  describe('getCurrentUserEmail', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
+
+    it('should return user email', () => {
+      currentUserSubject.next(mockUser);
+      expect(service.getCurrentUserEmail()).toBe('test@example.com');
+    });
+
+    it('should return null if no user', () => {
+      currentUserSubject.next(null);
+      expect(service.getCurrentUserEmail()).toBeNull();
+    });
+  });
+
+  describe('Observables', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+      currentUserSubject = (service as unknown as AuthServiceWithPrivate).currentUserSubject;
+    });
+
+    it('currentUser$ should emit current user', fakeAsync(() => {
+      currentUserSubject.next(mockUser);
+      let emittedUser: ExtendedAuthResponse | null = null;
+      const subscription = service.currentUser$.subscribe(user => {
+        emittedUser = user;
+      });
+      tick();
+      expect(emittedUser).toEqual(mockUser);
+      subscription.unsubscribe();
+    }));
+
+    it('checkedIn$ should emit checkedIn status', fakeAsync(() => {
+      currentUserSubject.next(mockUser);
+      let checkedIn: boolean | null = null;
+      const subscription = service.checkedIn$.subscribe(status => {
+        checkedIn = status;
+      });
+      tick();
+      expect(checkedIn).toBe(true);
+      subscription.unsubscribe();
+    }));
+
+    it('checkedIn$ should emit false if no user', fakeAsync(() => {
+      currentUserSubject.next(null);
+      let checkedIn: boolean | null = null;
+      const subscription = service.checkedIn$.subscribe(status => {
+        checkedIn = status;
+      });
+      tick();
+      expect(checkedIn).toBe(false);
+      subscription.unsubscribe();
+    }));
+  });
+
+  describe('handleError', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthService);
+    });
+
+    it('should handle 401 error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 401 });
+      let caughtError: Error | null = null;
+      const subscription = (service as unknown as AuthServiceWithPrivate)
+        .handleError(error)
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+      tick();
+      flushMicrotasks();
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe(
+        'Invalid credentials. Please check your email and password.'
+      );
+      subscription.unsubscribe();
+    }));
+
+    it('should handle 403 error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 403 });
+      let caughtError: Error | null = null;
+      const subscription = (service as unknown as AuthServiceWithPrivate)
+        .handleError(error)
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+      tick();
+      flushMicrotasks();
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('You do not have permission to perform this action.');
+      subscription.unsubscribe();
+    }));
+
+    it('should handle error with string message', fakeAsync(() => {
+      const error = new HttpErrorResponse({ error: 'Custom error' });
+      let caughtError: Error | null = null;
+      const subscription = (service as unknown as AuthServiceWithPrivate)
+        .handleError(error)
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+      tick();
+      flushMicrotasks();
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('Custom error');
+      subscription.unsubscribe();
+    }));
+
+    it('should handle error with object message', fakeAsync(() => {
+      const error = new HttpErrorResponse({ error: { message: 'Object error' } });
+      let caughtError: Error | null = null;
+      const subscription = (service as unknown as AuthServiceWithPrivate)
+        .handleError(error)
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+      tick();
+      flushMicrotasks();
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('Object error');
+      subscription.unsubscribe();
+    }));
+
+    it('should handle unknown error', fakeAsync(() => {
+      const error = new HttpErrorResponse({ status: 500 });
+      let caughtError: Error | null = null;
+      const subscription = (service as unknown as AuthServiceWithPrivate)
+        .handleError(error)
+        .subscribe({
+          error: (err: Error) => {
+            caughtError = err;
+          },
+        });
+      tick();
+      flushMicrotasks();
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toBe('An unknown error occurred');
+      subscription.unsubscribe();
     }));
   });
 });

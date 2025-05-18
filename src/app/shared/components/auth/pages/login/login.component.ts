@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { InputFieldComponent } from '@shared/components/input-field/input-field.component';
 import { amaliTechEmailValidator } from '@shared/validators/email.validator';
-import { AuthActions } from '@store/states/auth/auth.actions';
-import { selectIsLoading, selectAuthError } from '@store/states/auth/auth.selectors';
+import { AuthActions } from '@store/actions/auth.actions';
+import { selectIsLoading, selectAuthError } from '@store/selectors/auth.selectors';
 
 @Component({
   selector: 'app-login',
