@@ -15,7 +15,7 @@ export interface NSP {
 @Component({
   selector: 'app-nsp-table',
   standalone: true,
-  imports: [CommonModule ],
+  imports: [CommonModule],
   templateUrl: './nsp-table.component.html',
 })
 export class NspTableComponent {

@@ -6,7 +6,6 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
 import { filter, Subscription } from 'rxjs';
 
-
 interface NavItem {
   label: string;
   icon: string;
@@ -18,7 +17,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterLink, IconComponent, ClickOutsideDirective],
-  templateUrl: './sidebar.component.html'
+  templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Input() isOpen = true;
@@ -45,7 +44,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/nsps',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'NSP Management', link: '/admin/nsps' }
+        { label: 'NSP Management', link: '/admin/nsps' },
       ],
     },
     {
@@ -54,7 +53,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/facilitators',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'Facilitator Management', link: '/admin/facilitators' }
+        { label: 'Facilitator Management', link: '/admin/facilitators' },
       ],
     },
     {
@@ -63,7 +62,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/sessions',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'Session Management', link: '/admin/sessions' }
+        { label: 'Session Management', link: '/admin/sessions' },
       ],
     },
     {
@@ -72,7 +71,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/settings',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'Settings', link: '/admin/settings' }
+        { label: 'Settings', link: '/admin/settings' },
       ],
     },
   ];
@@ -82,14 +81,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.activeRoute = this.router.url;
 
     // Update active route on navigation
-    this.routerSubscription = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.activeRoute = this.router.url;
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.activeRoute = this.router.url;
 
-      // Don't automatically update breadcrumbs here - let the service handle it
-      // This prevents overriding auto-generated breadcrumbs from route data
-    });
+        // Don't automatically update breadcrumbs here - let the service handle it
+        // This prevents overriding auto-generated breadcrumbs from route data
+      });
   }
 
   ngOnDestroy(): void {

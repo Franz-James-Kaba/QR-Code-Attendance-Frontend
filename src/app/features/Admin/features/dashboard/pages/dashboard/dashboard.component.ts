@@ -161,20 +161,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Use forkJoin to make both API calls in parallel
     forkJoin({
       nsps: this.nspService.getAllNsps(0, 1), // Just need the total count, not all records
-      facilitators: this.facilitatorService.getAllFacilitators(0, 1)
+      facilitators: this.facilitatorService.getAllFacilitators(0, 1),
     })
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (results) => {
-        this.nspCount = results.nsps.total;
-        this.facilitatorCount = results.facilitators.total;
-        this.isLoadingCounts = false;
-      },
-      error: (err) => {
-        console.error('Error loading user counts:', err);
-        this.isLoadingCounts = false;
-      }
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: results => {
+          this.nspCount = results.nsps.total;
+          this.facilitatorCount = results.facilitators.total;
+          this.isLoadingCounts = false;
+        },
+        error: err => {
+          console.error('Error loading user counts:', err);
+          this.isLoadingCounts = false;
+        },
+      });
   }
 
   /**
@@ -192,15 +192,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const startDate = yesterday.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
-    this.attendanceService.getEarlyAttendees(startDate, endDate)
+    this.attendanceService
+      .getEarlyAttendees(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (result) => {
+        next: result => {
           this.earlyAttendees = result.data;
           this.earlyAttendeesTotal = result.total;
           this.isLoadingEarlyAttendees = false;
         },
-        error: (err) => {
+        error: err => {
           console.error('Error loading early attendees:', err);
           this.notificationService.error('Failed to load early attendees', { duration: 5000 });
           this.isLoadingEarlyAttendees = false;
@@ -213,7 +214,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { name: 'Emily Davis', program: 'Mobile Development NSP', time: '8:15 AM' },
             { name: 'Daniel Brown', program: 'Cloud Computing NSP', time: '8:20 AM' },
           ];
-        }
+        },
       });
   }
 

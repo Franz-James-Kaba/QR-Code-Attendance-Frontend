@@ -18,7 +18,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="createFacilitator()">
+      (buttonClick)="createFacilitator()"
+    >
       Create Facilitator
     </app-button>
   </div>
@@ -34,7 +35,16 @@
   <!-- Empty state -->
   <div *ngIf="!isLoading && !hasRecords" class="bg-white rounded-lg shadow p-10 text-center">
     <div class="flex justify-center mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-gray-400">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="w-16 h-16 text-gray-400"
+      >
         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
         <circle cx="8.5" cy="7" r="4"></circle>
         <line x1="20" y1="8" x2="20" y2="14"></line>
@@ -57,7 +67,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="createFacilitator()">
+      (buttonClick)="createFacilitator()"
+    >
       Create Facilitator
     </app-button>
   </div>
@@ -68,7 +79,8 @@
       [facilitators]="facilitators"
       (edit)="editFacilitator($event)"
       (delete)="confirmDelete($event)"
-      (togglePrivilege)="toggleReceptionPrivilege($event)">
+      (togglePrivilege)="toggleReceptionPrivilege($event)"
+    >
     </app-facilitator-table>
 
     <!-- Pagination control (simplified) -->
@@ -81,14 +93,16 @@
           class="px-4 py-2 border rounded-md"
           [disabled]="currentPage === 0"
           [class.opacity-50]="currentPage === 0"
-          (click)="onPageChange(currentPage - 1)">
+          (click)="onPageChange(currentPage - 1)"
+        >
           Previous
         </button>
         <button
           class="px-4 py-2 border rounded-md"
           [disabled]="(currentPage + 1) * pageSize >= totalItems"
           [class.opacity-50]="(currentPage + 1) * pageSize >= totalItems"
-          (click)="onPageChange(currentPage + 1)">
+          (click)="onPageChange(currentPage + 1)"
+        >
           Next
         </button>
       </div>
@@ -101,7 +115,8 @@
   [showModal]="showDeleteModal"
   [facilitator]="facilitatorToDelete"
   (confirm)="executeDelete()"
-  (cancel)="cancelDelete()">
+  (cancel)="cancelDelete()"
+>
 </app-facilitator-delete-confirmation>
 
 <!-- Modal Container (shared between NSP and Facilitator) -->

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { IconComponent } from '@shared/components/icon/icon.component';
 
 import { NotificationItem } from '../../models/notification.model';
 import { AdminNotificationService } from '../../services/admin-notification.service';
@@ -9,9 +8,9 @@ import { AdminNotificationService } from '../../services/admin-notification.serv
 @Component({
   selector: 'app-notification-dropdown',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './notification-dropdown.component.html',
-  styleUrls: ['./notification-dropdown.component.scss']
+  styleUrls: ['./notification-dropdown.component.scss'],
 })
 export class NotificationDropdownComponent {
   @Output() closeDropdown = new EventEmitter<void>();
@@ -34,7 +33,7 @@ export class NotificationDropdownComponent {
     this.notificationService.removeNotification(notificationId);
   }
   getNotificationTypeIcon(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
         return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'success':
@@ -49,7 +48,7 @@ export class NotificationDropdownComponent {
   }
 
   getNotificationTypeClass(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
         return 'bg-blue-500 text-white';
       case 'success':

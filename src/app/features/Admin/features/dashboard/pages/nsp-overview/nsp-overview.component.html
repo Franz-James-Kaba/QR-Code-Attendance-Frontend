@@ -13,7 +13,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="openBulkImport()">
+      (buttonClick)="openBulkImport()"
+    >
       Bulk Import
     </app-button>
     <app-button
@@ -27,7 +28,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="createNsp()">
+      (buttonClick)="createNsp()"
+    >
       Create NSP
     </app-button>
   </div>
@@ -35,7 +37,9 @@
 
 <!-- Loading indicator -->
 <div *ngIf="isLoading" class="flex justify-center my-8">
-  <div class="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+  <div
+    class="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"
+  ></div>
 </div>
 
 <!-- NSP Table view when there are records -->
@@ -51,28 +55,35 @@
 <!-- Pagination controls if needed -->
 <div *ngIf="hasRecords && totalItems > pageSize" class="mt-4 flex justify-between items-center">
   <span class="text-sm text-gray-600">
-    Showing {{currentPage * pageSize + 1}} - {{ (currentPage + 1) * pageSize > totalItems ? totalItems : (currentPage + 1) * pageSize }} of {{ totalItems }} NSPs
+    Showing {{ currentPage * pageSize + 1 }} -
+    {{ (currentPage + 1) * pageSize > totalItems ? totalItems : (currentPage + 1) * pageSize }} of
+    {{ totalItems }} NSPs
   </span>
   <div class="flex space-x-2">
     <button
       class="px-3 py-1 border border-gray-300 rounded-md text-sm"
       [class.bg-gray-100]="currentPage === 0"
       [disabled]="currentPage === 0"
-      (click)="onPageChange(currentPage - 1)">
+      (click)="onPageChange(currentPage - 1)"
+    >
       Previous
     </button>
     <button
       class="px-3 py-1 border border-gray-300 rounded-md text-sm"
       [class.bg-gray-100]="(currentPage + 1) * pageSize >= totalItems"
       [disabled]="(currentPage + 1) * pageSize >= totalItems"
-      (click)="onPageChange(currentPage + 1)">
+      (click)="onPageChange(currentPage + 1)"
+    >
       Next
     </button>
   </div>
 </div>
 
 <!-- Empty state when no records -->
-<div *ngIf="!hasRecords && !isLoading" class="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center min-h-[60vh]">
+<div
+  *ngIf="!hasRecords && !isLoading"
+  class="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center min-h-[60vh]"
+>
   <!-- Empty state illustration (isometric cube) -->
   <div class="mb-6 w-40 h-40 flex items-center justify-center">
     <svg
@@ -87,7 +98,9 @@
     </svg>
   </div>
   <h3 class="text-xl font-semibold text-gray-700 mb-2">No NSPs Found</h3>
-  <p class="text-gray-500 mb-6">Get started by creating your first NSP or importing multiple NSPs.</p>
+  <p class="text-gray-500 mb-6">
+    Get started by creating your first NSP or importing multiple NSPs.
+  </p>
 
   <!-- Action buttons for empty state -->
   <div class="flex space-x-4">
@@ -102,7 +115,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="openBulkImport()">
+      (buttonClick)="openBulkImport()"
+    >
       Bulk Import
     </app-button>
     <app-button
@@ -116,7 +130,8 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="createNsp()">
+      (buttonClick)="createNsp()"
+    >
       Create NSP
     </app-button>
   </div>
@@ -132,11 +147,15 @@
 </app-delete-confirmation>
 
 <!-- Bulk Import Modal -->
-<div *ngIf="showBulkImportModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<div
+  *ngIf="showBulkImportModal"
+  class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+>
   <div class="max-w-2xl w-full mx-4">
     <app-nsp-bulk-import
       (importComplete)="handleImportComplete($event)"
-      (cancel)="closeBulkImport()">
+      (cancel)="closeBulkImport()"
+    >
     </app-nsp-bulk-import>
   </div>
 </div>

@@ -30,24 +30,24 @@
 
 // Stacking behavior for notifications
 :host {
-  &[data-position^="top"] .notification-container {
+  &[data-position^='top'] .notification-container {
     align-items: center;
   }
 
-  &[data-position^="bottom"] .notification-container {
+  &[data-position^='bottom'] .notification-container {
     align-items: center;
     flex-direction: column-reverse;
   }
 
-  &[data-position$="right"] .notification-container {
+  &[data-position$='right'] .notification-container {
     align-items: flex-end;
   }
 
-  &[data-position$="left"] .notification-container {
+  &[data-position$='left'] .notification-container {
     align-items: flex-start;
   }
 
-  &[data-position$="center"] .notification-container {
+  &[data-position$='center'] .notification-container {
     align-items: center;
   }
 

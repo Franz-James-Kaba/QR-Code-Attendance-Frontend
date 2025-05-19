@@ -24,9 +24,7 @@ export class BreadcrumbService {
   private readonly router = inject(Router);
 
   constructor() {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
       const root = this.router.routerState.snapshot.root;
       const breadcrumbs = this.createBreadcrumbs(root);
       this.breadcrumbsSubject.next(breadcrumbs);
@@ -34,7 +32,11 @@ export class BreadcrumbService {
     });
   }
 
-  private createBreadcrumbs(route: ActivatedRouteSnapshot, url: string = '', breadcrumbs: BreadcrumbItem[] = []): BreadcrumbItem[] {
+  private createBreadcrumbs(
+    route: ActivatedRouteSnapshot,
+    url: string = '',
+    breadcrumbs: BreadcrumbItem[] = []
+  ): BreadcrumbItem[] {
     // Initialize with Dashboard breadcrumb for admin routes
     this.initializeAdminBreadcrumbs(breadcrumbs);
 
@@ -60,7 +62,7 @@ export class BreadcrumbService {
     if (breadcrumbs.length === 0 && this.router.url.startsWith('/admin')) {
       breadcrumbs.push({
         label: 'Dashboard',
-        link: '/admin/dashboard'
+        link: '/admin/dashboard',
       });
     }
   }
@@ -72,31 +74,37 @@ export class BreadcrumbService {
   }
 
   // Helper to add breadcrumb for the current route
-  private addCurrentRouteBreadcrumb(route: ActivatedRouteSnapshot, url: string, breadcrumbs: BreadcrumbItem[]): void {
+  private addCurrentRouteBreadcrumb(
+    route: ActivatedRouteSnapshot,
+    url: string,
+    breadcrumbs: BreadcrumbItem[]
+  ): void {
     const routeUrl = route.url.map(segment => segment.path).join('/');
 
     if (route.data['breadcrumb']) {
       breadcrumbs.push({
         label: route.data['breadcrumb'],
-        link: url
+        link: url,
       });
-    }
-    else if (route.data['title']) {
+    } else if (route.data['title']) {
       breadcrumbs.push({
         label: route.data['title'],
-        link: url
+        link: url,
       });
-    }
-    else if (routeUrl) {
+    } else if (routeUrl) {
       breadcrumbs.push({
         label: this.formatRouteLabel(routeUrl),
-        link: url
+        link: url,
       });
     }
   }
 
   // Helper to process child routes
-  private processChildRoutes(route: ActivatedRouteSnapshot, url: string, breadcrumbs: BreadcrumbItem[]): BreadcrumbItem[] {
+  private processChildRoutes(
+    route: ActivatedRouteSnapshot,
+    url: string,
+    breadcrumbs: BreadcrumbItem[]
+  ): BreadcrumbItem[] {
     for (const child of route.children) {
       if (child.routeConfig && this.isRouteActive(child)) {
         return this.createBreadcrumbs(child, url, breadcrumbs);
@@ -109,7 +117,8 @@ export class BreadcrumbService {
   private isRouteActive(route: ActivatedRouteSnapshot): boolean {
     // Explicitly handle potential null or undefined values
     const hasUrl = !!route.url && Array.isArray(route.url) && route.url.length > 0;
-    const isParentRoute = route.children.length > 0 && !!route.routeConfig && route.routeConfig.path === '';
+    const isParentRoute =
+      route.children.length > 0 && !!route.routeConfig && route.routeConfig.path === '';
 
     return hasUrl || isParentRoute;
   }
@@ -129,4 +138,3 @@ export class BreadcrumbService {
     this.breadcrumbsSignal.set(newItems); // Update signal as well
   }
 }
-

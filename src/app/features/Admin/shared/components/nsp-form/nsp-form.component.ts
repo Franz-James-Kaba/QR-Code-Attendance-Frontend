@@ -36,10 +36,13 @@ export class NspFormComponent implements OnInit {
   private initForm(): void {
     this.form = this.fb.group({
       id: [this.initialData?.id ?? ''],
-      firstName: [this.initialData?.firstName ?? '', [Validators.required, Validators.minLength(3)]],
+      firstName: [
+        this.initialData?.firstName ?? '',
+        [Validators.required, Validators.minLength(3)],
+      ],
       middleName: [this.initialData?.middleName ?? ''],
       lastName: [this.initialData?.lastName ?? '', [Validators.required, Validators.minLength(3)]],
-      email: [this.initialData?.email ?? '', [Validators.required, Validators.email]]
+      email: [this.initialData?.email ?? '', [Validators.required, Validators.email]],
     });
   }
 

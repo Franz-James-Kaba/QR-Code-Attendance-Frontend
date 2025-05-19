@@ -60,17 +60,17 @@ export class NspBulkImportComponent {
     this.isProcessing = true;
 
     this.fileUploadService.parseNspCsvFile(this.file).subscribe({
-      next: (nsps) => {
+      next: nsps => {
         this.nsps = nsps;
         this.isProcessing = false;
 
         // Validate NSPs
         this.validateNsps();
       },
-      error: (error) => {
+      error: error => {
         this.parseError = error.message ?? 'Failed to parse CSV file';
         this.isProcessing = false;
-      }
+      },
     });
   }
 
@@ -104,11 +104,13 @@ export class NspBulkImportComponent {
     if (invalidEmails.length > 0) {
       this.validationErrors.push(`Found ${invalidEmails.length} invalid email(s) in the file`);
     }
-    
+
     // Validate first and last name are provided
     const invalidNames = this.nsps.filter(nsp => !nsp.firstName || !nsp.lastName);
     if (invalidNames.length > 0) {
-      this.validationErrors.push(`Found ${invalidNames.length} record(s) with missing first or last name`);
+      this.validationErrors.push(
+        `Found ${invalidNames.length} record(s) with missing first or last name`
+      );
     }
   }
 
@@ -133,14 +135,14 @@ export class NspBulkImportComponent {
     this.isUploading = true;
 
     this.nspService.bulkImportNsps(this.nsps).subscribe({
-      next: (result) => {
+      next: result => {
         this.isUploading = false;
         this.importComplete.emit(result);
       },
-      error: (error) => {
+      error: error => {
         this.isUploading = false;
         this.parseError = error.message ?? 'Failed to import NSPs';
-      }
+      },
     });
   }
 
