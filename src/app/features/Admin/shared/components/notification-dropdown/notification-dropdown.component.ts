@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { IconComponent } from '@shared/components/icon/icon.component';
 
 import { NotificationItem } from '../../models/notification.model';
 import { AdminNotificationService } from '../../services/admin-notification.service';
@@ -9,7 +8,7 @@ import { AdminNotificationService } from '../../services/admin-notification.serv
 @Component({
   selector: 'app-notification-dropdown',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './notification-dropdown.component.html',
   styleUrls: ['./notification-dropdown.component.scss'],
 })
