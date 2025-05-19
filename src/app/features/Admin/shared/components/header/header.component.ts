@@ -26,7 +26,7 @@ import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.c
     ProfileDropdownComponent
   ],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit {
   @Input() sidebarOpen: boolean = true;

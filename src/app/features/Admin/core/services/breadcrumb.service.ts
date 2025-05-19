@@ -22,7 +22,7 @@ export class BreadcrumbService {
   breadcrumbs = this.breadcrumbsSignal.asReadonly();
 
   private readonly router = inject(Router);
-  
+
   constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -42,7 +42,7 @@ export class BreadcrumbService {
     if (route.routeConfig && route.routeConfig.path !== '') {
       // Build the current URL path
       url = this.buildCurrentUrl(route, url);
-      
+
       // Add breadcrumb for current route if applicable
       this.addCurrentRouteBreadcrumb(route, url, breadcrumbs);
     }
@@ -58,8 +58,8 @@ export class BreadcrumbService {
   // Helper to initialize admin dashboard breadcrumb
   private initializeAdminBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
     if (breadcrumbs.length === 0 && this.router.url.startsWith('/admin')) {
-      breadcrumbs.push({ 
-        label: 'Dashboard', 
+      breadcrumbs.push({
+        label: 'Dashboard',
         link: '/admin/dashboard'
       });
     }
@@ -74,13 +74,13 @@ export class BreadcrumbService {
   // Helper to add breadcrumb for the current route
   private addCurrentRouteBreadcrumb(route: ActivatedRouteSnapshot, url: string, breadcrumbs: BreadcrumbItem[]): void {
     const routeUrl = route.url.map(segment => segment.path).join('/');
-    
+
     if (route.data['breadcrumb']) {
       breadcrumbs.push({
         label: route.data['breadcrumb'],
         link: url
       });
-    } 
+    }
     else if (route.data['title']) {
       breadcrumbs.push({
         label: route.data['title'],
@@ -110,7 +110,7 @@ export class BreadcrumbService {
     // Explicitly handle potential null or undefined values
     const hasUrl = !!route.url && Array.isArray(route.url) && route.url.length > 0;
     const isParentRoute = route.children.length > 0 && !!route.routeConfig && route.routeConfig.path === '';
-    
+
     return hasUrl || isParentRoute;
   }
 
@@ -129,3 +129,4 @@ export class BreadcrumbService {
     this.breadcrumbsSignal.set(newItems); // Update signal as well
   }
 }
+

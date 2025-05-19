@@ -7,7 +7,7 @@ import { ChartDataSet, ChartOptions } from '@shared/models/chart.model';
   selector: 'facilitator-root',
   standalone: true,
   imports: [CommonModule, ChartComponent],
-  templateUrl: './facilitator.component.html'
+  templateUrl: './facilitator.component.html',
 })
 export class FacilitatorComponent implements OnInit {
   title = 'facilitator-frontend';
@@ -20,7 +20,7 @@ export class FacilitatorComponent implements OnInit {
     height: 300,
     responsive: true,
     tooltipEnabled: true,
-    showTimeRangeSelector: false
+    showTimeRangeSelector: false,
   };
 
   ngOnInit(): void {
@@ -39,7 +39,7 @@ export class FacilitatorComponent implements OnInit {
         { name: 'NSPs', color: '#3b82f6' }, // blue color
         { name: 'Facilitators', color: '#8b5cf6' }, // purple color
       ],
-      showLegend: true
+      showLegend: true,
     };
   }
 }

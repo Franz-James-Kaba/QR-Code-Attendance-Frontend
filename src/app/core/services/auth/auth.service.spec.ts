@@ -8,12 +8,35 @@ import { catchError, firstValueFrom } from 'rxjs';
 
 import { AuthService } from './auth.service';
 
+interface AuthServiceWithPrivate {
+  loadStoredUser: () => void;
+  fetchUserProfile: () => void;
+  currentUserSubject: BehaviorSubject<ExtendedAuthResponse | null>;
+  handleError: (error: HttpErrorResponse) => Observable<never>;
+}
+
+interface PartialHttpClient {
+  get: jest.Mock;
+  post: jest.Mock;
+}
+
+interface PartialRouter {
+  navigate: jest.Mock;
+}
+
+interface LocalStorageMock {
+  getItem: jest.Mock<string | null, [string]>;
+  setItem: jest.Mock<void, [string, string]>;
+  removeItem: jest.Mock<void, [string]>;
+  clear: jest.Mock<void, []>;
+}
+
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let router: Router;
   let localStorageSpy: jest.SpyInstance;
-  
+
   const mockToken = 'mock-token';
   const mockEmail = 'test@example.com';
   const mockUser: AuthResponse = {
@@ -22,7 +45,7 @@ describe('AuthService', () => {
     email: mockEmail,
     passwordResetRequired: false
   };
-  
+
   const mockCredentials: LoginCredentials = {
     email: mockEmail,
     password: 'password123'
@@ -39,16 +62,16 @@ beforeEach(() => {
       provideHttpClientTesting()
     ]
   });
-    
+
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
-    
+
     // Mock localStorage
     localStorageSpy = jest.spyOn(Storage.prototype, 'getItem');
     jest.spyOn(Storage.prototype, 'setItem');
     jest.spyOn(Storage.prototype, 'removeItem');
-    
+
     // Clear localStorage mocks before each test
     localStorage.clear();
     jest.clearAllMocks();
@@ -73,10 +96,10 @@ beforeEach(() => {
         if (key === 'current_user') return storedUser;
         return null;
       });
-      
+
       // Re-initialize service to trigger constructor
       service = TestBed.inject(AuthService);
-      
+
       // Check if the user was loaded
       service.currentUser$.subscribe(user => {
         expect(user).toEqual(mockUser);
@@ -90,14 +113,14 @@ beforeEach(() => {
         if (key === 'current_user') return '{invalid json}';
         return null;
       });
-      
+
       // Mock console.error more explicitly
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const logoutSpy = jest.spyOn(AuthService.prototype, 'logout').mockImplementation(() => {});
-      
+
       // Re-initialize service to trigger constructor
       service = TestBed.inject(AuthService);
-      
+
       // Verify with a delay to ensure async operations complete
       setTimeout(() => {
         expect(consoleErrorSpy).toHaveBeenCalled();
@@ -138,7 +161,7 @@ beforeEach(() => {
     it('should send reset password request', () => {
       const passwords = { password: 'newpass123', confirmPassword: 'newpass123' };
       const token = 'reset-token';
-      
+
       service.resetPassword(mockEmail, token, passwords).subscribe(response => {
         expect(response).toBe('Password reset successful');
       });
@@ -158,7 +181,7 @@ beforeEach(() => {
       service['loadStoredUser']();
 
       const passwords = { password: 'newpass123', confirmPassword: 'newpass123' };
-      
+
       service.firstTimePasswordReset(mockEmail, passwords).subscribe(response => {
         expect(response).toBe('Password reset successful');
       });
@@ -166,12 +189,12 @@ beforeEach(() => {
       const req = httpMock.expectOne(`${environment.auth.baseUrl}/first-password-reset?email=${mockEmail}`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(passwords);
-      
+
       // Mock a successful response and update the user
       const updatedUser = {...mockUser, passwordResetRequired: false};
       service['currentUserSubject'].next(updatedUser);
       localStorage.setItem('current_user', JSON.stringify(updatedUser));
-      
+
       req.flush('Password reset successful');
       tick();
 
@@ -201,14 +224,14 @@ beforeEach(() => {
     // Setup a mock user for testing
     localStorage.setItem(environment.auth.tokenKey, mockToken);
     localStorage.setItem('current_user', JSON.stringify(mockUser));
-    
+
     // Recreate the service to ensure it reads from localStorage
     service = TestBed.inject(AuthService);
-    
+
     // Or directly set the current user in the subject
     service['currentUserSubject'].next(mockUser);
   });
-    
+
     it('should get token from localStorage', () => {
       expect(service.getToken()).toBe(mockToken);
     });
@@ -217,7 +240,7 @@ beforeEach(() => {
       // Directly set the user state
       service['currentUserSubject'].next({...mockUser, passwordResetRequired: false});
       expect(service.hasPasswordResetRequired()).toBe(false);
-      
+
       // Change the state
       service['currentUserSubject'].next({...mockUser, passwordResetRequired: true});
       expect(service.hasPasswordResetRequired()).toBe(true);
@@ -225,14 +248,14 @@ beforeEach(() => {
 
     it('should get current user role', () => {
       expect(service.getCurrentUserRole()).toBe('ADMIN' as UserRole);
-      
+
       service['currentUserSubject'].next(null);
       expect(service.getCurrentUserRole()).toBeNull();
     });
 
     it('should get current user email', () => {
       expect(service.getCurrentUserEmail()).toBe(mockEmail);
-      
+
       service['currentUserSubject'].next(null);
       expect(service.getCurrentUserEmail()).toBeNull();
     });

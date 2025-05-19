@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { selectIsAuthenticated } from '@store/selectors/auth.selectors';
 import { Observable, of, firstValueFrom } from 'rxjs';
-
-import { selectIsAuthenticated } from '../../store/states/auth/auth.selectors';
-
-
 
 import { AuthGuard } from './auth.guard';
 
@@ -16,20 +18,17 @@ describe('AuthGuard', () => {
 
   const dummyRoute = {} as ActivatedRouteSnapshot;
   const dummyState = {
-    url: '/test-url'
+    url: '/test-url',
   } as RouterStateSnapshot;
 
   beforeEach(() => {
     // Create a mock router with Jest
     const routerMock = {
-      navigate: jest.fn()
+      navigate: jest.fn(),
     } as unknown as jest.Mocked<Router>;
 
     TestBed.configureTestingModule({
-      providers: [
-        provideMockStore(),
-        { provide: Router, useValue: routerMock }
-      ]
+      providers: [provideMockStore(), { provide: Router, useValue: routerMock }],
     });
 
     store = TestBed.inject(MockStore);
@@ -53,9 +52,7 @@ describe('AuthGuard', () => {
 
     // Assert
     // Handle both synchronous and asynchronous results
-    const canActivate = result instanceof Observable
-      ? await firstValueFrom(result)
-      : result;
+    const canActivate = result instanceof Observable ? await firstValueFrom(result) : result;
 
     expect(canActivate).toBe(true);
     expect(router.navigate).not.toHaveBeenCalled();
@@ -69,15 +66,12 @@ describe('AuthGuard', () => {
     const result = executeGuard(dummyRoute, dummyState);
 
     // Assert
-    const canActivate = result instanceof Observable
-      ? await firstValueFrom(result)
-      : result;
+    const canActivate = result instanceof Observable ? await firstValueFrom(result) : result;
 
     expect(canActivate).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(
-      ['/auth/login'],
-      { queryParams: { returnUrl: '/test-url' } }
-    );
+    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
+      queryParams: { returnUrl: '/test-url' },
+    });
   });
 
   test('should take only the first emission from the auth state', async () => {
@@ -113,10 +107,9 @@ describe('AuthGuard', () => {
       // If synchronous result, router should have been called by now
     }
 
-    expect(router.navigate).toHaveBeenCalledWith(
-      ['/auth/login'],
-      { queryParams: { returnUrl: '/protected-route/123' } }
-    );
+    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
+      queryParams: { returnUrl: '/protected-route/123' },
+    });
   });
 
   test('should evaluate authentication status synchronously', async () => {
@@ -144,15 +137,12 @@ describe('AuthGuard', () => {
     const result = executeGuard(dummyRoute, adminRoute);
 
     // Assert
-    const canActivate = result instanceof Observable
-      ? await firstValueFrom(result)
-      : result;
+    const canActivate = result instanceof Observable ? await firstValueFrom(result) : result;
 
     expect(canActivate).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(
-      ['/auth/login'],
-      { queryParams: { returnUrl: '/admin/dashboard' } }
-    );
+    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
+      queryParams: { returnUrl: '/admin/dashboard' },
+    });
   });
 
   test('should allow access to protected routes when authenticated', async () => {
@@ -164,9 +154,7 @@ describe('AuthGuard', () => {
     const result = executeGuard(dummyRoute, adminRoute);
 
     // Assert
-    const canActivate = result instanceof Observable
-      ? await firstValueFrom(result)
-      : result;
+    const canActivate = result instanceof Observable ? await firstValueFrom(result) : result;
 
     expect(canActivate).toBe(true);
     expect(router.navigate).not.toHaveBeenCalled();

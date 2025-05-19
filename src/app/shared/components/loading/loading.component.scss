@@ -44,15 +44,15 @@
 
 /* Colors */
 .loading-spinner.primary {
-  border-top-color: #7C5DFA;
+  border-top-color: #7c5dfa;
 }
 
 .loading-spinner.secondary {
-  border-top-color: #9277FF;
+  border-top-color: #9277ff;
 }
 
 .loading-spinner.tertiary {
-  border-top-color: #888EB0;
+  border-top-color: #888eb0;
 }
 
 /* Navigation specific styles */
@@ -73,7 +73,8 @@
     border-color: rgba(255, 255, 255, 0.1);
   }
 
-  .fullscreen, .navigation-loader {
+  .fullscreen,
+  .navigation-loader {
     background-color: rgba(0, 0, 0, 0.7);
   }
 

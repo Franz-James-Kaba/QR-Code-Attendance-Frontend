@@ -4,8 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#065186",
-        secondary: "#FBBF24",
+        primary: '#065186',
+        secondary: '#E0F0FE',
+        nspBg: '#F0F8FF',
+        nspText: '#292929',
+        lightGray: '#EFEFEF',
         accent: "#F472B6",
         neutral: "#374151",
         "base-light": "#FFFFFF",
@@ -15,10 +18,14 @@ export default {
         warning: "#FBBD23",
         error: "#F87272",
       },
+      fontSize: {
+        '10': '10px',
+        '14': '14px',
+      },
       fontFamily: {
-        sans: ["Lato", "sans-serif"],
-        serif: ["Merriweather", "serif"],
-        mono: ["Fira Code", "monospace"],
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Merriweather', 'serif'],
+        mono: ['Menlo', 'monospace'],
       },
     },
   },

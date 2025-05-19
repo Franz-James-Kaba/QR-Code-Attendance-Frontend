@@ -16,12 +16,8 @@ import { InputFieldComponent } from '@shared/components/input-field/input-field.
 import { OtpInputComponent } from '@shared/components/otp-input/otp-input.component';
 import { AuthStep } from '@shared/models/auth/auth.model';
 import { amaliTechEmailValidator } from '@shared/validators/email.validator';
-import { AuthActions } from '@store/states/auth/auth.actions';
-import {
-  selectAuthStep,
-  selectIsLoading,
-  selectAuthError,
-} from '@store/states/auth/auth.selectors';
+import { AuthActions } from '@store/actions/auth.actions';
+import { selectAuthStep, selectIsLoading, selectAuthError } from '@store/selectors/auth.selectors';
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
@@ -144,7 +140,7 @@ export class ForgotPasswordComponent implements OnInit {
                 email,
                 token,
                 password,
-                confirmPassword
+                confirmPassword,
               })
             );
           }

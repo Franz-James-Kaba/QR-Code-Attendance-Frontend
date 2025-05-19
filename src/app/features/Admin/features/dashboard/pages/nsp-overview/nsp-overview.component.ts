@@ -47,7 +47,7 @@ export class NspOverviewComponent implements OnInit {
     // Reset pagination to safe defaults
     this.currentPage = 0;
     this.pageSize = 10;
-    
+
     // Check for success messages from redirects (after edit/create/delete)
     this.route.queryParams.subscribe(params => {
       if (params['success']) {
@@ -62,7 +62,7 @@ export class NspOverviewComponent implements OnInit {
   // Load NSPs from API with pagination
   loadNsps(): void {
     this.isLoading = true;
-    
+
     this.nspService.getAllNsps(this.currentPage, this.pageSize)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
@@ -159,7 +159,7 @@ export class NspOverviewComponent implements OnInit {
     const apiModel = mapToApiModel(nsp);
     this.isLoading = true;
     const fullName = this.getFullName(nsp);
-    
+
     if (nsp.id && !isNaN(parseInt(nsp.id))) {
       // Update existing NSP
       const nspId = parseInt(nsp.id);
@@ -170,10 +170,10 @@ export class NspOverviewComponent implements OnInit {
           next: () => {
             // First close the modal
             this.modalService.closeModal();
-            
+
             // Then show success message
             this.showNotification('success', `${fullName} has been updated successfully`);
-            
+
             // Reload the data
             this.loadNsps();
           },
@@ -190,10 +190,10 @@ export class NspOverviewComponent implements OnInit {
           next: () => {
             // First close the modal
             this.modalService.closeModal();
-            
+
             // Then show success message
             this.showNotification('success', `${fullName} has been created successfully`);
-            
+
             // Reload the data
             this.loadNsps();
           },

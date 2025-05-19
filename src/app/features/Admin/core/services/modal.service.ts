@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 export type ModalType = 'createNsp' | 'createFacilitator' | 'editNsp' | 'editFacilitator' | 'createSession' | 'editSession' | null;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ModalService {
   private readonly modalVisibleSubject = new BehaviorSubject<boolean>(false);

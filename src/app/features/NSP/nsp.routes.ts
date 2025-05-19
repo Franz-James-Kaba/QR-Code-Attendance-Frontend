@@ -1,51 +1,41 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth/auth.guard';
 
-import { NspLayoutComponent } from './layouts/nsp-layout/nsp-layout.component';
-
 export const nspRoutes: Routes = [
   {
     path: '',
-    component: NspLayoutComponent,
     canActivate: [AuthGuard],
     data: {
-      title: 'NSP'
+      title: 'NSP',
     },
+    loadComponent: () =>
+      import('@features/NSP/pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
     children: [
       {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
+        path: 'history',
+        canActivate: [AuthGuard],
+        data: {
+          title: 'NSP - History',
+        },
+        loadComponent: () =>
+          import('@features/NSP/pages/history/history.component').then(m => m.HistoryComponent),
       },
-      // {
-      //   path: 'dashboard',
-      //   loadComponent: () => import('@NSP/features/dashboard/pages/dashboard/dashboard.component')
-      //     .then(m => m.DashboardComponent),
-      //   data: {
-      //     title: 'Dashboard'
-      //   }
-      // },
-      // {
-      //   path: 'events',
-      //   loadComponent: () => import('@NSP/features/events/pages/events-list/events-list.component')
-      //     .then(m => m.EventsListComponent),
-      //   data: {
-      //     title: 'Events'
-      //   }
-      // },
-      // {
-      //   path: 'reports',
-      //   loadComponent: () => import('@NSP/features/reports/pages/reports/reports.component')
-      //     .then(m => m.ReportsComponent),
-      //   data: {
-      //     title: 'Reports'
-      //   }
-      // },
       {
-        path: '**',
-        loadComponent: () => import('@shared/components/not-found/not-found.component')
-          .then(m => m.NotFoundComponent)
-      }
-    ]
-  }
+        path: 'leaderboard',
+        canActivate: [AuthGuard],
+        data: {
+          title: 'NSP - Leaderboard',
+        },
+        loadComponent: () =>
+          import('@features/NSP/pages/leaderboard/leaderboard.component').then(
+            m => m.LeaderboardComponent
+          ),
+      },
+    ],
+  },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('@shared/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];

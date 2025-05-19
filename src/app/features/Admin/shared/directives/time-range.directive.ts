@@ -1,8 +1,16 @@
-import { Directive, ElementRef, HostListener, Input, Renderer2, inject, AfterViewInit } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+  Renderer2,
+  inject,
+  AfterViewInit,
+} from '@angular/core';
 
 @Directive({
   selector: '[appTimeRange]',
-  standalone: true
+  standalone: true,
 })
 export class TimeRangeDirective implements AfterViewInit {
   @Input() activeClass = 'bg-gray-100';
@@ -27,7 +35,9 @@ export class TimeRangeDirective implements AfterViewInit {
 
     // Convert HTMLCollection to Array and filter for elements with our directive
     const elements = Array.from(parent.children);
-    const siblings = elements.filter(el => el instanceof HTMLElement && el.hasAttribute('appTimeRange'));
+    const siblings = elements.filter(
+      el => el instanceof HTMLElement && el.hasAttribute('appTimeRange')
+    );
 
     // Remove active class from all siblings
     siblings.forEach(sibling => {

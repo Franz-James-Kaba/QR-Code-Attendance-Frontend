@@ -5,6 +5,7 @@ export interface Attendee {
   time: string;
 }
 
+
 // API Response model for early attendees
 export interface EarlyAttendeeResponse {
   id: number;
@@ -63,8 +64,8 @@ export function mapToAttendeeViewModel(attendee: EarlyAttendeeResponse): Attende
   });
 
   // Construct the name from user info or fallback to "Unknown User"
-  const name = attendee.user ? 
-    `${attendee.user.firstName} ${attendee.user.middleName ? attendee.user.middleName + ' ' : ''}${attendee.user.lastName}` : 
+  const name = attendee.user ?
+    `${attendee.user.firstName} ${attendee.user.middleName ? attendee.user.middleName + ' ' : ''}${attendee.user.lastName}` :
     `Unknown User (ID: ${attendee.userId})`;
 
   // Get program from user info or use a placeholder

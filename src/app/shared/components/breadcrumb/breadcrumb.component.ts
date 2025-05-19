@@ -13,7 +13,7 @@ export interface Breadcrumb {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './breadcrumb.component.html',
-  styleUrl: './breadcrumb.component.scss'
+  styleUrl: './breadcrumb.component.scss',
 })
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   @Input() items: { label: string; link?: string }[] = []; // Add items input property
@@ -90,7 +90,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
 
       breadcrumbs.push({
         label: firstSegmentLabel,
-        url: firstSegmentUrl
+        url: firstSegmentUrl,
       });
     }
   }

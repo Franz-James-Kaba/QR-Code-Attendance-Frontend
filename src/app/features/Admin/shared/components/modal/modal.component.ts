@@ -1,12 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, EventEmitter, Output, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  EventEmitter,
+  Output,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './modal.component.html',
-  styleUrls: ['./modal.component.scss']
+  styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() title = 'Modal';
@@ -14,7 +23,7 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isLoading = false;
   @Input() loadingAction: 'create' | 'update' | null = null;
   @Output() modalClosed = new EventEmitter<void>();
-  
+
   // Flag to control content visibility for animations
   showContent = false;
 
@@ -65,7 +74,7 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
       this.showContent = false;
       // Re-enable scrolling
       document.body.style.overflow = '';
-      
+
       // Allow time for animation to complete before emitting closed event
       setTimeout(() => {
         this.modalClosed.emit();

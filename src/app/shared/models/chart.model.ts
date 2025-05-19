@@ -4,7 +4,7 @@
  */
 
 export interface ChartDataPoint {
-  label: string;  // X-axis label (e.g., day, category)
+  label: string; // X-axis label (e.g., day, category)
   values: number[]; // Array of values for each series
   tooltips?: string[]; // Optional custom tooltips for each value
 }

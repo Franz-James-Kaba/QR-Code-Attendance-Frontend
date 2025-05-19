@@ -35,26 +35,20 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to modal visibility changes
-    this.modalService.modalVisible$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(visible => {
-        this.isModalVisible = visible;
-      });
+    this.modalService.modalVisible$.pipe(takeUntil(this.destroy$)).subscribe(visible => {
+      this.isModalVisible = visible;
+    });
 
     // Subscribe to modal type changes
-    this.modalService.modalType$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(type => {
-        this.modalType = type;
-        this.updateModalTitle();
-      });
+    this.modalService.modalType$.pipe(takeUntil(this.destroy$)).subscribe(type => {
+      this.modalType = type;
+      this.updateModalTitle();
+    });
 
     // Subscribe to modal data changes
-    this.modalService.modalData$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
-        this.modalData = data;
-      });
+    this.modalService.modalData$.pipe(takeUntil(this.destroy$)).subscribe(data => {
+      this.modalData = data;
+    });
   }
 
   ngOnDestroy(): void {
@@ -97,6 +91,13 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
    * Handles form submission events
    */
   onFormSubmit(data: any): void {
+    console.log('Form submitted:', data);
+
+    // TODO: Handle the form data (e.g., API calls)
+    // For now, just close the modal
+    setTimeout(() => {
+      this.modalService.closeModal();
+    }, 500);
     this.isSubmitting = true;
 
     if (this.modalType === 'createNsp' || this.modalType === 'editNsp') {
@@ -232,3 +233,4 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     });
   }
 }
+

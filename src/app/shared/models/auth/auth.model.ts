@@ -4,14 +4,14 @@ export const AuthStep = {
   RESET_PASSWORD: 'RESET_PASSWORD',
 } as const;
 
-export type AuthStep = typeof AuthStep[keyof typeof AuthStep];
+export type AuthStep = (typeof AuthStep)[keyof typeof AuthStep];
 
-export type UserRole = 'ADMIN' | 'FACILITATOR' | 'NSP' | 'RECEPTIONIST';
+export type UserRole = 'ADMIN' | 'FACILITATOR' | 'NSP' | 'RECEPTIONIST' | string;
 
 export interface User {
   id: string | null;
   firstName: string;
-  middleName?: string;
+  middleName?: string | null;
   lastName: string;
   email: string;
   role: UserRole;
@@ -20,9 +20,18 @@ export interface User {
 
 export interface AuthResponse {
   token: string;
-  passwordResetRequired: boolean;
+  email: string | null;
   role: UserRole;
-  email: string; // Added email property to fix the type error
+  passwordResetRequired: boolean;
+  firstName?: string;
+  lastName?: string;
+  checkedIn?: boolean;
+}
+
+export interface ExtendedAuthResponse extends AuthResponse {
+  firstName?: string;
+  lastName?: string;
+  checkedIn?: boolean;
 }
 
 export interface LoginCredentials {
@@ -43,25 +52,31 @@ export interface CreateUserRequest {
 }
 
 export interface AuthState {
-  user: User | null;
   token: string | null;
-  passwordResetRequired: boolean;
+  user: {
+    id: string | null;
+    email: string;
+    role: UserRole | null;
+    firstName: string;
+    lastName: string;
+  } | null;
+  email: string | null;
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
   currentStep: AuthStep;
-  email: string | null;
   otpVerified: boolean;
+  passwordResetRequired: boolean;
 }
 
 export const initialAuthState: AuthState = {
-  user: null,
   token: null,
-  passwordResetRequired: false,
+  user: null,
+  email: null,
   isLoading: false,
   error: null,
   successMessage: null,
   currentStep: AuthStep.EMAIL,
-  email: null,
   otpVerified: false,
+  passwordResetRequired: false,
 };

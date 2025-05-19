@@ -10,10 +10,16 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChartDataPoint, ChartDataSet, ChartOptions, ChartType, TimeRange } from '@shared/models/chart.model';
+import {
+  ChartDataPoint,
+  ChartDataSet,
+  ChartOptions,
+  ChartType,
+  TimeRange,
+} from '@shared/models/chart.model';
 
 interface PieChartArc {
   path: string;
@@ -36,35 +42,43 @@ interface PieChartArc {
     trigger('barAnimation', [
       transition(':enter', [
         style({ height: 0, opacity: 0.3 }),
-        animate('800ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ height: '*', opacity: 1 }))
+        animate('800ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ height: '*', opacity: 1 })),
       ]),
-      transition('* => *', [
-        style({ height: '{{ prevHeight }}px' }),
-        animate('500ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ height: '*' }))
-      ], { params: { prevHeight: 0 } })
+      transition(
+        '* => *',
+        [
+          style({ height: '{{ prevHeight }}px' }),
+          animate('500ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ height: '*' })),
+        ],
+        { params: { prevHeight: 0 } }
+      ),
     ]),
     trigger('lineAnimation', [
       transition(':enter', [
         style({ opacity: 0, strokeDashoffset: 1000 }),
-        animate('800ms ease-out', style({ opacity: 1, strokeDashoffset: 0 }))
-      ])
+        animate('800ms ease-out', style({ opacity: 1, strokeDashoffset: 0 })),
+      ]),
     ]),
     trigger('pointAnimation', [
       transition(':enter', [
         style({ opacity: 0, transform: 'scale(0)' }),
-        animate('400ms 300ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1)' }))
-      ])
+        animate(
+          '400ms 300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          style({ opacity: 1, transform: 'scale(1)' })
+        ),
+      ]),
     ]),
     trigger('pieAnimation', [
       transition(':enter', [
         style({ opacity: 0, transform: 'scale(0.8)' }),
-        animate('600ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1)' }))
+        animate(
+          '600ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          style({ opacity: 1, transform: 'scale(1)' })
+        ),
       ]),
-      transition('* => *', [
-        animate('500ms cubic-bezier(0.34, 1.56, 0.64, 1)')
-      ])
-    ])
-  ]
+      transition('* => *', [animate('500ms cubic-bezier(0.34, 1.56, 0.64, 1)')]),
+    ]),
+  ],
 })
 export class ChartComponent implements OnInit, OnChanges {
   // Make Math available to the template
@@ -291,7 +305,7 @@ export class ChartComponent implements OnInit, OnChanges {
     // Calculate bar width based on available space and number of bars
     const availableSpace = this.containerWidth * 0.8; // Use 80% of container width for bars
     const totalBarsWidth = availableSpace / totalPoints;
-    const barWidthCalculated = (totalBarsWidth / seriesCount) - this.barGap;
+    const barWidthCalculated = totalBarsWidth / seriesCount - this.barGap;
 
     // Apply constraints
     this.barWidth = Math.min(Math.max(barWidthCalculated, this.minBarWidth), this.maxBarWidth);
@@ -328,12 +342,14 @@ export class ChartComponent implements OnInit, OnChanges {
 
     // Create line paths for each series
     for (let seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
-      this.chartPointsData[seriesIndex] = this.dataSet.data.map((item, index) => {
-        const value = item.values[seriesIndex] || 0;
-        const x = (index / (this.dataSet!.data.length - 1)) * 100;
-        const y = 100 - (((value - minValue) / (maxValue - minValue)) * 100);
-        return `${x},${y}`;
-      }).join(' ');
+      this.chartPointsData[seriesIndex] = this.dataSet.data
+        .map((item, index) => {
+          const value = item.values[seriesIndex] || 0;
+          const x = (index / (this.dataSet!.data.length - 1)) * 100;
+          const y = 100 - ((value - minValue) / (maxValue - minValue)) * 100;
+          return `${x},${y}`;
+        })
+        .join(' ');
     }
 
     // Generate y-axis labels if not provided
@@ -356,7 +372,7 @@ export class ChartComponent implements OnInit, OnChanges {
   // Helper method to get the y-position for a value (for line charts)
   getYPosition(value: number, minValue: number, maxValue: number): number {
     if (minValue === maxValue) return 50; // Handle edge case to avoid division by zero
-    return 100 - (((value - minValue) / (maxValue - minValue)) * 100);
+    return 100 - ((value - minValue) / (maxValue - minValue)) * 100;
   }
 
   // Calculate min value for chart data
@@ -440,7 +456,7 @@ export class ChartComponent implements OnInit, OnChanges {
         percentage,
         value,
         visible: true,
-        percentageLabel
+        percentageLabel,
       });
 
       // Update start angle for next segment
@@ -469,11 +485,16 @@ export class ChartComponent implements OnInit, OnChanges {
 
   // Convert degrees to radians
   degToRad(degrees: number): number {
-    return degrees * Math.PI / 180;
+    return (degrees * Math.PI) / 180;
   }
 
   // Calculate arc text position for percentage labels
-  getArcTextPosition(centerX: number, centerY: number, radius: number, angle: number): { x: number, y: number } {
+  getArcTextPosition(
+    centerX: number,
+    centerY: number,
+    radius: number,
+    angle: number
+  ): { x: number; y: number } {
     // Position text along the arc at the specified angle
     // Use 85% of radius to place text within the arc stroke
     const adjustedRadius = radius * 0.85;
@@ -481,7 +502,7 @@ export class ChartComponent implements OnInit, OnChanges {
 
     return {
       x: centerX + adjustedRadius * Math.cos(radians),
-      y: centerY + adjustedRadius * Math.sin(radians)
+      y: centerY + adjustedRadius * Math.sin(radians),
     };
   }
 
@@ -507,7 +528,7 @@ export class ChartComponent implements OnInit, OnChanges {
       '#10b981', // emerald-500
       '#f59e0b', // amber-500
       '#ef4444', // red-500
-      '#ec4899'  // pink-500
+      '#ec4899', // pink-500
     ];
 
     return colors[index % colors.length];
@@ -521,7 +542,9 @@ export class ChartComponent implements OnInit, OnChanges {
 
     // Calculate position within the pie chart area
     if (!event.currentTarget) return;
-    const pieContainer = (event.currentTarget as HTMLElement).closest('.pie-chart-container') as HTMLElement;
+    const pieContainer = (event.currentTarget as HTMLElement).closest(
+      '.pie-chart-container'
+    ) as HTMLElement;
     const containerRect = pieContainer.getBoundingClientRect();
     this.tooltipX = event.clientX - containerRect.left;
     this.tooltipY = event.clientY - containerRect.top - 10;
@@ -539,10 +562,14 @@ export class ChartComponent implements OnInit, OnChanges {
     target.addEventListener('mousemove', this.handleMouseMove);
 
     // Add the mouseleave listener to hide tooltip when cursor leaves the element
-    target.addEventListener('mouseleave', () => {
-      this.hideTooltip();
-      target.removeEventListener('mousemove', this.handleMouseMove);
-    }, { once: true });
+    target.addEventListener(
+      'mouseleave',
+      () => {
+        this.hideTooltip();
+        target.removeEventListener('mousemove', this.handleMouseMove);
+      },
+      { once: true }
+    );
   }
 
   // SHARED UTILITY METHODS
@@ -566,18 +593,34 @@ export class ChartComponent implements OnInit, OnChanges {
   }
 
   getMonthName(month: number): string {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                   'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month];
   }
 
   getOrdinalSuffix(day: number): string {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
@@ -596,9 +639,10 @@ export class ChartComponent implements OnInit, OnChanges {
     if (!event.currentTarget) return;
 
     // Calculate position within the chart area
-    const chartContainer = (event.currentTarget as HTMLElement).closest('.chart-content-wrapper') ||
-                           (event.currentTarget as HTMLElement).closest('.chart-svg-container') ||
-                           event.currentTarget;
+    const chartContainer =
+      (event.currentTarget as HTMLElement).closest('.chart-content-wrapper') ||
+      (event.currentTarget as HTMLElement).closest('.chart-svg-container') ||
+      event.currentTarget;
 
     // Get coordinates relative to chart container
     const containerRect = (chartContainer as HTMLElement).getBoundingClientRect();
@@ -618,25 +662,30 @@ export class ChartComponent implements OnInit, OnChanges {
     target.addEventListener('mousemove', this.handleMouseMove);
 
     // Add the mouseleave listener to hide tooltip when cursor leaves the element
-    target.addEventListener('mouseleave', () => {
-      this.hideTooltip();
-      target.removeEventListener('mousemove', this.handleMouseMove);
-    }, { once: true });
+    target.addEventListener(
+      'mouseleave',
+      () => {
+        this.hideTooltip();
+        target.removeEventListener('mousemove', this.handleMouseMove);
+      },
+      { once: true }
+    );
   }
 
   // Handle mouse movement for tooltip tracking
   private readonly handleMouseMove = (event: MouseEvent): void => {
     if (!this.tooltipVisible) return;
 
-    const chartContainer = (event.currentTarget as HTMLElement).closest('.chart-content-wrapper') ||
-                         (event.currentTarget as HTMLElement).closest('.chart-svg-container') ||
-                         (event.currentTarget as HTMLElement).closest('.pie-chart-container') ||
-                         event.currentTarget;
+    const chartContainer =
+      (event.currentTarget as HTMLElement).closest('.chart-content-wrapper') ||
+      (event.currentTarget as HTMLElement).closest('.chart-svg-container') ||
+      (event.currentTarget as HTMLElement).closest('.pie-chart-container') ||
+      event.currentTarget;
 
     const containerRect = (chartContainer as HTMLElement).getBoundingClientRect();
     this.tooltipX = event.clientX - containerRect.left;
     this.tooltipY = event.clientY - containerRect.top - 10;
-  }
+  };
 
   hideTooltip(): void {
     this.tooltipVisible = false;

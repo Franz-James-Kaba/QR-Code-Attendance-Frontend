@@ -18,7 +18,6 @@ export interface NSP {
   imports: [CommonModule ],
   templateUrl: './nsp-table.component.html',
 })
-
 export class NspTableComponent {
   @Input() nsps: NSP[] = [];
 

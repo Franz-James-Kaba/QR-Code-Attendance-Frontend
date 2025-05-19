@@ -16,8 +16,8 @@ import { FacilitatorService } from '../../../../shared/services/facilitator.serv
   selector: 'app-facilitator-overview',
   standalone: true,
   imports: [
-    CommonModule, 
-    ButtonComponent, 
+    CommonModule,
+    ButtonComponent,
     FacilitatorTableComponent,
     FacilitatorDeleteConfirmationComponent,
     ModalContainerComponent
@@ -43,7 +43,7 @@ export class FacilitatorOverviewComponent implements OnInit {
     // Reset pagination to defaults
     this.currentPage = 0;
     this.pageSize = 10;
-    
+
     // Check for success messages from redirects (after edit/create/delete)
     this.route.queryParams.subscribe(params => {
       if (params['success']) {
@@ -58,7 +58,7 @@ export class FacilitatorOverviewComponent implements OnInit {
   // Load facilitators from API with pagination
   loadFacilitators(): void {
     this.isLoading = true;
-    
+
     this.facilitatorService.getAllFacilitators(this.currentPage, this.pageSize)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
@@ -115,7 +115,7 @@ export class FacilitatorOverviewComponent implements OnInit {
             // Show success message
             const fullName = this.getFullName(this.facilitatorToDelete!);
             this.showNotification('success', `${fullName} has been successfully deleted`);
-            
+
             // Reload the facilitator list
             this.loadFacilitators();
 
@@ -136,14 +136,14 @@ export class FacilitatorOverviewComponent implements OnInit {
     const { facilitator, grant } = event;
     const facilitatorName = this.getFullName(facilitator);
     const actionText = grant ? 'grant' : 'revoke';
-    
+
     this.isLoading = true;
-    
+
     // Call the appropriate service method based on whether we're granting or revoking
-    const serviceCall = grant 
+    const serviceCall = grant
       ? this.facilitatorService.grantReceptionPrivilege(facilitator.email)
       : this.facilitatorService.revokeReceptionPrivilege(facilitator.email);
-    
+
     serviceCall
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
@@ -155,19 +155,19 @@ export class FacilitatorOverviewComponent implements OnInit {
             }
             return f;
           });
-          
+
           this.facilitators = updatedFacilitators;
-          
+
           // Show success message
           this.showNotification(
-            'success', 
+            'success',
             `Reception privilege ${actionText}ed for ${facilitatorName}`
           );
         },
         error: (error) => {
           console.error(`Error ${actionText}ing reception privilege:`, error);
           this.showNotification(
-            'error', 
+            'error',
             `Failed to ${actionText} reception privilege: ${error.message}`
           );
         }

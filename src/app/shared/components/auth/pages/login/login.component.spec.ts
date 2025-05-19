@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { AuthActions } from '@store/states/auth/auth.actions';
+import { AuthActions } from '@store/actions/auth.actions';
 
 import { LoginComponent } from './login.component';
 
@@ -17,21 +17,15 @@ describe('LoginComponent', () => {
   const initialState = {
     auth: {
       isLoading: false,
-      error: null
-    }
+      error: null,
+    },
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        LoginComponent,
-        ReactiveFormsModule,
-        RouterTestingModule
-      ],
-      providers: [
-        provideMockStore({ initialState })
-      ],
-      schemas: [NO_ERRORS_SCHEMA] // To handle custom components without full implementation
+      imports: [LoginComponent, ReactiveFormsModule, RouterTestingModule],
+      providers: [provideMockStore({ initialState })],
+      schemas: [NO_ERRORS_SCHEMA], // To handle custom components without full implementation
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
@@ -78,7 +72,7 @@ describe('LoginComponent', () => {
     // Set form to invalid state
     component.loginForm.setValue({
       email: 'invalid-email',
-      password: '12345'
+      password: '12345',
     });
     fixture.detectChanges();
 
@@ -89,7 +83,7 @@ describe('LoginComponent', () => {
   it('should enable submit button when form is valid', () => {
     component.loginForm.setValue({
       email: 'test@amalitech.com',
-      password: '123456'
+      password: '123456',
     });
     fixture.detectChanges();
 
@@ -103,7 +97,7 @@ describe('LoginComponent', () => {
 
     component.loginForm.setValue({
       email: testEmail,
-      password: testPassword
+      password: testPassword,
     });
 
     component.onSubmit();
@@ -111,7 +105,7 @@ describe('LoginComponent', () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       AuthActions.login({
         email: testEmail,
-        password: testPassword
+        password: testPassword,
       })
     );
   });
@@ -119,7 +113,7 @@ describe('LoginComponent', () => {
   it('should not dispatch login action when form is invalid', () => {
     component.loginForm.setValue({
       email: 'invalid-email',
-      password: '12345'
+      password: '12345',
     });
 
     component.onSubmit();
@@ -133,8 +127,8 @@ describe('LoginComponent', () => {
     store.setState({
       auth: {
         isLoading: false,
-        error: errorMessage
-      }
+        error: errorMessage,
+      },
     });
     store.refreshState();
     fixture.detectChanges();
@@ -147,8 +141,8 @@ describe('LoginComponent', () => {
     store.setState({
       auth: {
         isLoading: true,
-        error: null
-      }
+        error: null,
+      },
     });
     store.refreshState();
     fixture.detectChanges();

@@ -2,9 +2,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { AuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { ExtendedAuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -12,26 +12,26 @@ import { catchError, tap } from 'rxjs/operators';
 export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly API_URL = environment.auth.baseUrl;
-  private readonly currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
-  private readonly http = inject(HttpClient)
+  private readonly currentUserSubject = new BehaviorSubject<ExtendedAuthResponse | null>(null);
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-  ) {
-    // Check if user is already logged in
+  public currentUser$ = this.currentUserSubject.asObservable();
+  public checkedIn$ = this.currentUser$.pipe(map(user => user?.checkedIn ?? false));
+
+  constructor() {
     this.loadStoredUser();
   }
 
-  // Load user from localStorage when service initializes
   private loadStoredUser(): void {
     const token = this.getToken();
     const userStr = localStorage.getItem('current_user');
 
     if (token && userStr) {
       try {
-        const userData = JSON.parse(userStr);
+        const userData: ExtendedAuthResponse = JSON.parse(userStr);
         this.currentUserSubject.next(userData);
+        this.fetchUserProfile();
       } catch (e) {
         console.error('Error parsing stored user data', e);
         this.logout();
@@ -39,8 +39,16 @@ export class AuthService {
     }
   }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
+  private fetchUserProfile(): void {
+    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    this.http
+      .get<{
+        firstName: string;
+        middleName: string | null;
+        lastName: string;
+        role: string;
+        checkedIn: boolean;
+      }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
       .pipe(
         tap(response => {
           // Ensure email is included in the response
@@ -57,13 +65,14 @@ export class AuthService {
       );
   }
 
-  resetPassword(email: string, token: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/reset-password?email=${email}&token=${token}`,
-      passwords
-    ).pipe(
-      catchError(this.handleError)
-    );
+  public resetPassword(
+    email: string,
+    token: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password?email=${email}&token=${token}`, passwords)
+      .pipe(catchError(this.handleError));
   }
 
   firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
@@ -87,41 +96,38 @@ export class AuthService {
     );
   }
 
-  requestPasswordReset(email: string): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/reset-password-request?email=${email}`,
-      {}
-    ).pipe(
-      catchError(this.handleError)
-    );
+  public requestPasswordReset(email: string): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
+      .pipe(catchError(this.handleError));
   }
 
-  logout(): void {
+  public logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem('current_user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
 
-  getToken(): string | null {
+  public getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  isLoggedIn(): boolean {
+  public isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  hasPasswordResetRequired(): boolean {
+  public hasPasswordResetRequired(): boolean {
     const user = this.currentUserSubject.value;
     return user ? user.passwordResetRequired : false;
   }
 
-  getCurrentUserRole(): UserRole | null {
+  public getCurrentUserRole(): UserRole | null {
     const user = this.currentUserSubject.value;
     return user ? user.role : null;
   }
 
-  getCurrentUserEmail(): string | null {
+  public getCurrentUserEmail(): string | null {
     const user = this.currentUserSubject.value;
     return user ? user.email : null;
   }

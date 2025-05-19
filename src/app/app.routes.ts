@@ -6,12 +6,12 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: '/auth/login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'login',
     redirectTo: '/auth/login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'auth',
@@ -20,55 +20,59 @@ export const routes: Routes = [
       {
         path: '',
         redirectTo: 'login',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'login',
-        loadComponent: () => import('./shared/components/auth/pages/login/login.component')
-          .then(m => m.LoginComponent),
-        title: 'Login'
+        loadComponent: () =>
+          import('./shared/components/auth/pages/login/login.component').then(
+            m => m.LoginComponent
+          ),
+        title: 'Login',
       },
       {
         path: 'forgot-password',
-        loadComponent: () => import('./shared/components/auth/pages/forgot-password/forgot-password.component')
-          .then(m => m.ForgotPasswordComponent),
-        title: 'Forgot Password'
+        loadComponent: () =>
+          import('./shared/components/auth/pages/forgot-password/forgot-password.component').then(
+            m => m.ForgotPasswordComponent
+          ),
+        title: 'Forgot Password',
       },
       {
         path: 'reset-password',
-        loadComponent: () => import('./shared/components/auth/pages/reset-password/reset-password.component')
-          .then(m => m.ResetPasswordComponent),
-        title: 'Reset Password'
-      }
-    ]
+        loadComponent: () =>
+          import('./shared/components/auth/pages/reset-password/reset-password.component').then(
+            m => m.ResetPasswordComponent
+          ),
+        title: 'Reset Password',
+      },
+    ],
   },
   {
     path: 'admin',
-    loadChildren: () => import('./features/Admin/admin.routes')
-      .then(r => r.adminRoutes),
+    loadChildren: () => import('./features/Admin/admin.routes').then(r => r.adminRoutes),
     data: {
-      title: 'Admin'
-    }
+      title: 'Admin',
+    },
   },
   {
     path: 'nsp',
-    loadChildren: () => import('./features/NSP/nsp.routes')
-      .then(r => r.nspRoutes),
+    loadChildren: () => import('./features/NSP/nsp.routes').then(r => r.nspRoutes),
     data: {
-      title: 'NSP'
-    }
+      title: 'NSP',
+    },
   },
   {
     path: 'facilitator',
-    loadChildren: () => import('./features/Facilitator/facilitator.routes')
-      .then(r => r.facilitatorRoutes),
+    loadChildren: () =>
+      import('./features/Facilitator/facilitator.routes').then(r => r.facilitatorRoutes),
     data: {
-      title: 'Facilitator'
-    }
+      title: 'Facilitator',
+    },
   },
   {
     path: '**',
-    loadComponent: () => import('@shared/components/not-found/not-found.component')
-      .then(m => m.NotFoundComponent)
-  }
+    loadComponent: () =>
+      import('@shared/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];

@@ -8,7 +8,7 @@ import {
   AdminUserListResponse,
   CreateUserRequest,
   UpdateUserRequest,
-  UserFilter
+  UserFilter,
 } from '@features/Admin/shared/models/user/user.model';
 
 @Injectable({
@@ -48,7 +48,8 @@ export class AdminUserService {
       }
     }
 
-    return this.http.get<AdminUserListResponse>(this.API_URL, { params })
+    return this.http
+      .get<AdminUserListResponse>(this.API_URL, { params })
       .pipe(catchError(this.handleError));
   }
 
@@ -56,23 +57,22 @@ export class AdminUserService {
    * Get a specific user by ID
    */
   getUserById(id: number): Observable<AdminUser> {
-    return this.http.get<AdminUser>(`${this.API_URL}/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<AdminUser>(`${this.API_URL}/${id}`).pipe(catchError(this.handleError));
   }
 
   /**
    * Create a new user
    */
   createUser(userData: CreateUserRequest): Observable<AdminUser> {
-    return this.http.post<AdminUser>(this.API_URL, userData)
-      .pipe(catchError(this.handleError));
+    return this.http.post<AdminUser>(this.API_URL, userData).pipe(catchError(this.handleError));
   }
 
   /**
    * Update an existing user
    */
   updateUser(userId: number, userData: UpdateUserRequest): Observable<AdminUser> {
-    return this.http.patch<AdminUser>(`${this.API_URL}/${userId}`, userData)
+    return this.http
+      .patch<AdminUser>(`${this.API_URL}/${userId}`, userData)
       .pipe(catchError(this.handleError));
   }
 
@@ -80,15 +80,15 @@ export class AdminUserService {
    * Delete a user
    */
   deleteUser(userId: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${userId}`)
-      .pipe(catchError(this.handleError));
+    return this.http.delete<void>(`${this.API_URL}/${userId}`).pipe(catchError(this.handleError));
   }
 
   /**
    * Deactivate a user
    */
   deactivateUser(userId: number): Observable<AdminUser> {
-    return this.http.patch<AdminUser>(`${this.API_URL}/${userId}/deactivate`, {})
+    return this.http
+      .patch<AdminUser>(`${this.API_URL}/${userId}/deactivate`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -96,7 +96,8 @@ export class AdminUserService {
    * Activate a user
    */
   activateUser(userId: number): Observable<AdminUser> {
-    return this.http.patch<AdminUser>(`${this.API_URL}/${userId}/activate`, {})
+    return this.http
+      .patch<AdminUser>(`${this.API_URL}/${userId}/activate`, {})
       .pipe(catchError(this.handleError));
   }
 
@@ -104,7 +105,8 @@ export class AdminUserService {
    * Send password reset link to a user
    */
   sendPasswordResetLink(userId: number): Observable<void> {
-    return this.http.post<void>(`${this.API_URL}/${userId}/reset-password`, {})
+    return this.http
+      .post<void>(`${this.API_URL}/${userId}/reset-password`, {})
       .pipe(catchError(this.handleError));
   }
 

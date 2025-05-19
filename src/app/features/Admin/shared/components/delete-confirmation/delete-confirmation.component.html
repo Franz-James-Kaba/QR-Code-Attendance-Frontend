@@ -1,12 +1,24 @@
 <!-- Modal overlay -->
-<div *ngIf="showModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+<div
+  *ngIf="showModal"
+  class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4"
+>
   <!-- Modal container -->
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6">
     <div class="text-center">
       <!-- Warning icon -->
       <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-10 w-10 text-red-600"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+            clip-rule="evenodd"
+          />
         </svg>
       </div>
 
@@ -20,18 +32,10 @@
 
       <!-- Action buttons -->
       <div class="flex justify-center space-x-3 mt-6">
-        <app-button
-          variant="secondary"
-          size="md"
-          type="button"
-          (buttonClick)="onCancel()">
+        <app-button variant="secondary" size="md" type="button" (buttonClick)="onCancel()">
           Cancel
         </app-button>
-        <app-button
-          variant="danger"
-          size="md"
-          type="button"
-          (buttonClick)="onConfirm()">
+        <app-button variant="danger" size="md" type="button" (buttonClick)="onConfirm()">
           Delete
         </app-button>
       </div>

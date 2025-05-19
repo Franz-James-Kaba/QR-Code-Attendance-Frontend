@@ -12,13 +12,9 @@ export interface Personnel {
 @Component({
   selector: 'app-personnel-table',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './personnel-table.component.html',
-  styleUrls: ['./personnel-table.component.scss']
+  styleUrls: ['./personnel-table.component.scss'],
 })
 export class PersonnelTableComponent implements OnInit {
   // Full list of personnel
@@ -29,7 +25,7 @@ export class PersonnelTableComponent implements OnInit {
     { name: 'Robert Fox', stack: 'Back-End(Java)', status: 'NSP' },
     { name: 'Jacob Jones', stack: 'QA', status: 'NSP' },
     { name: 'Cody Fisher', stack: 'QA', status: 'NSP' },
-    { name: 'Ralph Edwards', stack: 'Front-End(React)', status: 'NSP' }
+    { name: 'Ralph Edwards', stack: 'Front-End(React)', status: 'NSP' },
   ];
 
   // Filtered personnel list (what's shown in the table)
@@ -41,13 +37,21 @@ export class PersonnelTableComponent implements OnInit {
   selectedStatus: string = 'All Status';
 
   // Dropdown options
-  stackOptions: string[] = ['All Stacks', 'Front-End(Angular)', 'Front-End(React)', 'Back-End(Java)', 'UI/UX Designer', 'UI/UX Trainer', 'QA'];
+  stackOptions: string[] = [
+    'All Stacks',
+    'Front-End(Angular)',
+    'Front-End(React)',
+    'Back-End(Java)',
+    'UI/UX Designer',
+    'UI/UX Trainer',
+    'QA',
+  ];
   statusOptions: string[] = ['All Status', 'NSP', 'Facilitator'];
 
   // Loading state
   isLoading: boolean = false;
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit(): void {
     // Initialize with all personnel
@@ -70,10 +74,11 @@ export class PersonnelTableComponent implements OnInit {
     // Apply search filter (case insensitive)
     if (this.searchQuery.trim() !== '') {
       const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(person =>
-        person.name.toLowerCase().includes(query) ||
-        person.stack.toLowerCase().includes(query) ||
-        person.status.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        person =>
+          person.name.toLowerCase().includes(query) ||
+          person.stack.toLowerCase().includes(query) ||
+          person.status.toLowerCase().includes(query)
       );
     }
 

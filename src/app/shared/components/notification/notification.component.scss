@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
+
+  // Animation for the container
   max-width: 400px;
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -20,7 +22,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.8);
   }
@@ -31,41 +33,41 @@
   &[data-position^="top"] .notification-container {
     align-items: center;
   }
-  
+
   &[data-position^="bottom"] .notification-container {
     align-items: center;
     flex-direction: column-reverse;
   }
-  
+
   &[data-position$="right"] .notification-container {
     align-items: flex-end;
   }
-  
+
   &[data-position$="left"] .notification-container {
     align-items: flex-start;
   }
-  
+
   &[data-position$="center"] .notification-container {
     align-items: center;
   }
-  
+
   // Theme styles
   &.light-theme {
     .more-notifications {
       background-color: rgba(0, 0, 0, 0.7);
       color: white;
-      
+
       &:hover {
         background-color: rgba(0, 0, 0, 0.8);
       }
     }
   }
-  
+
   &.dark-theme {
     .more-notifications {
       background-color: rgba(255, 255, 255, 0.15);
       color: white;
-      
+
       &:hover {
         background-color: rgba(255, 255, 255, 0.2);
       }

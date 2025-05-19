@@ -1,0 +1,49 @@
+export interface CalendarDate {
+  day: number;
+  name: string;
+  active: boolean;
+  selectable: boolean;
+}
+
+interface SvgIcon {
+  path: string;
+  size: number;
+  viewBox: string;
+}
+
+export interface SummaryCard {
+  icon: SvgIcon;
+  title: string;
+  value: string;
+  description: string;
+}
+
+export interface AverageTimeResponse {
+  message: string;
+  data: string | null;
+}
+
+export interface CheckInResponse {
+  message: string;
+  success: boolean;
+}
+
+export interface AttendancePositionResponse {
+  success: boolean;
+  message: string;
+  position: number;
+}
+
+export interface DashboardState {
+  selectedDate: Date | undefined;
+  isCheckedIn: boolean;
+  attendanceSummary: SummaryCard[];
+  error: string | null;
+}
+
+export const initialState: DashboardState = {
+  selectedDate: new Date(),
+  isCheckedIn: false,
+  attendanceSummary: [],
+  error: null,
+};

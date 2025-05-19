@@ -77,15 +77,15 @@
         Showing {{ facilitators.length }} of {{ totalItems }} facilitators
       </div>
       <div class="flex space-x-2">
-        <button 
-          class="px-4 py-2 border rounded-md" 
+        <button
+          class="px-4 py-2 border rounded-md"
           [disabled]="currentPage === 0"
           [class.opacity-50]="currentPage === 0"
           (click)="onPageChange(currentPage - 1)">
           Previous
         </button>
-        <button 
-          class="px-4 py-2 border rounded-md" 
+        <button
+          class="px-4 py-2 border rounded-md"
           [disabled]="(currentPage + 1) * pageSize >= totalItems"
           [class.opacity-50]="(currentPage + 1) * pageSize >= totalItems"
           (click)="onPageChange(currentPage + 1)">
