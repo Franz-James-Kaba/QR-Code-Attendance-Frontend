@@ -1,6 +1,25 @@
+/* Header component styles */
 :host {
   display: block;
   width: 100%;
+}
+
+/* User dropdown animation */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host ::ng-deep {
+  .absolute.z-40 {
+    animation: dropdownFade 0.2s ease-out;
+  }
 }
 
 header {
@@ -23,4 +42,11 @@ header {
   border-radius: 50%;
   background-color: #ef4444;
   transform: translate(50%, -50%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  :host {
+    padding-left: 0 !important;
+  }
 }

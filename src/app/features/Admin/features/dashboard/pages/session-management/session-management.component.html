@@ -1,0 +1,260 @@
+<!-- Session Management Page -->
+<section class="container mx-auto p-6">
+  <!-- Header with title and action buttons -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Session Management</h1>
+      <p class="text-sm text-gray-600">Create and manage attendance sessions</p>
+    </div>
+    <app-button
+      variant="primary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <circle cx='12' cy='12' r='10'></circle>
+          <line x1='12' y1='8' x2='12' y2='16'></line>
+          <line x1='8' y1='12' x2='16' y2='12'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="createSession()">
+      Create Session
+    </app-button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Filters</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Status filter -->
+      <div>
+        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select
+          id="status-filter"
+          [(ngModel)]="selectedStatus"
+          (change)="onStatusChange($event)"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status === 'all' ? 'All Statuses' : getStatusText(status) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Start date filter -->
+      <div>
+        <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input
+          id="start-date"
+          type="date"
+          [(ngModel)]="dateFilter.startDate"
+          (change)="onDateFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+      </div>
+
+      <!-- End date filter -->
+      <div>
+        <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input
+          id="end-date"
+          type="date"
+          [(ngModel)]="dateFilter.endDate"
+          (change)="onDateFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-10">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+    <p class="ml-4 text-gray-600">Loading sessions...</p>
+  </div>
+
+  <!-- Sessions list -->
+  <div *ngIf="!isLoading" class="bg-white shadow rounded-lg overflow-hidden">
+    <table *ngIf="sessions.length > 0" class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-[#0074B7] text-white">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Start Time</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">End Time</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Attendees</th>
+          <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let session of sessions">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            #{{ session.id }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ session.startTime | date:'medium' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ session.endTime | date:'medium' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+              [ngClass]="getStatusClass(session.status)"
+            >
+              {{ getStatusText(session.status) }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ session.attendees || 0 }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex justify-end space-x-2">
+              <!-- Edit button - only for SCHEDULED sessions -->
+              <button
+                *ngIf="session.status === 'SCHEDULED'"
+                (click)="editSession(session)"
+                class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-full"
+                title="Edit Session"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+              </button>
+
+              <!-- Generate QR Code button - for SCHEDULED and ONGOING sessions -->
+              <button
+                *ngIf="session.status === 'SCHEDULED' || session.status === 'ONGOING'"
+                (click)="generateQrCode(session)"
+                class="text-purple-600 hover:text-purple-900 bg-purple-50 p-2 rounded-full"
+                title="Generate QR Code"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2h1v1H5V6zm6-2a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2h1v1h-1V6zm-2 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3zm2 2h1v1h-1v-1zm-6-2a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1v-3a1 1 0 00-1-1H4zm2 2h1v1H6v-1z" />
+                </svg>
+              </button>
+
+              <!-- Cancel button - only for SCHEDULED sessions -->
+              <button
+                *ngIf="session.status === 'SCHEDULED'"
+                (click)="cancelSession(session)"
+                class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-full"
+                title="Cancel Session"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div *ngIf="sessions.length === 0" class="text-center py-8">
+      <div class="flex justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900">No sessions found</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        No sessions match your filter criteria. Try changing your filters or create a new session.
+      </p>
+      <div class="mt-6">
+        <app-button
+          variant="primary"
+          size="md"
+          (buttonClick)="createSession()">
+          Create a new session
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && sessions.length > 0" class="flex justify-between items-center mt-4 p-4 bg-white rounded-lg shadow">
+    <div class="text-sm text-gray-700">
+      Showing {{ sessions.length }} of {{ totalItems }} sessions
+    </div>
+    <div class="flex space-x-2">
+      <button
+        [disabled]="currentPage === 0"
+        [class.opacity-50]="currentPage === 0"
+        class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white text-gray-700 hover:bg-gray-50"
+        (click)="onPageChange(currentPage - 1)"
+        type="button">
+        Previous
+      </button>
+      <button
+        [disabled]="(currentPage + 1) * pageSize >= totalItems"
+        [class.opacity-50]="(currentPage + 1) * pageSize >= totalItems"
+        class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white text-gray-700 hover:bg-gray-50"
+        (click)="onPageChange(currentPage + 1)"
+        type="button">
+        Next
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- QR Code Modal -->
+<div *ngIf="showQrCodeModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div class="p-6">
+      <div class="flex justify-between items-start">
+        <h3 class="text-lg font-medium text-gray-900">QR Code</h3>
+        <button
+          class="text-gray-400 hover:text-gray-500"
+          (click)="closeQrCodeModal()"
+          type="button">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div *ngIf="selectedSession" class="mt-4">
+        <p class="text-sm text-gray-500 mb-4">
+          Session: {{ selectedSession.startTime | date:'medium' }} to {{ selectedSession.endTime | date:'medium' }}
+        </p>
+
+        <div *ngIf="qrCodeGenerating" class="flex justify-center items-center h-64">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+          <p class="ml-4 text-gray-600">Generating QR code...</p>
+        </div>
+
+        <div *ngIf="!qrCodeGenerating && qrCodeUrl" class="flex flex-col items-center">
+          <img [src]="qrCodeUrl" alt="QR Code" class="border rounded-lg shadow-sm max-w-full h-auto max-h-64">
+          <p class="mt-4 text-sm text-gray-500">Scan this QR code to record attendance</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-3">
+        <app-button
+          variant="secondary"
+          size="md"
+          (buttonClick)="closeQrCodeModal()">
+          Close
+        </app-button>
+        <app-button
+          variant="primary"
+          size="md"
+          [disabled]="!qrCodeUrl || qrCodeGenerating"
+          (buttonClick)="downloadQrCode()">
+          Download
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal container for session forms -->
+<app-modal-container></app-modal-container>
