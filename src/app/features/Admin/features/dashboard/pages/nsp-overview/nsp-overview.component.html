@@ -1,41 +1,78 @@
-<!-- Success message notification -->
-<div
-  *ngIf="showSuccessMessage"
-  class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded"
->
-  <div class="flex items-center">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 mr-2"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path
-        fill-rule="evenodd"
-        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-        clip-rule="evenodd"
-      />
-    </svg>
-    <span>{{ successMessage }}</span>
+<!-- Header with action buttons -->
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">NSP Management</h1>
+  <div class="flex space-x-3">
+    <app-button
+      variant="secondary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
+          <polyline points='7 10 12 15 17 10'></polyline>
+          <line x1='12' y1='15' x2='12' y2='3'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="openBulkImport()">
+      Bulk Import
+    </app-button>
+    <app-button
+      variant="primary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <circle cx='12' cy='12' r='10'></circle>
+          <line x1='12' y1='8' x2='12' y2='16'></line>
+          <line x1='8' y1='12' x2='16' y2='12'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="createNsp()">
+      Create NSP
+    </app-button>
   </div>
+</div>
+
+<!-- Loading indicator -->
+<div *ngIf="isLoading" class="flex justify-center my-8">
+  <div class="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
 </div>
 
 <!-- NSP Table view when there are records -->
 <app-nsp-table
-  *ngIf="hasRecords"
+  *ngIf="hasRecords && !isLoading"
   [nsps]="nsps"
-  [showSuccessMessage]="false"
   (edit)="editNsp($event)"
   (delete)="confirmDelete($event)"
   (create)="createNsp()"
 >
 </app-nsp-table>
 
+<!-- Pagination controls if needed -->
+<div *ngIf="hasRecords && totalItems > pageSize" class="mt-4 flex justify-between items-center">
+  <span class="text-sm text-gray-600">
+    Showing {{currentPage * pageSize + 1}} - {{ (currentPage + 1) * pageSize > totalItems ? totalItems : (currentPage + 1) * pageSize }} of {{ totalItems }} NSPs
+  </span>
+  <div class="flex space-x-2">
+    <button
+      class="px-3 py-1 border border-gray-300 rounded-md text-sm"
+      [class.bg-gray-100]="currentPage === 0"
+      [disabled]="currentPage === 0"
+      (click)="onPageChange(currentPage - 1)">
+      Previous
+    </button>
+    <button
+      class="px-3 py-1 border border-gray-300 rounded-md text-sm"
+      [class.bg-gray-100]="(currentPage + 1) * pageSize >= totalItems"
+      [disabled]="(currentPage + 1) * pageSize >= totalItems"
+      (click)="onPageChange(currentPage + 1)">
+      Next
+    </button>
+  </div>
+</div>
+
 <!-- Empty state when no records -->
-<div
-  *ngIf="!hasRecords"
-  class="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center min-h-[60vh]"
->
+<div *ngIf="!hasRecords && !isLoading" class="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center min-h-[60vh]">
   <!-- Empty state illustration (isometric cube) -->
   <div class="mb-6 w-40 h-40 flex items-center justify-center">
     <svg
@@ -49,26 +86,40 @@
       ></path>
     </svg>
   </div>
-  <h3 class="text-xl font-semibold text-gray-700 mb-2">No Record Found</h3>
-  <p class="text-gray-500">Create your first NSP to get started</p>
+  <h3 class="text-xl font-semibold text-gray-700 mb-2">No NSPs Found</h3>
+  <p class="text-gray-500 mb-6">Get started by creating your first NSP or importing multiple NSPs.</p>
 
-  <!-- Add create button for empty state -->
-  <app-button
-    class="mt-4"
-    variant="primary"
-    size="md"
-    [svgIcon]="
-      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
-        <circle cx='12' cy='12' r='10'></circle>
-        <line x1='12' y1='8' x2='12' y2='16'></line>
-        <line x1='8' y1='12' x2='16' y2='12'></line>
-      </svg>`
-    "
-    iconPosition="left"
-    (buttonClick)="createNsp()"
-  >
-    Create NSP
-  </app-button>
+  <!-- Action buttons for empty state -->
+  <div class="flex space-x-4">
+    <app-button
+      variant="secondary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
+          <polyline points='7 10 12 15 17 10'></polyline>
+          <line x1='12' y1='15' x2='12' y2='3'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="openBulkImport()">
+      Bulk Import
+    </app-button>
+    <app-button
+      variant="primary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <circle cx='12' cy='12' r='10'></circle>
+          <line x1='12' y1='8' x2='12' y2='16'></line>
+          <line x1='8' y1='12' x2='16' y2='12'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="createNsp()">
+      Create NSP
+    </app-button>
+  </div>
 </div>
 
 <!-- Delete confirmation modal -->
@@ -79,6 +130,16 @@
   (cancel)="cancelDelete()"
 >
 </app-delete-confirmation>
+
+<!-- Bulk Import Modal -->
+<div *ngIf="showBulkImportModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="max-w-2xl w-full mx-4">
+    <app-nsp-bulk-import
+      (importComplete)="handleImportComplete($event)"
+      (cancel)="closeBulkImport()">
+    </app-nsp-bulk-import>
+  </div>
+</div>
 
 <!-- Modal Container (shared between NSP and Facilitator) -->
 <app-modal-container></app-modal-container>

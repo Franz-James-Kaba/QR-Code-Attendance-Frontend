@@ -1,45 +1,66 @@
 <aside
-  [class]="
-    'fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-[#464646] border-r border-gray-200 ' +
-    (isOpen ? 'translate-x-0' : '-translate-x-full') +
-    ' ' +
-    (isMinimized ? 'w-16' : 'w-64') +
-    ' ' +
-    'md:translate-x-0'
-  "
+  class="fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-base-dark border-r border-gray-200"
+  [class.translate-x-0]="isOpen"
+  [class.-translate-x-full]="!isOpen"
+  [class.w-16]="isMinimized"
+  [class.w-64]="!isMinimized"
+  [class.md:translate-x-0]="true"
+  clickOutside
+  (clickOutside)="onClickOutside()"
 >
   <!-- Logo Section -->
   <div class="flex items-center h-16 px-4">
     <div class="flex items-center overflow-hidden">
       @if (!isMinimized) {
-        <span class="ml-2 text-xl font-semibold text-white truncate"> Attendance System </span>
+        <span class="ml-2 text-xl font-semibold text-white truncate">
+          Attendance System
+        </span>
+      } @else {
+        <span class="text-xl font-semibold text-white text-center w-full">
+          AS
+        </span>
       }
     </div>
 
-    <!-- Mobile close button -->
+    <!-- Mobile close button - only visible on mobile -->
     <button
       class="ml-auto p-2 rounded-lg hover:bg-[#656565] md:hidden"
       (click)="onToggle()"
-      onkeypress="onToggle()"
+      aria-label="Close sidebar"
     >
-      <app-icon path="M6 18L18 6M6 6l12 12" class="text-white" />
+      <app-icon path="M6 18L18 6M6 6l12 12" class="text-white w-5 h-5" />
     </button>
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="p-4 space-y-2">
+  <nav class="px-3 space-y-3 mt-8">
     @for (item of navItems; track item.route) {
       <a
         [routerLink]="item.route"
-        routerLinkActive="bg-[#656565]"
-        class="flex items-center p-2 text-white rounded-lg hover:bg-[#656565] group"
+        [class.bg-primary]="isRouteActive(item.route)"
+        class="flex items-center p-2 text-white rounded-lg border border-primary hover:bg-primary group transition-colors duration-200"
         (click)="updateBreadcrumbs(item.breadcrumbs)"
       >
-        <app-icon [path]="item.icon" class="text-white" />
+        <app-icon [path]="item.icon" class="text-white w-5 h-5 shrink-0" />
         @if (!isMinimized) {
-          <span class="ml-3">{{ item.label }}</span>
+          <span class="ml-3 whitespace-nowrap">{{ item.label }}</span>
         }
       </a>
     }
   </nav>
+
+  <!-- Minimize Toggle Button - only visible on desktop -->
+  <div class="absolute bottom-4 w-full hidden md:block">
+    <button
+      class="flex items-center justify-center mx-auto p-2 rounded-lg text-white hover:bg-[#656565] transition-colors duration-200"
+      (click)="onToggle()"
+      aria-label="Toggle sidebar width"
+    >
+      @if (isMinimized) {
+        <app-icon path="M13 5l7 7-7 7M5 5l7 7-7 7" class="w-5 h-5" />
+      } @else {
+        <app-icon path="M11 19l-7-7 7-7m8 14l-7-7 7-7" class="w-5 h-5" />
+      }
+    </button>
+  </div>
 </aside>

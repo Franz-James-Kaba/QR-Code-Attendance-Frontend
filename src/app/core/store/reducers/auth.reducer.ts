@@ -22,7 +22,7 @@ export const authReducer = createReducer(
     passwordResetRequired: response.passwordResetRequired,
     user: {
       role: response.role,
-      id: null, // These will be populated by user profile if needed
+      id: null,
       email: response.email ?? state.email ?? '',
       firstName: '',
       lastName: '',
@@ -66,13 +66,13 @@ export const authReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-
+  
   on(AuthActions.firstTimePasswordResetSuccess, state => ({
     ...state,
     passwordResetRequired: false,
     isLoading: false,
     error: null,
-    successMessage: 'Password has been reset successfully',
+    successMessage: 'Your password has been updated successfully. Please login with your new password.',
   })),
 
   on(AuthActions.firstTimePasswordResetFailure, (state, { error }) => ({

@@ -20,10 +20,23 @@ import {
 export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() title = 'Modal';
   @Input() visible = false;
+  @Input() isLoading = false;
+  @Input() loadingAction: 'create' | 'update' | null = null;
   @Output() modalClosed = new EventEmitter<void>();
 
   // Flag to control content visibility for animations
   showContent = false;
+
+  get loadingMessage(): string {
+    if (!this.isLoading) return '';
+    
+    if (this.loadingAction === 'create') {
+      return 'Creating...';
+    } else if (this.loadingAction === 'update') {
+      return 'Updating...';
+    }
+    return 'Processing...';
+  }
 
   ngOnInit(): void {
     // Listen for visible changes to trigger animations
@@ -73,7 +86,9 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
    * Closes the modal
    */
   close(): void {
-    this.onVisibilityChange(false);
+    if (!this.isLoading) {
+      this.onVisibilityChange(false);
+    }
   }
 
   /**
@@ -81,7 +96,8 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
    */
   onBackdropClick(event: MouseEvent): void {
     // Only close if the backdrop itself was clicked, not modal content
-    if ((event.target as HTMLElement).classList.contains('fixed')) {
+    // And don't close if we're in a loading state
+    if (!this.isLoading && (event.target as HTMLElement).classList.contains('fixed')) {
       this.close();
     }
   }

@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ButtonComponent } from '@shared/components/button/button.component';
+import { NotificationService } from '@shared/components/notification/notification.service';
+import { finalize } from 'rxjs';
 
+import { ModalService } from '../../../../core/services/modal.service';
 import { DeleteConfirmationComponent } from '../../../../shared/components/delete-confirmation/delete-confirmation.component';
 import { ModalContainerComponent } from '../../../../shared/components/modal-container/modal-container.component';
-import {
-  NspTableComponent,
-  NSP,
-} from '../../../../shared/components/nsp-table/nsp-table.component';
-import { ModalService } from '../../../../core/services/modal.service';
+import { NspBulkImportComponent } from '../../../../shared/components/nsp-bulk-import/nsp-bulk-import.component';
+import { NspTableComponent } from '../../../../shared/components/nsp-table/nsp-table.component';
+import { NSPImportResult, NSPViewModel, mapToApiModel } from '../../../../shared/models/nsp.model';
+import { NspService } from '../../../../shared/services/nsp.service';
 
 @Component({
   selector: 'app-nsp-overview',
@@ -20,82 +22,62 @@ import { ModalService } from '../../../../core/services/modal.service';
     NspTableComponent,
     DeleteConfirmationComponent,
     ModalContainerComponent,
+    NspBulkImportComponent
   ],
   templateUrl: './nsp-overview.component.html',
-  styleUrls: ['./nsp-overview.component.scss'],
 })
+
 export class NspOverviewComponent implements OnInit {
-  // Flag to control empty state or table view
   hasRecords = false;
-
-  // Success message handling
-  showSuccessMessage = false;
-  successMessage = '';
-
-  // Delete confirmation modal handling
   showDeleteModal = false;
-  nspToDelete: NSP | null = null;
+  nspToDelete: NSPViewModel | null = null;
+  showBulkImportModal = false;
+  currentPage = 0;
+  pageSize = 10;
+  totalItems = 0;
+  isLoading = false;
+  nsps: NSPViewModel[] = [];
 
-  // Mock data for the table view
-  nsps: NSP[] = [];
-
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private modalService = inject(ModalService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly modalService = inject(ModalService);
+  private readonly nspService = inject(NspService);
+  private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
+    // Reset pagination to safe defaults
+    this.currentPage = 0;
+    this.pageSize = 10;
+
     // Check for success messages from redirects (after edit/create/delete)
     this.route.queryParams.subscribe(params => {
       if (params['success']) {
-        this.showSuccessMessage = true;
-        this.successMessage = params['message'] || 'Operation successful';
-        // Hide success message after 5 seconds
-        setTimeout(() => (this.showSuccessMessage = false), 5000);
+        this.showNotification('success', params['message'] ?? 'Operation successful');
       }
     });
 
-    // Load mock data for demonstration
-    this.loadMockData();
+    // Load NSPs from service
+    this.loadNsps();
   }
 
-  loadMockData(): void {
-    // For demonstration purposes: mock data
-    // In a real application, this would fetch from a service
-    this.nsps = [
-      {
-        id: 'NSP-1234',
-        name: 'John Doe',
-        stack: 'Frontend',
-        status: 'Active',
-        email: 'john.doe@example.com',
-        phone: '+1 234 567 8901',
-        program: 'Web Development',
-        joinDate: '2024-05-01',
-      },
-      {
-        id: 'NSP-5678',
-        name: 'Jane Smith',
-        stack: 'Backend',
-        status: 'Active',
-        email: 'jane.smith@example.com',
-        phone: '+1 234 567 8902',
-        program: 'Data Science',
-        joinDate: '2024-04-15',
-      },
-      {
-        id: 'NSP-9012',
-        name: 'David Johnson',
-        stack: 'FullStack',
-        status: 'On Leave',
-        email: 'david.johnson@example.com',
-        phone: '+1 234 567 8903',
-        program: 'Web Development',
-        joinDate: '2024-03-10',
-      },
-    ];
+  // Load NSPs from API with pagination
+  loadNsps(): void {
+    this.isLoading = true;
 
-    // Update hasRecords flag
-    this.hasRecords = this.nsps.length > 0;
+    this.nspService.getAllNsps(this.currentPage, this.pageSize)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (result) => {
+          this.nsps = result.data;
+          this.totalItems = result.total;
+
+          // Update UI state
+          this.hasRecords = this.nsps.length > 0;
+        },
+        error: (error) => {
+          console.error('Error loading NSPs:', error);
+          this.showNotification('error', 'Failed to load NSP data: ' + error.message);
+        }
+      });
   }
 
   // Methods for handling NSP actions using the shared modal service
@@ -103,12 +85,12 @@ export class NspOverviewComponent implements OnInit {
     this.modalService.openModal('createNsp');
   }
 
-  editNsp(nsp: NSP): void {
+  editNsp(nsp: NSPViewModel): void {
     this.modalService.openModal('editNsp', nsp);
   }
 
   // Delete confirmation methods
-  confirmDelete(nsp: NSP): void {
+  confirmDelete(nsp: NSPViewModel): void {
     this.nspToDelete = nsp;
     this.showDeleteModal = true;
   }
@@ -120,25 +102,130 @@ export class NspOverviewComponent implements OnInit {
 
   executeDelete(): void {
     if (this.nspToDelete) {
-      // In a real application, call a service to delete the NSP
-      console.log('Deleting NSP:', this.nspToDelete.id);
+      const nspId = parseInt(this.nspToDelete.id);
+      if (isNaN(nspId)) {
+        this.showNotification('error', 'Invalid NSP ID');
+        return;
+      }
 
-      // Remove from local array for demonstration
-      this.nsps = this.nsps.filter(nsp => nsp.id !== this.nspToDelete?.id);
+      this.isLoading = true;
 
-      // Update empty state flag
-      this.hasRecords = this.nsps.length > 0;
+      this.nspService.deleteNsp(nspId)
+        .pipe(finalize(() => this.isLoading = false))
+        .subscribe({
+          next: () => {
+            // Show success message
+            const fullName = this.getFullName(this.nspToDelete!);
+            this.showNotification('success', `${fullName} has been successfully deleted`);
 
-      // Show success message
-      this.showSuccessMessage = true;
-      this.successMessage = `${this.nspToDelete.name} has been successfully deleted`;
+            // Reload the NSP list
+            this.loadNsps();
 
-      // Hide success message after 5 seconds
-      setTimeout(() => (this.showSuccessMessage = false), 5000);
+            // Close modal
+            this.showDeleteModal = false;
+            this.nspToDelete = null;
+          },
+          error: (error) => {
+            console.error('Error deleting NSP:', error);
+            this.showNotification('error', 'Failed to delete NSP: ' + error.message);
+          }
+        });
+    }
+  }
 
-      // Close modal
-      this.showDeleteModal = false;
-      this.nspToDelete = null;
+  onPageChange(page: number): void {
+    // Ensure page is never negative
+    this.currentPage = Math.max(0, page);
+    this.loadNsps();
+  }
+
+  openBulkImport(): void {
+    this.showBulkImportModal = true;
+  }
+
+  closeBulkImport(): void {
+    this.showBulkImportModal = false;
+  }
+
+  handleImportComplete(result: NSPImportResult): void {
+    this.showBulkImportModal = false;
+
+    const failedMessage = result.failed > 0 ? 'Failed to import ' + result.failed + ' NSPs.' : '';
+    this.showNotification('success', `Successfully imported ${result.successful} NSPs. ${failedMessage}`);
+
+    this.loadNsps();
+  }
+  handleNspFormSubmit(nsp: NSPViewModel): void {
+    const apiModel = mapToApiModel(nsp);
+    this.isLoading = true;
+    const fullName = this.getFullName(nsp);
+
+    if (nsp.id && !isNaN(parseInt(nsp.id))) {
+      // Update existing NSP
+      const nspId = parseInt(nsp.id);
+
+      this.nspService.updateNsp(nspId, apiModel)
+        .pipe(finalize(() => this.isLoading = false))
+        .subscribe({
+          next: () => {
+            // First close the modal
+            this.modalService.closeModal();
+
+            // Then show success message
+            this.showNotification('success', `${fullName} has been updated successfully`);
+
+            // Reload the data
+            this.loadNsps();
+          },
+          error: (error) => {
+            console.error('Error updating NSP:', error);
+            this.showNotification('error', 'Failed to update NSP: ' + error.message);
+          }
+        });
+    } else {
+      // Create new NSP
+      this.nspService.createNsp(apiModel)
+        .pipe(finalize(() => this.isLoading = false))
+        .subscribe({
+          next: () => {
+            // First close the modal
+            this.modalService.closeModal();
+
+            // Then show success message
+            this.showNotification('success', `${fullName} has been created successfully`);
+
+            // Reload the data
+            this.loadNsps();
+          },
+          error: (error) => {
+            console.error('Error creating NSP:', error);
+            this.showNotification('error', 'Failed to create NSP: ' + error.message);
+          }
+        });
+    }
+  }
+
+  // Helper methods
+  private getFullName(nsp: NSPViewModel): string {
+    return `${nsp.firstName} ${nsp.middleName ? nsp.middleName + ' ' : ''}${nsp.lastName}`;
+  }
+
+  /**
+   * Display a notification using the global notification service
+   */
+  private showNotification(type: 'success' | 'error' | 'info', message: string, duration = 5000): void {
+    switch (type) {
+      case 'success':
+        this.notificationService.success(message, { duration });
+        break;
+      case 'error':
+        this.notificationService.error(message, { duration });
+        break;
+      case 'info':
+        this.notificationService.info(message, { duration });
+        break;
+      default:
+        this.notificationService.info(message, { duration });
     }
   }
 }

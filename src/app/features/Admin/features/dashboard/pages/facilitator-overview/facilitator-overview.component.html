@@ -1,7 +1,7 @@
 <!-- Facilitator Overview Page -->
 <section class="container mx-auto p-6">
-  <!-- Header with title and action button -->
-  <div class="flex justify-between items-center mb-6">
+  <!-- Header with title and action buttons -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-800">Facilitator Management</h1>
       <p class="text-sm text-gray-600">Manage all facilitators in the system</p>
@@ -18,102 +18,91 @@
         </svg>`
       "
       iconPosition="left"
-      (buttonClick)="onCreateFacilitator()"
-    >
+      (buttonClick)="createFacilitator()">
       Create Facilitator
     </app-button>
   </div>
 
-  <!-- Facilitator Table -->
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Name
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Email
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Program
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Status
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let facilitator of facilitators" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div
-                  class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"
-                >
-                  {{ facilitator.name.charAt(0) }}
-                </div>
-                <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ facilitator.name }}</div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ facilitator.email }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ facilitator.program }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span
-                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                [ngClass]="
-                  facilitator.status === 'Active'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                "
-              >
-                {{ facilitator.status }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button
-                class="text-blue-600 hover:text-blue-900 mr-4"
-                (click)="onEditFacilitator(facilitator)"
-              >
-                Edit
-              </button>
-              <button
-                class="text-red-600 hover:text-red-900"
-                (click)="onDeleteFacilitator(facilitator.id)"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="bg-white rounded-lg shadow p-6 text-center">
+    <div class="animate-pulse flex justify-center">
+      <div class="h-6 w-6 bg-blue-400 rounded-full"></div>
+    </div>
+    <p class="mt-2 text-gray-600">Loading facilitators...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !hasRecords" class="bg-white rounded-lg shadow p-10 text-center">
+    <div class="flex justify-center mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-gray-400">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="8.5" cy="7" r="4"></circle>
+        <line x1="20" y1="8" x2="20" y2="14"></line>
+        <line x1="17" y1="11" x2="23" y1="11"></line>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-2">No Facilitators Found</h3>
+    <p class="text-gray-500 mb-6">Get started by creating your first facilitator.</p>
+
+    <!-- Action button for empty state -->
+    <app-button
+      variant="primary"
+      size="md"
+      [svgIcon]="
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+          <path d='M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path>
+          <circle cx='8.5' cy='7' r='4'></circle>
+          <line x1='20' y1='8' x2='20' y2='14'></line>
+          <line x1='17' y1='11' x2='23' y1='11'></line>
+        </svg>`
+      "
+      iconPosition="left"
+      (buttonClick)="createFacilitator()">
+      Create Facilitator
+    </app-button>
+  </div>
+
+  <!-- Data table showing list of facilitators -->
+  <div *ngIf="!isLoading && hasRecords">
+    <app-facilitator-table
+      [facilitators]="facilitators"
+      (edit)="editFacilitator($event)"
+      (delete)="confirmDelete($event)"
+      (togglePrivilege)="toggleReceptionPrivilege($event)">
+    </app-facilitator-table>
+
+    <!-- Pagination control (simplified) -->
+    <div class="mt-4 flex justify-between items-center bg-white p-4 rounded-lg shadow">
+      <div class="text-sm text-gray-700">
+        Showing {{ facilitators.length }} of {{ totalItems }} facilitators
+      </div>
+      <div class="flex space-x-2">
+        <button
+          class="px-4 py-2 border rounded-md"
+          [disabled]="currentPage === 0"
+          [class.opacity-50]="currentPage === 0"
+          (click)="onPageChange(currentPage - 1)">
+          Previous
+        </button>
+        <button
+          class="px-4 py-2 border rounded-md"
+          [disabled]="(currentPage + 1) * pageSize >= totalItems"
+          [class.opacity-50]="(currentPage + 1) * pageSize >= totalItems"
+          (click)="onPageChange(currentPage + 1)">
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Modal Container -->
+<!-- Delete confirmation modal -->
+<app-facilitator-delete-confirmation
+  [showModal]="showDeleteModal"
+  [facilitator]="facilitatorToDelete"
+  (confirm)="executeDelete()"
+  (cancel)="cancelDelete()">
+</app-facilitator-delete-confirmation>
+
+<!-- Modal Container (shared between NSP and Facilitator) -->
 <app-modal-container></app-modal-container>

@@ -31,6 +31,7 @@ export const AuthActions = {
       confirmPassword: string;
     }>()
   ),
+
   firstTimePasswordResetSuccess: createAction('[Auth] First Time Password Reset Success'),
   firstTimePasswordResetFailure: createAction(
     '[Auth] First Time Password Reset Failure',

@@ -2,15 +2,19 @@ import { ModalContainerComponent } from '@Admin/shared/components/modal-containe
 import { PersonnelTableComponent } from '@Admin/shared/components/personnel-table/personnel-table.component';
 import { Attendee } from '@Admin/shared/models/attendee.interface';
 import { QuickAccessItem } from '@Admin/shared/models/quick-access-item.interface';
+import { NspService } from '@Admin/shared/services/nsp.service';
+import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
+import { AttendanceService } from '@Admin/shared/services/attendance.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { ChartComponent } from '@shared/components/chart/chart.component';
 import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { ChartDataSet, ChartOptions, TimeRange } from '@shared/models/chart.model';
 import { ChartService } from '@shared/services/chart.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,6 +32,16 @@ import { Subject, takeUntil } from 'rxjs';
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   public readonly userName = 'Franz';
+
+  // Properties to store user counts
+  nspCount: number = 0;
+  facilitatorCount: number = 0;
+  isLoadingCounts: boolean = false;
+
+  // Early attendees properties
+  earlyAttendees: Attendee[] = [];
+  isLoadingEarlyAttendees: boolean = false;
+  earlyAttendeesTotal: number = 0;
 
   attendanceChartData: ChartDataSet | null = null;
   stayingTimeChartData: ChartDataSet | null = null;
@@ -68,11 +82,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private readonly chartService = inject(ChartService);
   private readonly modalService = inject(ModalService);
+  private readonly nspService = inject(NspService);
+  private readonly facilitatorService = inject(FacilitatorService);
+  private readonly attendanceService = inject(AttendanceService);
+  private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
+    this.loadUserCounts();
     this.loadAttendanceChartData();
     this.loadStayingTimeChartData();
     this.loadProgramDistributionData();
+    this.loadEarlyAttendees();
   }
 
   ngOnDestroy(): void {
@@ -135,6 +155,71 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Load NSP and Facilitator counts from the API simultaneously
+   */
+  loadUserCounts(): void {
+    this.isLoadingCounts = true;
+    
+    // Use forkJoin to make both API calls in parallel
+    forkJoin({
+      nsps: this.nspService.getAllNsps(0, 1), // Just need the total count, not all records
+      facilitators: this.facilitatorService.getAllFacilitators(0, 1)
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (results) => {
+        this.nspCount = results.nsps.total;
+        this.facilitatorCount = results.facilitators.total;
+        this.isLoadingCounts = false;
+      },
+      error: (err) => {
+        console.error('Error loading user counts:', err);
+        this.isLoadingCounts = false;
+      }
+    });
+  }
+
+  /**
+   * Load early attendees from the API
+   */
+  loadEarlyAttendees(): void {
+    this.isLoadingEarlyAttendees = true;
+    
+    // Calculate date range (today and yesterday)
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Format dates as YYYY-MM-DD
+    const startDate = yesterday.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+    
+    this.attendanceService.getEarlyAttendees(startDate, endDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          this.earlyAttendees = result.data;
+          this.earlyAttendeesTotal = result.total;
+          this.isLoadingEarlyAttendees = false;
+        },
+        error: (err) => {
+          console.error('Error loading early attendees:', err);
+          this.notificationService.error('Failed to load early attendees', { duration: 5000 });
+          this.isLoadingEarlyAttendees = false;
+          
+          // Fallback to mock data in case of error
+          this.earlyAttendees = [
+            { name: 'John Doe', program: 'Web Development NSP', time: '8:02 AM' },
+            { name: 'Sarah Johnson', program: 'Data Science NSP', time: '8:05 AM' },
+            { name: 'Mark Williams', program: 'UI/UX Design NSP', time: '8:12 AM' },
+            { name: 'Emily Davis', program: 'Mobile Development NSP', time: '8:15 AM' },
+            { name: 'Daniel Brown', program: 'Cloud Computing NSP', time: '8:20 AM' },
+          ];
+        }
+      });
+  }
+
   // Event handlers for time range changes
   onAttendanceTimeRangeChange(timeRange: TimeRange): void {
     this.selectedAttendanceTimeRange = timeRange;
@@ -154,43 +239,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onCreateFacilitator(): void {
     this.modalService.openModal('createFacilitator');
   }
-
-  earlyAttendees: Attendee[] = [
-    { name: 'John Doe', program: 'Web Development NSP', time: '8:02 AM' },
-    { name: 'Sarah Johnson', program: 'Data Science NSP', time: '8:05 AM' },
-    { name: 'Mark Williams', program: 'UI/UX Design NSP', time: '8:12 AM' },
-    { name: 'Emily Davis', program: 'Mobile Development NSP', time: '8:15 AM' },
-    { name: 'Daniel Brown', program: 'Cloud Computing NSP', time: '8:20 AM' },
-  ];
-
-  quickAccessItems: QuickAccessItem[] = [
-    {
-      title: 'New NSP',
-      icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
-      link: '#',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
-    },
-    {
-      title: 'Attendance',
-      icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-      link: '#',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
-    },
-    {
-      title: 'Reports',
-      icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      link: '#',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600',
-    },
-    {
-      title: 'Settings',
-      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-      link: '#',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-600',
-    },
-  ];
 }
