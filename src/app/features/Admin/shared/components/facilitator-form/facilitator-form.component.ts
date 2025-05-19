@@ -33,7 +33,7 @@ export class FacilitatorFormComponent implements OnInit {
   /**
    * Initialize the form with default values or existing facilitator data
    */
-    private initForm(): void {
+  private initForm(): void {
     this.form = this.fb.group({
       id: [this.initialData?.id ?? ''],
       firstName: [

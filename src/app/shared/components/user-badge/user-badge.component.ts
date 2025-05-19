@@ -17,10 +17,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       <div class="relative">
         <!-- Avatar image or initials fallback -->
         <div
-          [ngClass]="[
-            sizeClasses,
-            'rounded-full flex items-center justify-center overflow-hidden',
-          ]"
+          [ngClass]="[sizeClasses, 'rounded-full flex items-center justify-center overflow-hidden']"
         >
           @if (avatarSrc) {
             <img
@@ -29,7 +26,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
               class="w-full h-full object-cover"
             />
           } @else {
-            <div class="w-full h-full bg-primary flex items-center justify-center text-white font-semibold">
+            <div
+              class="w-full h-full bg-primary flex items-center justify-center text-white font-semibold"
+            >
               {{ initials }}
             </div>
           }

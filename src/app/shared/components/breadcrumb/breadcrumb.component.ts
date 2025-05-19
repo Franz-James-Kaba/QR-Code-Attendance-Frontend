@@ -43,7 +43,11 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
+  private createBreadcrumbs(
+    route: ActivatedRoute,
+    url: string = '',
+    breadcrumbs: Breadcrumb[] = []
+  ): Breadcrumb[] {
     this.addFirstLevelBreadcrumb(breadcrumbs);
     const children: ActivatedRoute[] = route.children;
 

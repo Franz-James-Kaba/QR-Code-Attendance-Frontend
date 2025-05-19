@@ -37,7 +37,7 @@ describe('AuthService', () => {
   let localStorageMock: LocalStorageMock;
   let currentUserSubject: BehaviorSubject<ExtendedAuthResponse | null>;
 
-  const mockEnvironment = environment
+  const mockEnvironment = environment;
 
   const mockUser: ExtendedAuthResponse = {
     token: 'mock-token',

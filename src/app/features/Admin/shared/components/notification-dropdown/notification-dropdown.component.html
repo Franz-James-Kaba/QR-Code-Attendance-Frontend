@@ -4,7 +4,8 @@
     <h3 class="font-medium text-gray-800">Notifications</h3>
     <button
       (click)="markAllAsRead()"
-      class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition duration-150">
+      class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition duration-150"
+    >
       Mark all as read
     </button>
   </div>
@@ -17,15 +18,27 @@
             [routerLink]="notification.link"
             (click)="markAsRead(notification)"
             class="block px-4 py-3.5 hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer"
-            [class.bg-blue-50]="!notification.isRead">
+            [class.bg-blue-50]="!notification.isRead"
+          >
             <div class="flex items-start">
               <!-- Notification icon -->
               <div class="flex-shrink-0 mr-3.5">
-                <div [class]="getNotificationTypeClass(notification.type)" class="w-9 h-9 rounded-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      [attr.d]="getNotificationTypeIcon(notification.type)">
-                    </path>
+                <div
+                  [class]="getNotificationTypeClass(notification.type)"
+                  class="w-9 h-9 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      [attr.d]="getNotificationTypeIcon(notification.type)"
+                    ></path>
                   </svg>
                 </div>
               </div>
@@ -39,9 +52,15 @@
                   <button
                     (click)="removeNotification($event, notification.id)"
                     class="text-gray-400 hover:text-gray-600 transition duration-150"
-                    aria-label="Remove notification">
+                    aria-label="Remove notification"
+                  >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      ></path>
                     </svg>
                   </button>
                 </div>
@@ -56,22 +75,38 @@
       </div>
     } @else {
       <div class="flex flex-col items-center justify-center p-8 text-center text-gray-500">
-        <svg class="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-          </path>
+        <svg
+          class="w-12 h-12 mb-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+          ></path>
         </svg>
         <p class="font-medium">No new notifications</p>
         <p class="text-xs mt-1">You're all caught up!</p>
       </div>
     }
   </div>
-    <!-- Footer with view all link -->
+  <!-- Footer with view all link -->
   <div class="border-t px-4 py-3 bg-gray-50">
-    <a routerLink="/admin/notifications" class="flex items-center justify-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition duration-150">
+    <a
+      routerLink="/admin/notifications"
+      class="flex items-center justify-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition duration-150"
+    >
       <span>View all notifications</span>
       <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        ></path>
       </svg>
     </a>
   </div>
