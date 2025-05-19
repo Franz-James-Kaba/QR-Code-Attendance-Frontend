@@ -5,7 +5,6 @@ export interface Attendee {
   time: string;
 }
 
-
 // API Response model for early attendees
 export interface EarlyAttendeeResponse {
   id: number;
