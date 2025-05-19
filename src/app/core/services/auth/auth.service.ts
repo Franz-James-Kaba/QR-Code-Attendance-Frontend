@@ -42,27 +42,55 @@ export class AuthService {
   private fetchUserProfile(): void {
     const headers = { Authorization: `Bearer ${this.getToken()}` };
     this.http
-      .get<{
-        firstName: string;
-        middleName: string | null;
-        lastName: string;
-        role: string;
-        checkedIn: boolean;
-      }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
+      .get<{ firstName: string; middleName: string | null; lastName: string; role: string; checkedIn: boolean }>(
+        `${environment.api.baseUrl}/metrics/user-info`,
+        { headers }
+      )
       .pipe(
-        tap(response => {
-          // Ensure email is included in the response
-          const responseWithEmail: AuthResponse = {
-            ...response,
-            email: credentials.email // Add email from the login credentials
-          };
-
-          localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
-          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
-          this.currentUserSubject.next(responseWithEmail);
+        tap(profile => {
+          const currentUser = this.currentUserSubject.value;
+          if (currentUser) {
+            const validRole: UserRole = this.isValidUserRole(profile.role)
+              ? profile.role
+              : currentUser.role || 'NSP';
+            const updatedUser: ExtendedAuthResponse = {
+              ...currentUser,
+              firstName: profile.firstName,
+              lastName: profile.lastName,
+              role: validRole,
+              checkedIn: profile.checkedIn,
+              email: currentUser.email ?? null,
+            };
+            localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            this.currentUserSubject.next(updatedUser);
+          }
         }),
-        catchError(this.handleError)
-      );
+        catchError(error => {
+          console.error('Error fetching user profile:', error);
+          return throwError(() => new Error('Failed to load user profile'));
+        })
+      )
+      .subscribe();
+  }
+
+  private isValidUserRole(role: string): role is UserRole {
+    return ['ADMIN', 'FACILITATOR', 'NSP', 'RECEPTIONIST'].includes(role);
+  }
+
+  public login(credentials: LoginCredentials): Observable<ExtendedAuthResponse> {
+    return this.http.post<ExtendedAuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+      tap(response => {
+        const responseWithEmail: ExtendedAuthResponse = {
+          ...response,
+          email: credentials.email ?? null,
+        };
+        localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
+        localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
+        this.currentUserSubject.next(responseWithEmail);
+        this.fetchUserProfile();
+      }),
+      catchError(this.handleError)
+    );
   }
 
   public resetPassword(
@@ -75,25 +103,13 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
-  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
-    return this.http.post<string>(
-      `${this.API_URL}/first-password-reset?email=${email}`,
-      passwords
-    ).pipe(
-      tap(() => {
-        // After successful password reset, we should clear the passwordResetRequired flag
-        const currentUser = this.currentUserSubject.value;
-        if (currentUser) {
-          const updatedUser = {
-            ...currentUser,
-            passwordResetRequired: false
-          };
-          localStorage.setItem('current_user', JSON.stringify(updatedUser));
-          this.currentUserSubject.next(updatedUser);
-        }
-      }),
-      catchError(this.handleError)
-    );
+  public firstTimePasswordReset(
+    email: string,
+    passwords: { password: string; confirmPassword: string }
+  ): Observable<string> {
+    return this.http
+      .post<string>(`${this.API_URL}/first-password-reset?email=${email}`, passwords)
+      .pipe(catchError(this.handleError));
   }
 
   public requestPasswordReset(email: string): Observable<string> {
