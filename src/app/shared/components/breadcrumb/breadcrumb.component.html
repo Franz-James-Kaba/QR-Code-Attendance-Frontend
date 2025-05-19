@@ -1,6 +1,6 @@
 <nav aria-label="Breadcrumb">
   <ol class="flex items-center text-sm">
-    @for (breadcrumb of breadcrumbs; track breadcrumb.url; let last = $last; let i = $index) {
+       @for (breadcrumb of breadcrumbs; track $index; let last = $last; let i = $index) {
       <li class="flex items-center">
         @if (!last) {
           <a

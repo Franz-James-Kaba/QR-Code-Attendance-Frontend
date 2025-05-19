@@ -12,7 +12,7 @@
         (click)="onToggleSidebar()"
         aria-label="Toggle sidebar"
       >
-        <app-icon [path]="MENU_ICON_PATH" class="w-6 h-6 text-gray-700" />
+        <app-icon [path]="MENU_ICON_PATH" class="w-6 h-6 text-gray-700"></app-icon>
       </button>
 
       <!-- Breadcrumbs -->
@@ -32,7 +32,7 @@
           class="relative p-2 rounded-lg hover:bg-gray-100"
           aria-label="View notifications"
         >
-          <app-icon [path]="BELL_ICON_PATH" class="w-6 h-6 text-gray-700" />
+          <app-icon [path]="BELL_ICON_PATH" class="w-6 h-6 text-gray-700"></app-icon>
 
           <!-- Notification indicator -->
           @if (unreadCount > 0) {
@@ -58,20 +58,23 @@
 
       <!-- User badge - desktop -->
       <div class="relative">
-        <app-user-badge
-          [userName]="currentUser().name"
-          [userRole]="currentUser().role"
-          [userAvatar]="currentUser().avatar ?? ''"
+        <button
+          type="button"
+          class="cursor-pointer flex items-center"
           (click)="onUserBadgeClick()"
           (keydown)="onUserBadgeKeyDown($event)"
-          tabindex="0"
-          role="button"
           aria-haspopup="true"
           [attr.aria-expanded]="showUserDropdown"
           aria-label="User profile menu"
-          [clickable]="true"
-          class="cursor-pointer"
-        ></app-user-badge>
+        >
+          <app-user-badge
+            [firstName]="getUserFirstName()"
+            [lastName]="getUserLastName()"
+            [userRole]="currentUser().role"
+            [avatarSrc]="currentUser().avatar ?? ''"
+            [clickable]="true"
+          ></app-user-badge>
+        </button>
 
         <!-- User dropdown menu -->
         @if (showUserDropdown) {

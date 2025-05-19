@@ -70,7 +70,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onUserBadgeClick(): void {
-    // If notification dropdown is open, close it
     if (this.showNotificationDropdown) {
       this.showNotificationDropdown = false;
     }
@@ -78,7 +77,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onToggleNotifications(): void {
-    // If user dropdown is open, close it
     if (this.showUserDropdown) {
       this.showUserDropdown = false;
     }
@@ -91,6 +89,18 @@ export class HeaderComponent implements OnInit {
       event.preventDefault();
       this.showUserDropdown = !this.showUserDropdown;
     }
+  }
+
+  getUserFirstName(): string {
+    const fullName = this.currentUser().name || '';
+    const nameParts = fullName.split(' ');
+    return nameParts[0] || 'User';
+  }
+
+  getUserLastName(): string {
+    const fullName = this.currentUser().name || '';
+    const nameParts = fullName.split(' ');
+    return nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
   }
 
   onClickOutside(): void {

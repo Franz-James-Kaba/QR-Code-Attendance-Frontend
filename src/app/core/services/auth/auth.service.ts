@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { ExtendedAuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { ExtendedAuthResponse, UserRole, AuthResponse } from '@shared/models/auth/auth.model';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -54,7 +54,9 @@ export class AuthService {
           // Ensure email is included in the response
           const responseWithEmail: AuthResponse = {
             ...response,
-            email: credentials.email // Add email from the login credentials
+            email: this.currentUserSubject.value?.email ?? '',
+            token: this.getToken() ?? '',
+            passwordResetRequired: false
           };
 
           localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
@@ -95,7 +97,6 @@ export class AuthService {
       catchError(this.handleError)
     );
   }
-
   public requestPasswordReset(email: string): Observable<string> {
     return this.http
       .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
@@ -103,10 +104,14 @@ export class AuthService {
   }
 
   public logout(): void {
+    // Clear all authentication-related data from localStorage
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem('current_user');
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_token');
+
+    // Clear the current user from the BehaviorSubject
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
   }
 
   public getToken(): string | null {
@@ -130,6 +135,32 @@ export class AuthService {
   public getCurrentUserEmail(): string | null {
     const user = this.currentUserSubject.value;
     return user ? user.email : null;
+  }
+
+  public login(credentials: { email: string; password: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
+      .pipe(
+        tap(response => {
+          // Store token in localStorage
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+          localStorage.setItem('auth_token', response.token);
+
+          // Store user data in localStorage
+          const userData = {
+            ...response
+          };
+          localStorage.setItem('current_user', JSON.stringify(userData));
+          localStorage.setItem('auth_user', JSON.stringify({
+            role: response.role,
+            email: response.email,
+            passwordResetRequired: response.passwordResetRequired
+          }));
+
+          // Update the current user subject
+          this.currentUserSubject.next(userData);
+        }),
+        catchError(this.handleError)
+      );
   }
 
   private handleError(error: HttpErrorResponse) {
