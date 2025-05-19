@@ -14,6 +14,19 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+          
+      - name: Create Angular environment files
+        run: |
+          mkdir -p src/environments
+
+          cat <<EOF > src/environments/environment.ts
+          export const environment {
+            production = false;
+            apiUrl = '';
+          }
+          EOF
+
+          echo "${{ secrets.ENVIRONMENT_PROD_TS }}" > src/environments/environment.prod.ts
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
