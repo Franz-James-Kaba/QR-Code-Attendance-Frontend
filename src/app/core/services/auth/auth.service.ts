@@ -48,7 +48,7 @@ export class AuthService {
             ...response,
             email: credentials.email // Add email from the login credentials
           };
-          
+
           localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
           localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
           this.currentUserSubject.next(responseWithEmail);
@@ -66,8 +66,8 @@ export class AuthService {
     );
   }
 
-  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<any> {
-    return this.http.post<any>(
+  firstTimePasswordReset(email: string, passwords: { password: string, confirmPassword: string }): Observable<string> {
+    return this.http.post<string>(
       `${this.API_URL}/first-password-reset?email=${email}`,
       passwords
     ).pipe(
@@ -130,10 +130,8 @@ export class AuthService {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.status === 401) {
         errorMessage = 'Invalid credentials. Please check your email and password.';
       } else if (error.status === 403) {

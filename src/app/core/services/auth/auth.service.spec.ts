@@ -1,322 +1,305 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import {
-  MOCK_USERS,
-  MockStorage,
-  API_ERRORS,
-  VALID_OTP
-} from '@core/data/mock-data';
-import { firstValueFrom } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { environment } from '@environments/environment';
+import { AuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { catchError, firstValueFrom } from 'rxjs';
 
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let httpMock: HttpTestingController;
+  let router: Router;
+  let localStorageSpy: jest.SpyInstance;
+  
+  const mockToken = 'mock-token';
+  const mockEmail = 'test@example.com';
+  const mockUser: AuthResponse = {
+    token: mockToken,
+    role: 'ADMIN' as UserRole,
+    email: mockEmail,
+    passwordResetRequired: false
+  };
+  
+  const mockCredentials: LoginCredentials = {
+    email: mockEmail,
+    password: 'password123'
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AuthService],
-      imports: [HttpClientTestingModule]
+      imports: [
+        provideHttpClientTesting(),
+        provideRouter([])
+      ]
     });
+    
     service = TestBed.inject(AuthService);
-
+    httpMock = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
+    
+    // Mock localStorage
+    localStorageSpy = jest.spyOn(Storage.prototype, 'getItem');
+    jest.spyOn(Storage.prototype, 'setItem');
+    jest.spyOn(Storage.prototype, 'removeItem');
+    
+    // Clear localStorage mocks before each test
     localStorage.clear();
+    jest.clearAllMocks();
+  });
 
-    jest.spyOn(MockStorage, 'storeOtp').mockClear();
-    jest.spyOn(MockStorage, 'recordPasswordResetRequest').mockClear();
-    jest.spyOn(MockStorage, 'completePasswordReset').mockClear();
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('loadStoredUser', () => {
+    it('should load user from localStorage on initialization', () => {
+      // Setup localStorage mock to return data
+      const storedUser = JSON.stringify(mockUser);
+      localStorageSpy.mockImplementation((key) => {
+        if (key === environment.auth.tokenKey) return mockToken;
+        if (key === 'current_user') return storedUser;
+        return null;
+      });
+      
+      // Re-initialize service to trigger constructor
+      service = TestBed.inject(AuthService);
+      
+      // Check if the user was loaded
+      service.currentUser$.subscribe(user => {
+        expect(user).toEqual(mockUser);
+      });
+    });
+
+    it('should handle invalid JSON in localStorage', () => {
+      // Setup localStorage mock to return invalid JSON
+      localStorageSpy.mockImplementation((key) => {
+        if (key === environment.auth.tokenKey) return mockToken;
+        if (key === 'current_user') return '{invalid json}';
+        return null;
+      });
+      
+      // Spy on console.error
+      jest.spyOn(console, 'error').mockImplementation();
+      // Spy on logout method
+      jest.spyOn(AuthService.prototype, 'logout');
+      
+      // Re-initialize service to trigger constructor
+      service = TestBed.inject(AuthService);
+      
+      expect(console.error).toHaveBeenCalled();
+      expect(AuthService.prototype.logout).toHaveBeenCalled();
+    });
+  });
+
   describe('login', () => {
-    it('should successfully login with valid credentials', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
+    it('should authenticate user and store token', () => {
+      service.login(mockCredentials).subscribe(response => {
+        expect(response).toEqual(mockUser);
+        expect(localStorage.setItem).toHaveBeenCalledWith(environment.auth.tokenKey, mockToken);
+        expect(localStorage.setItem).toHaveBeenCalledWith('current_user', JSON.stringify(mockUser));
+      });
 
-      // Act - using modern Promise approach
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-      const result = await loginPromise;
+      const req = httpMock.expectOne(`${environment.auth.baseUrl}/login`);
+      expect(req.request.method).toBe('POST');
+      req.flush({ token: mockToken, role: 'ADMIN' as UserRole, passwordResetRequired: false });
+    });
 
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.user).toBeDefined();
-      expect(result.user.email).toBe(credentials.email);
-      expect(result.user.role).toBe(MOCK_USERS[credentials.email].role);
-      expect(result.token).toBeDefined();
-    }));
+    it('should handle login error', () => {
+      const errorResponse = { message: 'Invalid credentials' };
+      service.login(mockCredentials).subscribe({
+        next: () => {},
+        error: (error) => {
+          expect(error).toEqual(errorResponse);
+        }
+      });
 
-   it('should return error with invalid email', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'nonexistent@amalitech.com',
-        password: 'RandomPassword'
-      };
-
-      // Act & Assert
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-
-      await expect(loginPromise).rejects.toEqual(
-        expect.objectContaining({ message: API_ERRORS.invalidCredentials })
-      );
-    }));
-
-    it('should return error with invalid password', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'WrongPassword'
-      };
-
-      // Act & Assert
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-
-      await expect(loginPromise).rejects.toThrow(API_ERRORS.invalidCredentials);
-    }));
-
-    it('should set internal user email on successful login', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
-
-      // Act
-      const loginPromise = firstValueFrom(service.login(credentials));
-      tick(2000);
-      await loginPromise;
-
-      // Assert
-      expect(service.getCurrentUserRole()).toBe(MOCK_USERS[credentials.email].role);
-    }));
+      const req = httpMock.expectOne(`${environment.auth.baseUrl}/login`);
+      expect(req.request.method).toBe('POST');
+      req.flush(errorResponse, { status: 401, statusText: 'Unauthorized' });
+    });
   });
 
   describe('resetPassword', () => {
-    it('should successfully reset password with valid data', fakeAsync(async () => {
-      // Arrange - first login to set current user
-      const loginCredentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
-      const newPassword = 'NewPassword@123';
+    it('should send reset password request', () => {
+      const passwords = { password: 'newpass123', confirmPassword: 'newpass123' };
+      const token = 'reset-token';
+      
+      service.resetPassword(mockEmail, token, passwords).subscribe(response => {
+        expect(response).toBe('Password reset successful');
+      });
 
-      // Set up user session
-      await firstValueFrom(service.login(loginCredentials));
-      tick(2000);
+      const req = httpMock.expectOne(`${environment.auth.baseUrl}/reset-password?email=${mockEmail}&token=${token}`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(passwords);
+      req.flush('Password reset successful');
+    });
+  });
 
-      // Mock the MockStorage static method
-      jest.spyOn(MockStorage, 'completePasswordReset');
+  describe('firstTimePasswordReset', () => {
+    it('should reset password for first time login and update user', fakeAsync(() => {
+      // Set up a mock current user in the service
+      localStorage.setItem(environment.auth.tokenKey, mockToken);
+      localStorage.setItem('current_user', JSON.stringify({...mockUser, passwordResetRequired: true}));
+      service['loadStoredUser']();
 
-      // Act
-      const resetPromise = firstValueFrom(service.resetPassword(loginCredentials.password, newPassword));
-      tick(2000);
-      await resetPromise;
+      const passwords = { password: 'newpass123', confirmPassword: 'newpass123' };
+      
+      service.firstTimePasswordReset(mockEmail, passwords).subscribe(response => {
+        expect(response).toBe('Password reset successful');
+      });
 
-      // Assert
-      expect(MockStorage.completePasswordReset).toHaveBeenCalledWith(loginCredentials.email);
-      expect(MOCK_USERS[loginCredentials.email].password).toBe(newPassword);
-      expect(MOCK_USERS[loginCredentials.email].passwordResetRequired).toBe(false);
-    }));
+      const req = httpMock.expectOne(`${environment.auth.baseUrl}/first-password-reset?email=${mockEmail}`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(passwords);
+      req.flush('Password reset successful');
+      tick();
 
-    it('should return error when old password is incorrect', fakeAsync(async () => {
-      // Arrange - first login to set current user
-      const loginCredentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
-      const wrongOldPassword = 'WrongOldPassword';
-      const newPassword = 'NewPassword@123';
-
-      // Set up user session
-      await firstValueFrom(service.login(loginCredentials));
-      tick(2000);
-
-      // Act & Assert
-      const resetPromise = firstValueFrom(service.resetPassword(wrongOldPassword, newPassword));
-      tick(2000);
-
-      await expect(resetPromise).rejects.toThrow(API_ERRORS.oldPasswordIncorrect);
-      expect(MOCK_USERS[loginCredentials.email].password).toBe(loginCredentials.password); // Password unchanged
-    }));
-
-    it('should return error when there is no active user session', fakeAsync(async () => {
-      // Arrange
-      const newPassword = 'NewPassword@123';
-
-      // Act & Assert
-      const resetPromise = firstValueFrom(service.resetPassword('', newPassword));
-      tick(2000);
-
-      await expect(resetPromise).rejects.toThrow('No active user session');
+      // Check that user was updated with passwordResetRequired = false
+      service.currentUser$.subscribe(user => {
+        expect(user?.passwordResetRequired).toBe(false);
+      });
+      expect(localStorage.setItem).toHaveBeenCalledWith('current_user', expect.any(String));
     }));
   });
 
-  describe('verifyOtp', () => {
-    it('should successfully verify valid OTP', fakeAsync(async () => {
-      // Arrange - first set up user email with forgotPassword
-      const email = 'admin@amalitech.com';
+  describe('requestPasswordReset', () => {
+    it('should send password reset request', () => {
+      service.requestPasswordReset(mockEmail).subscribe(response => {
+        expect(response).toBe('Password reset email sent');
+      });
 
-      // Set up user session
-      await firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-
-      // Act
-      const verifyPromise = firstValueFrom(service.verifyOtp(VALID_OTP));
-      tick(1000);
-      await verifyPromise;
-
-      // Assert - if no error is thrown, the test passes
-      expect(true).toBeTruthy();
-    }));
-
-    it('should return error with invalid OTP', fakeAsync(async () => {
-      // Arrange - first set up user email
-      const email = 'admin@amalitech.com';
-      const invalidOtp = '999999'; // Not the VALID_OTP
-
-      // Set up user session
-      await firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-
-      // Act & Assert
-      const verifyPromise = firstValueFrom(service.verifyOtp(invalidOtp));
-      tick(1000);
-
-      await expect(verifyPromise).rejects.toThrow(API_ERRORS.invalidOtp);
-    }));
-
-    it('should return error when no email is provided for OTP verification', fakeAsync(async () => {
-      // Arrange - no user email set
-
-      // Act & Assert
-      const verifyPromise = firstValueFrom(service.verifyOtp(VALID_OTP));
-      tick(1000);
-
-      await expect(verifyPromise).rejects.toThrow('No email provided for OTP verification');
-    }));
-  });
-
-  describe('forgotPassword', () => {
-    it('should successfully process forgot password for existing user', fakeAsync(async () => {
-      // Arrange
-      const email = 'admin@amalitech.com';
-
-      // Mock the MockStorage static methods
-      jest.spyOn(MockStorage, 'storeOtp');
-      jest.spyOn(MockStorage, 'recordPasswordResetRequest');
-
-      // Act
-      const forgotPromise = firstValueFrom(service.forgotPassword(email));
-      tick(2000);
-      await forgotPromise;
-
-      // Assert
-      expect(MockStorage.storeOtp).toHaveBeenCalledWith(email);
-      expect(MockStorage.recordPasswordResetRequest).toHaveBeenCalledWith(email);
-    }));
-
-    it('should not reveal if email does not exist', fakeAsync(async () => {
-      // Arrange
-      const nonExistentEmail = 'nonexistent@amalitech.com';
-
-      // Mock the MockStorage static methods
-      jest.spyOn(MockStorage, 'storeOtp');
-      jest.spyOn(MockStorage, 'recordPasswordResetRequest');
-
-      // Act
-      const forgotPromise = firstValueFrom(service.forgotPassword(nonExistentEmail));
-      tick(2000);
-      await forgotPromise;
-
-      // Assert - request should succeed even for non-existent emails
-      // but the storage methods should NOT be called
-      expect(MockStorage.storeOtp).not.toHaveBeenCalled();
-      expect(MockStorage.recordPasswordResetRequest).not.toHaveBeenCalled();
-    }));
+      const req = httpMock.expectOne(`${environment.auth.baseUrl}/reset-password-request?email=${mockEmail}`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush('Password reset email sent');
+    });
   });
 
   describe('logout', () => {
-    it('should clear user session and token on logout', fakeAsync(async () => {
-      // Arrange - set up user session and token
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
-      localStorage.setItem('auth_token', 'mock-token');
-
-      await firstValueFrom(service.login(credentials));
-      tick(2000);
-
-      // Verify user role is set before logout
-      expect(service.getCurrentUserRole()).toBe(MOCK_USERS[credentials.email].role);
-      expect(localStorage.getItem('auth_token')).toBe('mock-token');
-
-      // Act
+    it('should clear local storage and navigate to login', () => {
+      const navigateSpy = jest.spyOn(router, 'navigate');
+      
       service.logout();
+      
+      expect(localStorage.removeItem).toHaveBeenCalledWith(environment.auth.tokenKey);
+      expect(localStorage.removeItem).toHaveBeenCalledWith('current_user');
+      expect(navigateSpy).toHaveBeenCalledWith(['/login']);
 
-      // Assert
+      // Check that current user is null
+      service.currentUser$.subscribe(user => {
+        expect(user).toBeNull();
+      });
+    });
+  });
+
+  describe('helper methods', () => {
+    beforeEach(() => {
+      // Setup a mock user for testing
+      localStorage.setItem(environment.auth.tokenKey, mockToken);
+      localStorage.setItem('current_user', JSON.stringify(mockUser));
+      service['loadStoredUser']();
+    });
+    
+    it('should get token from localStorage', () => {
+      expect(service.getToken()).toBe(mockToken);
+    });
+
+    it('should check if user is logged in', () => {
+      expect(service.isLoggedIn()).toBe(true);
+      
+      localStorage.removeItem(environment.auth.tokenKey);
+      expect(service.isLoggedIn()).toBe(false);
+    });
+
+    it('should check if password reset is required', () => {
+      expect(service.hasPasswordResetRequired()).toBe(false);
+      
+      // Set user with password reset required
+      const userWithReset = {...mockUser, passwordResetRequired: true};
+      localStorage.setItem('current_user', JSON.stringify(userWithReset));
+      service['loadStoredUser']();
+      
+      expect(service.hasPasswordResetRequired()).toBe(true);
+    });
+
+    it('should get current user role', () => {
+      expect(service.getCurrentUserRole()).toBe('ADMIN' as UserRole);
+      
+      service['currentUserSubject'].next(null);
       expect(service.getCurrentUserRole()).toBeNull();
-      expect(localStorage.getItem('auth_token')).toBeNull();
-    }));
-  });
-
-  describe('getToken', () => {
-    it('should retrieve token from localStorage', () => {
-      // Arrange
-      const mockToken = 'mock-auth-token';
-      localStorage.setItem('auth_token', mockToken);
-
-      // Act
-      const result = service.getToken();
-
-      // Assert
-      expect(result).toBe(mockToken);
     });
 
-    it('should return null when no token exists', () => {
-      // Arrange - ensure localStorage is empty
-      localStorage.removeItem('auth_token');
-
-      // Act
-      const result = service.getToken();
-
-      // Assert
-      expect(result).toBeNull();
+    it('should get current user email', () => {
+      expect(service.getCurrentUserEmail()).toBe(mockEmail);
+      
+      service['currentUserSubject'].next(null);
+      expect(service.getCurrentUserEmail()).toBeNull();
     });
   });
 
-  describe('getCurrentUserRole', () => {
-    it('should return null when no user is logged in', () => {
-      // Act
-      const result = service.getCurrentUserRole();
+  describe('error handling', () => {
+    it('should handle client-side errors', async () => {
+      const clientError = new HttpErrorResponse({
+        error: new ErrorEvent('Client Error', { message: 'Client-side error' }),
+        status: 0
+      });
 
-      // Assert
-      expect(result).toBeNull();
+      const error = await firstValueFrom(
+        service['handleError'](clientError)
+          .pipe(
+            catchError(err => {
+              expect(err.message).toBe('Error: Client-side error');
+              throw err;
+            })
+          )
+      ).catch(e => e);
+
+      expect(error.message).toBe('Error: Client-side error');
     });
 
-    it('should return correct role for logged in user', fakeAsync(async () => {
-      // Arrange
-      const credentials = {
-        email: 'admin@amalitech.com',
-        password: 'Admin@123'
-      };
-      const expectedRole = MOCK_USERS[credentials.email].role;
+    it('should handle 401 errors', async () => {
+      const unauthorizedError = new HttpErrorResponse({
+        error: 'Unauthorized',
+        status: 401
+      });
 
-      // Act
-      await firstValueFrom(service.login(credentials));
-      tick(2000);
-      const result = service.getCurrentUserRole();
+      const error = await firstValueFrom(
+        service['handleError'](unauthorizedError)
+          .pipe(
+            catchError(err => {
+              expect(err.message).toBe('Invalid credentials. Please check your email and password.');
+              throw err;
+            })
+          )
+      ).catch(e => e);
 
-      // Assert
-      expect(result).toBe(expectedRole);
-    }));
+      expect(error.message).toBe('Invalid credentials. Please check your email and password.');
+    });
+
+    it('should handle errors with custom messages', async () => {
+      const customError = new HttpErrorResponse({
+        error: { message: 'Custom error message' },
+        status: 400
+      });
+
+      const error = await firstValueFrom(
+        service['handleError'](customError)
+          .pipe(
+            catchError(err => {
+              expect(err.message).toBe('Custom error message');
+              throw err;
+            })
+          )
+      ).catch(e => e);
+
+      expect(error.message).toBe('Custom error message');
+    });
   });
 });
