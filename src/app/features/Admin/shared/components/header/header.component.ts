@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { BreadcrumbComponent, Breadcrumb } from '@shared/components/breadcrumb/breadcrumb.component';
-import { IconComponent } from '@shared/components/icon/icon.component';
 import { UserBadgeComponent } from '@shared/components/user-badge/user-badge.component';
 import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
 
@@ -27,7 +26,6 @@ import { ProfileDropdownComponent } from '../profile-dropdown/profile-dropdown.c
     CommonModule,
     RouterModule,
     BreadcrumbComponent,
-    IconComponent,
     UserBadgeComponent,
     ClickOutsideDirective,
     NotificationDropdownComponent,

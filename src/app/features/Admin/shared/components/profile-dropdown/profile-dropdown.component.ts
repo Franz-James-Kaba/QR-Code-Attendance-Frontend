@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { IconComponent } from '@shared/components/icon/icon.component';
 import { AuthActions } from '@app/core/store/actions/auth.actions';
+import { Store } from '@ngrx/store';
 
 import { UserProfileService } from '../../services/user-profile.service';
 

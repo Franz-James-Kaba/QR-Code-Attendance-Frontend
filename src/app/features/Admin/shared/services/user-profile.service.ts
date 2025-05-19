@@ -1,6 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService } from '@core/services/auth/auth.service';
-import { Observable, map, of } from 'rxjs';
 
 export interface UserProfile {
   id: string;

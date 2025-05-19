@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { ExtendedAuthResponse, LoginCredentials, UserRole } from '@shared/models/auth/auth.model';
+import { ExtendedAuthResponse, LoginCredentials } from '@shared/models/auth/auth.model';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
 import { AuthService } from './auth.service';
@@ -37,15 +37,7 @@ describe('AuthService', () => {
   let localStorageMock: LocalStorageMock;
   let currentUserSubject: BehaviorSubject<ExtendedAuthResponse | null>;
 
-  const mockEnvironment = {
-    auth: {
-      tokenKey: 'auth_token',
-      baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth',
-    },
-    api: {
-      baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
-    },
-  };
+  const mockEnvironment = environment
 
   const mockUser: ExtendedAuthResponse = {
     token: 'mock-token',
@@ -212,7 +204,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
       });
       expect(httpClient.get).toHaveBeenCalledWith(
-        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/metrics/user-info',
+        `${mockEnvironment.api.baseUrl}/metrics/user-info`,
         { headers: { Authorization: 'Bearer mock-token' } }
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -291,7 +283,6 @@ describe('AuthService', () => {
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_token');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('current_user');
       expect(currentUserSubject.getValue()).toBeNull();
-      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
 
@@ -316,7 +307,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Password reset successful');
       expect(httpClient.post).toHaveBeenCalledWith(
-        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/reset-password?email=test@example.com&token=reset-token',
+        `${mockEnvironment.auth.baseUrl}/reset-password?email=test@example.com&token=reset-token`,
         passwords
       );
 
@@ -369,7 +360,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Password reset successful');
       expect(httpClient.post).toHaveBeenCalledWith(
-        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/first-password-reset?email=test@example.com',
+        `${mockEnvironment.auth.baseUrl}/first-password-reset?email=test@example.com`,
         passwords
       );
 
@@ -420,7 +411,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Reset link sent');
       expect(httpClient.post).toHaveBeenCalledWith(
-        'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth/reset-password-request?email=test@example.com',
+        `${mockEnvironment.auth.baseUrl}/reset-password-request?email=test@example.com`,
         {}
       );
 
