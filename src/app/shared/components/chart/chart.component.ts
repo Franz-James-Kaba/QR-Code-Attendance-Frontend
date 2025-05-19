@@ -21,7 +21,6 @@ import {
   TimeRange,
 } from '@shared/models/chart.model';
 
-// Interface for pie chart arc segments
 interface PieChartArc {
   path: string;
   stroke: string;

@@ -2,5 +2,9 @@
 <app-navigation-loading />
 <router-outlet />
 
-<!-- Global notification container -->
-<app-notification></app-notification>
+<!-- Global notification container with custom configuration -->
+<app-notification 
+  position="top-right"
+  theme="light"
+  [maxVisibleNotifications]="3">
+</app-notification>
