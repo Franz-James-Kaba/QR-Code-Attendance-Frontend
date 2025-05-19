@@ -44,33 +44,24 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    #   - name: Download and prepare task definition
-    #     id: prepare-task-def
-    #     env:
-    #       IMAGE_TAG: ${{ github.sha }}
-    #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     run: |
-    #       aws ecs describe-task-definition \
-    #         --task-definition qrcode-frontend-task \
-    #         --query 'taskDefinition' \
-    #         | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
-    #         > task-def.json
+      - name: Clone Terraform Repository
+        uses: actions/checkout@v4
+        with:
+          repository: Franz-James-Kaba/QR-Code-Frontend_Architecture
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: terraform-infra
+      
+      - name: Generate terraform.tfvars file
+        run: |
+          cat <<EOF > terraform-infra/terraform.tfvars
+          vpc_id     = "${{ secrets.VPC_ID }}"
+          subnet_ids = ["${{ secrets.SUBNET_ID_1 }}", "${{ secrets.SUBNET_ID_2 }}"]
+          image_uri  = "${{ steps.login-ecr.outputs.registry }}/qrcode-frontend-repo:${{ github.sha }}"
+          EOF
 
-    #       IMAGE_URI="$ECR_REGISTRY/qrcode-frontend-repo:$IMAGE_TAG"
-    #       jq --arg IMAGE "$IMAGE_URI" '.containerDefinitions[0].image = $IMAGE' task-def.json > new-task-def.json
+      - name: Apply Terraform
+        working-directory: terraform-infra
+        run: |
+          terraform init
+          terraform apply -var-file=terraform.tfvars -auto-approve
 
-    #   - name: Register new task definition
-    #     id: register-task-def
-    #     run: |
-    #       TASK_DEF_ARN=$(aws ecs register-task-definition \
-    #         --cli-input-json file://new-task-def.json \
-    #         --query 'taskDefinition.taskDefinitionArn' \
-    #         --output text)
-    #       echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
-
-    #   - name: Update ECS service
-    #     run: |
-    #       aws ecs update-service \
-    #         --cluster qrcode-cluster \
-    #         --service qrcode-frontend-service \
-    #         --task-definition ${{ env.TASK_DEF_ARN }}
