@@ -1,52 +1,91 @@
-<header class="py-4 px-6 transition-all duration-200" [ngClass]="{ 'shadow-md': isScrolled }">
-  <div class="flex items-center justify-between">
-    <!-- Left section with toggle and breadcrumb -->
+<header
+  class="sticky top-0 z-30 flex items-center h-16 transition-all duration-300 bg-white shadow"
+  [class.shadow]="isScrolled"
+>
+  <div class="flex items-center justify-between w-full px-4">
+    <!-- Left side: Toggle button + Breadcrumbs -->
     <div class="flex items-center space-x-4">
-      <!-- Sidebar toggle button (visible on mobile) -->
+      <!-- Mobile Menu Toggle -->
       <button
         type="button"
-        class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none"
+        class="p-2 rounded-lg hover:bg-gray-100 md:hidden"
         (click)="onToggleSidebar()"
         aria-label="Toggle sidebar"
       >
-        <app-icon [path]="MENU_ICON_PATH" [size]="24"></app-icon>
+        <app-icon [path]="MENU_ICON_PATH" class="w-6 h-6 text-gray-700" />
       </button>
 
-      <!-- Breadcrumb navigation -->
-      <app-breadcrumb></app-breadcrumb>
+      <!-- Breadcrumbs -->
+      <app-breadcrumb
+        [items]="breadcrumbs"
+        class="hidden md:block"
+      ></app-breadcrumb>
     </div>
 
-    <!-- Right section: Notification and User Profile -->
-    <div class="flex items-center space-x-4">
-      <!-- Notification Bell -->
+    <!-- Right side: Notification + User Badge -->
+    <div class="flex items-center space-x-2">
+      <!-- Notification bell -->
       <div class="relative">
         <button
           type="button"
-          class="text-gray-600 hover:text-gray-900 focus:outline-none relative"
-          aria-label="Notifications"
+          (click)="onToggleNotifications()"
+          class="relative p-2 rounded-lg hover:bg-gray-100"
+          aria-label="View notifications"
         >
-          <app-icon [path]="BELL_ICON_PATH" [size]="24"></app-icon>
+          <app-icon [path]="BELL_ICON_PATH" class="w-6 h-6 text-gray-700" />
 
           <!-- Notification indicator -->
-          @if (hasNotifications) {
+          @if (unreadCount > 0) {
             <span
-              class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 transform translate-x-1 -translate-y-1"
-              aria-hidden="true"
+              class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"
             ></span>
           }
         </button>
+
+        <!-- Notification dropdown -->
+        @if (showNotificationDropdown) {
+          <div
+            class="absolute right-0 mt-2 z-50"
+            clickOutside
+            (clickOutside)="onClickOutside()"
+          >
+            <app-notification-dropdown
+              (closeDropdown)="showNotificationDropdown = false"
+            ></app-notification-dropdown>
+          </div>
+        }
       </div>
 
-      <!-- User Badge - Now using new properties -->
-      <app-user-badge
-        userName="John Doe"
-        userRole="Administrator"
-        size="md"
-        [clickable]="true"
-        status="online"
-        customClass="hover:bg-gray-50 rounded-full p-1"
-        (badgeClick)="onUserBadgeClick()"
-      ></app-user-badge>
+      <!-- User badge - desktop -->
+      <div class="relative">
+        <app-user-badge
+          [userName]="currentUser().name"
+          [userRole]="currentUser().role"
+          [userAvatar]="currentUser().avatar ?? ''"
+          (click)="onUserBadgeClick()"
+          (keydown)="onUserBadgeKeyDown($event)"
+          tabindex="0"
+          role="button"
+          aria-haspopup="true"
+          [attr.aria-expanded]="showUserDropdown"
+          aria-label="User profile menu"
+          [clickable]="true"
+          class="cursor-pointer"
+        ></app-user-badge>
+
+        <!-- User dropdown menu -->
+        @if (showUserDropdown) {
+          <div
+            class="absolute right-0 mt-2 z-50"
+            clickOutside
+            (clickOutside)="onClickOutside()"
+          >
+            <app-profile-dropdown
+              (closeDropdown)="showUserDropdown = false"
+            ></app-profile-dropdown>
+          </div>
+        }
+      </div>
     </div>
   </div>
 </header>

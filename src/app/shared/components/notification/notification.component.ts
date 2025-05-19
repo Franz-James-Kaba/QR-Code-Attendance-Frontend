@@ -48,6 +48,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private readonly mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
   @HostBinding('class') className = '';
+  @HostBinding('attr.data-position') get dataPosition() { return this._position; }
   @HostBinding('class.light-theme') get isLightTheme() {
     return this.theme === 'light' || (this.theme === 'system' && !this.mediaQuery.matches);
   }
@@ -81,6 +82,18 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notificationService.remove(id);
   }
 
+  /**
+   * Show all notifications if there are more than the visible limit
+   */
+  showAllNotifications(): void {
+    // Temporarily increase the limit to show all notifications
+    this.maxVisibleNotifications = 999;
+    // Reset after 10 seconds
+    setTimeout(() => {
+      this.maxVisibleNotifications = 5;
+    }, 10000);
+  }
+  
   /**
    * Update the position class based on the current position value
    */

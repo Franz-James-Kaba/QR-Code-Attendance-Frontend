@@ -12,8 +12,8 @@
 
   <!-- Show count of hidden notifications if any -->
   @if (((notifications$ | async) || []).length > maxVisibleNotifications) {
-    <div class="more-notifications">
-      {{ ((notifications$ | async) || []).length - maxVisibleNotifications }} more notifications...
+    <div class="more-notifications" (click)="showAllNotifications()" onkeypress="showAllNotifications()" tabindex="0">
+      {{ ((notifications$ | async) || []).length - maxVisibleNotifications }} more notifications... (click to view all)
     </div>
   }
 </div>
