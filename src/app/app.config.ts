@@ -13,7 +13,7 @@ import {
   withComponentInputBinding,
   withPreloading,
 } from '@angular/router';
-import { AuthInterceptor } from '@core/interceptors/auth/auth.interceptor';
+import { authInterceptor } from '@core/interceptors/auth/auth.interceptor';
 import { ErrorInterceptor } from '@core/interceptors/error/error.interceptor';
 import { NavigationLoadingInterceptor } from '@core/interceptors/navigation-loading/navigation-loading.interceptor';
 import { NotificationInterceptor } from '@core/interceptors/notification/notification.interceptor';

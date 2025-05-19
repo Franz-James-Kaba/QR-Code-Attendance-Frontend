@@ -1,17 +1,16 @@
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
 import { PersonnelTableComponent } from '@Admin/shared/components/personnel-table/personnel-table.component';
 import { Attendee } from '@Admin/shared/models/attendee.interface';
-import { QuickAccessItem } from '@Admin/shared/models/quick-access-item.interface';
-import { NspService } from '@Admin/shared/services/nsp.service';
-import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
 import { AttendanceService } from '@Admin/shared/services/attendance.service';
+import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
+import { NspService } from '@Admin/shared/services/nsp.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { ChartComponent } from '@shared/components/chart/chart.component';
-import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
 import { ChartDataSet, ChartOptions, TimeRange } from '@shared/models/chart.model';
 import { ChartService } from '@shared/services/chart.service';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
@@ -33,12 +32,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   public readonly userName = 'Franz';
 
-  // Properties to store user counts
   nspCount: number = 0;
   facilitatorCount: number = 0;
   isLoadingCounts: boolean = false;
 
-  // Early attendees properties
   earlyAttendees: Attendee[] = [];
   isLoadingEarlyAttendees: boolean = false;
   earlyAttendeesTotal: number = 0;
@@ -195,8 +192,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const startDate = yesterday.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
-    this.attendanceService
-      .getEarlyAttendees(startDate, endDate)
+    this.attendanceService.getEarlyAttendees(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: result => {
