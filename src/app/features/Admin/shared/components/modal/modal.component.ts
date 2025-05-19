@@ -29,7 +29,7 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   get loadingMessage(): string {
     if (!this.isLoading) return '';
-    
+
     if (this.loadingAction === 'create') {
       return 'Creating...';
     } else if (this.loadingAction === 'update') {

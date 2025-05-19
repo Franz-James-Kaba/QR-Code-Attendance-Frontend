@@ -22,11 +22,10 @@ import { NspService } from '../../../../shared/services/nsp.service';
     NspTableComponent,
     DeleteConfirmationComponent,
     ModalContainerComponent,
-    NspBulkImportComponent
+    NspBulkImportComponent,
   ],
   templateUrl: './nsp-overview.component.html',
 })
-
 export class NspOverviewComponent implements OnInit {
   hasRecords = false;
   showDeleteModal = false;
@@ -63,20 +62,21 @@ export class NspOverviewComponent implements OnInit {
   loadNsps(): void {
     this.isLoading = true;
 
-    this.nspService.getAllNsps(this.currentPage, this.pageSize)
-      .pipe(finalize(() => this.isLoading = false))
+    this.nspService
+      .getAllNsps(this.currentPage, this.pageSize)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (result) => {
+        next: result => {
           this.nsps = result.data;
           this.totalItems = result.total;
 
           // Update UI state
           this.hasRecords = this.nsps.length > 0;
         },
-        error: (error) => {
+        error: error => {
           console.error('Error loading NSPs:', error);
           this.showNotification('error', 'Failed to load NSP data: ' + error.message);
-        }
+        },
       });
   }
 
@@ -110,8 +110,9 @@ export class NspOverviewComponent implements OnInit {
 
       this.isLoading = true;
 
-      this.nspService.deleteNsp(nspId)
-        .pipe(finalize(() => this.isLoading = false))
+      this.nspService
+        .deleteNsp(nspId)
+        .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
             // Show success message
@@ -125,10 +126,10 @@ export class NspOverviewComponent implements OnInit {
             this.showDeleteModal = false;
             this.nspToDelete = null;
           },
-          error: (error) => {
+          error: error => {
             console.error('Error deleting NSP:', error);
             this.showNotification('error', 'Failed to delete NSP: ' + error.message);
-          }
+          },
         });
     }
   }
@@ -151,7 +152,10 @@ export class NspOverviewComponent implements OnInit {
     this.showBulkImportModal = false;
 
     const failedMessage = result.failed > 0 ? 'Failed to import ' + result.failed + ' NSPs.' : '';
-    this.showNotification('success', `Successfully imported ${result.successful} NSPs. ${failedMessage}`);
+    this.showNotification(
+      'success',
+      `Successfully imported ${result.successful} NSPs. ${failedMessage}`
+    );
 
     this.loadNsps();
   }
@@ -164,8 +168,9 @@ export class NspOverviewComponent implements OnInit {
       // Update existing NSP
       const nspId = parseInt(nsp.id);
 
-      this.nspService.updateNsp(nspId, apiModel)
-        .pipe(finalize(() => this.isLoading = false))
+      this.nspService
+        .updateNsp(nspId, apiModel)
+        .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
             // First close the modal
@@ -177,15 +182,16 @@ export class NspOverviewComponent implements OnInit {
             // Reload the data
             this.loadNsps();
           },
-          error: (error) => {
+          error: error => {
             console.error('Error updating NSP:', error);
             this.showNotification('error', 'Failed to update NSP: ' + error.message);
-          }
+          },
         });
     } else {
       // Create new NSP
-      this.nspService.createNsp(apiModel)
-        .pipe(finalize(() => this.isLoading = false))
+      this.nspService
+        .createNsp(apiModel)
+        .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
             // First close the modal
@@ -197,10 +203,10 @@ export class NspOverviewComponent implements OnInit {
             // Reload the data
             this.loadNsps();
           },
-          error: (error) => {
+          error: error => {
             console.error('Error creating NSP:', error);
             this.showNotification('error', 'Failed to create NSP: ' + error.message);
-          }
+          },
         });
     }
   }
@@ -213,7 +219,11 @@ export class NspOverviewComponent implements OnInit {
   /**
    * Display a notification using the global notification service
    */
-  private showNotification(type: 'success' | 'error' | 'info', message: string, duration = 5000): void {
+  private showNotification(
+    type: 'success' | 'error' | 'info',
+    message: string,
+    duration = 5000
+  ): void {
     switch (type) {
       case 'success':
         this.notificationService.success(message, { duration });

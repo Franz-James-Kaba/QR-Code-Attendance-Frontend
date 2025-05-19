@@ -77,22 +77,22 @@ describe('SlideButtonComponent', () => {
     );
   });
 
-  it('should display "Slide to Check In" when isCheckedIn is false', () => {
+  it('should display "Click to Check In" when isCheckedIn is false', () => {
     component.isCheckedIn = false;
     fixture.detectChanges();
 
     const span = fixture.nativeElement.querySelector('span');
     expect(span).toBeTruthy();
-    expect(span.textContent).toBe('Slide to Check In');
+    expect(span.textContent).toBe('Click to Check In');
   });
 
-  it('should display "Slide to Check Out" when isCheckedIn is true', () => {
+  it('should display "Click to Check Out" when isCheckedIn is true', () => {
     component.isCheckedIn = true;
     fixture.detectChanges();
 
     const span = fixture.nativeElement.querySelector('span');
     expect(span).toBeTruthy();
-    expect(span.textContent).toBe('Slide to Check Out');
+    expect(span.textContent).toBe('Click to Check Out');
   });
 
   it('should emit scanRequested event when button is clicked', () => {

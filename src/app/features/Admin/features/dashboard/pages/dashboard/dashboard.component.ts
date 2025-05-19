@@ -1,17 +1,16 @@
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
 import { PersonnelTableComponent } from '@Admin/shared/components/personnel-table/personnel-table.component';
 import { Attendee } from '@Admin/shared/models/attendee.interface';
-import { QuickAccessItem } from '@Admin/shared/models/quick-access-item.interface';
-import { NspService } from '@Admin/shared/services/nsp.service';
-import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
 import { AttendanceService } from '@Admin/shared/services/attendance.service';
+import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
+import { NspService } from '@Admin/shared/services/nsp.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { ChartComponent } from '@shared/components/chart/chart.component';
-import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
 import { ChartDataSet, ChartOptions, TimeRange } from '@shared/models/chart.model';
 import { ChartService } from '@shared/services/chart.service';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
@@ -33,12 +32,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   public readonly userName = 'Franz';
 
-  // Properties to store user counts
   nspCount: number = 0;
   facilitatorCount: number = 0;
   isLoadingCounts: boolean = false;
 
-  // Early attendees properties
   earlyAttendees: Attendee[] = [];
   isLoadingEarlyAttendees: boolean = false;
   earlyAttendeesTotal: number = 0;
@@ -160,24 +157,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   loadUserCounts(): void {
     this.isLoadingCounts = true;
-    
+
     // Use forkJoin to make both API calls in parallel
     forkJoin({
       nsps: this.nspService.getAllNsps(0, 1), // Just need the total count, not all records
-      facilitators: this.facilitatorService.getAllFacilitators(0, 1)
+      facilitators: this.facilitatorService.getAllFacilitators(0, 1),
     })
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (results) => {
-        this.nspCount = results.nsps.total;
-        this.facilitatorCount = results.facilitators.total;
-        this.isLoadingCounts = false;
-      },
-      error: (err) => {
-        console.error('Error loading user counts:', err);
-        this.isLoadingCounts = false;
-      }
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: results => {
+          this.nspCount = results.nsps.total;
+          this.facilitatorCount = results.facilitators.total;
+          this.isLoadingCounts = false;
+        },
+        error: err => {
+          console.error('Error loading user counts:', err);
+          this.isLoadingCounts = false;
+        },
+      });
   }
 
   /**
@@ -185,29 +182,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   loadEarlyAttendees(): void {
     this.isLoadingEarlyAttendees = true;
-    
+
     // Calculate date range (today and yesterday)
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     // Format dates as YYYY-MM-DD
     const startDate = yesterday.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
-    
-    this.attendanceService.getEarlyAttendees(startDate, endDate)
+
+    this.attendanceService
+      .getEarlyAttendees(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (result) => {
+        next: result => {
           this.earlyAttendees = result.data;
           this.earlyAttendeesTotal = result.total;
           this.isLoadingEarlyAttendees = false;
         },
-        error: (err) => {
+        error: err => {
           console.error('Error loading early attendees:', err);
           this.notificationService.error('Failed to load early attendees', { duration: 5000 });
           this.isLoadingEarlyAttendees = false;
-          
+
           // Fallback to mock data in case of error
           this.earlyAttendees = [
             { name: 'John Doe', program: 'Web Development NSP', time: '8:02 AM' },
@@ -216,7 +214,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { name: 'Emily Davis', program: 'Mobile Development NSP', time: '8:15 AM' },
             { name: 'Daniel Brown', program: 'Cloud Computing NSP', time: '8:20 AM' },
           ];
-        }
+        },
       });
   }
 

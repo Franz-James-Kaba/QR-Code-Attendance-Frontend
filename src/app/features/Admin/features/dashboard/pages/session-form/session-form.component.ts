@@ -1,9 +1,20 @@
 import { ModalService } from '@Admin/core/services/modal.service';
-import { CreateSessionRequest, Session, UpdateSessionRequest } from '@Admin/shared/models/session/session.model';
+import {
+  CreateSessionRequest,
+  Session,
+  UpdateSessionRequest,
+} from '@Admin/shared/models/session/session.model';
 import { SessionService } from '@Admin/shared/services/session.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { finalize } from 'rxjs';
@@ -39,7 +50,7 @@ export class SessionFormComponent implements OnInit {
       onOpen: () => {
         this.resetForm();
         this.isEdit = false;
-      }
+      },
     });
 
     this.modalService.registerModal('editSession', {
@@ -48,7 +59,7 @@ export class SessionFormComponent implements OnInit {
         this.sessionToEdit = session;
         this.isEdit = true;
         this.patchForm(session);
-      }
+      },
     });
   }
 
@@ -56,7 +67,7 @@ export class SessionFormComponent implements OnInit {
     // Create form with validators - using non-deprecated syntax
     this.form = this.fb.group({
       startTime: ['', [Validators.required]],
-      endTime: ['', [Validators.required]]
+      endTime: ['', [Validators.required]],
     });
 
     // Add validators separately to avoid deprecation warning
@@ -75,7 +86,7 @@ export class SessionFormComponent implements OnInit {
 
     this.form.patchValue({
       startTime: startDateTime,
-      endTime: endDateTime
+      endTime: endDateTime,
     });
   }
 
@@ -101,41 +112,43 @@ export class SessionFormComponent implements OnInit {
       const updates: UpdateSessionRequest = {
         id: this.sessionToEdit.id,
         startTime,
-        endTime
+        endTime,
       };
 
-      this.sessionService.updateSession(this.sessionToEdit.id, updates)
-        .pipe(finalize(() => this.isSubmitting = false))
+      this.sessionService
+        .updateSession(this.sessionToEdit.id, updates)
+        .pipe(finalize(() => (this.isSubmitting = false)))
         .subscribe({
-          next: (updatedSession) => {
+          next: updatedSession => {
             this.notificationService.success('Session updated successfully');
             this.closeModal();
             // Signal to parent component to refresh the list
             this.modalService.modalClosed.next({ id: 'editSession', data: updatedSession });
           },
-          error: (error) => {
+          error: error => {
             this.notificationService.error(error.message ?? 'Failed to update session');
-          }
+          },
         });
     } else {
       // Create new session
       const newSession: CreateSessionRequest = {
         startTime,
-        endTime
+        endTime,
       };
 
-      this.sessionService.createSession(newSession)
-        .pipe(finalize(() => this.isSubmitting = false))
+      this.sessionService
+        .createSession(newSession)
+        .pipe(finalize(() => (this.isSubmitting = false)))
         .subscribe({
-          next: (createdSession) => {
+          next: createdSession => {
             this.notificationService.success('Session created successfully');
             this.closeModal();
             // Signal to parent component to refresh the list
             this.modalService.modalClosed.next({ id: 'createSession', data: createdSession });
           },
-          error: (error) => {
+          error: error => {
             this.notificationService.error(error.message ?? 'Failed to create session');
-          }
+          },
         });
     }
   }

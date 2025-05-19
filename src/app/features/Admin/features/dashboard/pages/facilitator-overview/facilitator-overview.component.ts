@@ -20,7 +20,7 @@ import { FacilitatorService } from '../../../../shared/services/facilitator.serv
     ButtonComponent,
     FacilitatorTableComponent,
     FacilitatorDeleteConfirmationComponent,
-    ModalContainerComponent
+    ModalContainerComponent,
   ],
   templateUrl: './facilitator-overview.component.html',
 })
@@ -59,22 +59,28 @@ export class FacilitatorOverviewComponent implements OnInit {
   loadFacilitators(): void {
     this.isLoading = true;
 
-    this.facilitatorService.getAllFacilitators(this.currentPage, this.pageSize)
-      .pipe(finalize(() => this.isLoading = false))
+    this.facilitatorService
+      .getAllFacilitators(this.currentPage, this.pageSize)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (result) => {
+        next: result => {
           console.log('Received facilitators data:', result);
           this.facilitators = result.data;
           this.totalItems = result.total;
 
           // Update UI state
           this.hasRecords = this.facilitators.length > 0;
-          console.log('Has records:', this.hasRecords, 'Facilitator count:', this.facilitators.length);
+          console.log(
+            'Has records:',
+            this.hasRecords,
+            'Facilitator count:',
+            this.facilitators.length
+          );
         },
-        error: (error) => {
+        error: error => {
           console.error('Error loading facilitators:', error);
           this.showNotification('error', 'Failed to load facilitator data: ' + error.message);
-        }
+        },
       });
   }
 
@@ -108,8 +114,9 @@ export class FacilitatorOverviewComponent implements OnInit {
 
       this.isLoading = true;
 
-      this.facilitatorService.deleteFacilitator(facilitatorId)
-        .pipe(finalize(() => this.isLoading = false))
+      this.facilitatorService
+        .deleteFacilitator(facilitatorId)
+        .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
             // Show success message
@@ -123,10 +130,10 @@ export class FacilitatorOverviewComponent implements OnInit {
             this.showDeleteModal = false;
             this.facilitatorToDelete = null;
           },
-          error: (error) => {
+          error: error => {
             console.error('Error deleting facilitator:', error);
             this.showNotification('error', 'Failed to delete facilitator: ' + error.message);
-          }
+          },
         });
     }
   }
@@ -144,34 +151,32 @@ export class FacilitatorOverviewComponent implements OnInit {
       ? this.facilitatorService.grantReceptionPrivilege(facilitator.email)
       : this.facilitatorService.revokeReceptionPrivilege(facilitator.email);
 
-    serviceCall
-      .pipe(finalize(() => this.isLoading = false))
-      .subscribe({
-        next: () => {
-          // Update the local state to reflect the new privilege status
-          const updatedFacilitators = this.facilitators.map(f => {
-            if (f.id === facilitator.id) {
-              return { ...f, hasReceptionPrivilege: grant };
-            }
-            return f;
-          });
+    serviceCall.pipe(finalize(() => (this.isLoading = false))).subscribe({
+      next: () => {
+        // Update the local state to reflect the new privilege status
+        const updatedFacilitators = this.facilitators.map(f => {
+          if (f.id === facilitator.id) {
+            return { ...f, hasReceptionPrivilege: grant };
+          }
+          return f;
+        });
 
-          this.facilitators = updatedFacilitators;
+        this.facilitators = updatedFacilitators;
 
-          // Show success message
-          this.showNotification(
-            'success',
-            `Reception privilege ${actionText}ed for ${facilitatorName}`
-          );
-        },
-        error: (error) => {
-          console.error(`Error ${actionText}ing reception privilege:`, error);
-          this.showNotification(
-            'error',
-            `Failed to ${actionText} reception privilege: ${error.message}`
-          );
-        }
-      });
+        // Show success message
+        this.showNotification(
+          'success',
+          `Reception privilege ${actionText}ed for ${facilitatorName}`
+        );
+      },
+      error: error => {
+        console.error(`Error ${actionText}ing reception privilege:`, error);
+        this.showNotification(
+          'error',
+          `Failed to ${actionText} reception privilege: ${error.message}`
+        );
+      },
+    });
   }
 
   onPageChange(page: number): void {
@@ -187,7 +192,11 @@ export class FacilitatorOverviewComponent implements OnInit {
   /**
    * Display a notification using the global notification service
    */
-  private showNotification(type: 'success' | 'error' | 'info', message: string, duration = 5000): void {
+  private showNotification(
+    type: 'success' | 'error' | 'info',
+    message: string,
+    duration = 5000
+  ): void {
     switch (type) {
       case 'success':
         this.notificationService.success(message, { duration });

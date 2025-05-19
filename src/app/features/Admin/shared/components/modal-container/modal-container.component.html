@@ -3,8 +3,8 @@
   [visible]="isModalVisible"
   [isLoading]="isSubmitting"
   [loadingAction]="submitAction"
-  (modalClosed)="onModalClose()">
-
+  (modalClosed)="onModalClose()"
+>
   <!-- NSP Form -->
   <ng-container *ngIf="modalType === 'createNsp' || modalType === 'editNsp'">
     <app-nsp-form

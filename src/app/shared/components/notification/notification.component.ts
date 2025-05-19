@@ -48,7 +48,9 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private readonly mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
   @HostBinding('class') className = '';
-  @HostBinding('attr.data-position') get dataPosition() { return this._position; }
+  @HostBinding('attr.data-position') get dataPosition() {
+    return this._position;
+  }
   @HostBinding('class.light-theme') get isLightTheme() {
     return this.theme === 'light' || (this.theme === 'system' && !this.mediaQuery.matches);
   }
@@ -93,7 +95,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
       this.maxVisibleNotifications = 5;
     }, 10000);
   }
-  
+
   /**
    * Update the position class based on the current position value
    */

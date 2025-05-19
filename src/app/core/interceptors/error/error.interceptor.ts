@@ -13,7 +13,6 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
 

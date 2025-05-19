@@ -34,7 +34,7 @@ export class AdminNotificationService {
 
     const currentNotifications = this.notifications.getValue();
     const updatedNotifications = [newNotification, ...currentNotifications];
-    
+
     this.notifications.next(updatedNotifications);
     this.notificationsSignal.set(updatedNotifications);
     this.updateUnreadCount(updatedNotifications);
@@ -43,10 +43,10 @@ export class AdminNotificationService {
   // Mark a notification as read
   markAsRead(id: string): void {
     const currentNotifications = this.notifications.getValue();
-    const updatedNotifications = currentNotifications.map(notification => 
+    const updatedNotifications = currentNotifications.map(notification =>
       notification.id === id ? { ...notification, isRead: true } : notification
     );
-    
+
     this.notifications.next(updatedNotifications);
     this.notificationsSignal.set(updatedNotifications);
     this.updateUnreadCount(updatedNotifications);
@@ -55,10 +55,11 @@ export class AdminNotificationService {
   // Mark all notifications as read
   markAllAsRead(): void {
     const currentNotifications = this.notifications.getValue();
-    const updatedNotifications = currentNotifications.map(notification => 
-      ({ ...notification, isRead: true })
-    );
-    
+    const updatedNotifications = currentNotifications.map(notification => ({
+      ...notification,
+      isRead: true,
+    }));
+
     this.notifications.next(updatedNotifications);
     this.notificationsSignal.set(updatedNotifications);
     this.unreadCountSignal.set(0);
@@ -67,8 +68,10 @@ export class AdminNotificationService {
   // Remove a notification
   removeNotification(id: string): void {
     const currentNotifications = this.notifications.getValue();
-    const updatedNotifications = currentNotifications.filter(notification => notification.id !== id);
-    
+    const updatedNotifications = currentNotifications.filter(
+      notification => notification.id !== id
+    );
+
     this.notifications.next(updatedNotifications);
     this.notificationsSignal.set(updatedNotifications);
     this.updateUnreadCount(updatedNotifications);
@@ -87,36 +90,36 @@ export class AdminNotificationService {
         title: 'New NSP Registered',
         message: 'New NSP John Doe has registered for the program.',
         type: 'info',
-        link: '/admin/nsps'
+        link: '/admin/nsps',
       },
       {
         title: 'Attendance Report Available',
         message: 'Weekly attendance report for Week 12 is now available.',
         type: 'success',
-        link: '/admin/reports'
+        link: '/admin/reports',
       },
       {
         title: 'System Update',
         message: 'System will undergo maintenance at 11:00 PM today.',
-        type: 'warning'
-      }
+        type: 'warning',
+      },
     ];
 
     // Add mock notifications with decreasing timestamps
     mockNotifications.forEach((notification, index) => {
       const timestamp = new Date();
       timestamp.setHours(timestamp.getHours() - index);
-      
+
       const newNotification: NotificationItem = {
         id: this.generateRandomId(),
         ...notification,
         timestamp,
-        isRead: false
+        isRead: false,
       };
-      
+
       const currentNotifications = this.notifications.getValue();
       const updatedNotifications = [...currentNotifications, newNotification];
-      
+
       this.notifications.next(updatedNotifications);
       this.notificationsSignal.set(updatedNotifications);
     });
@@ -126,6 +129,8 @@ export class AdminNotificationService {
 
   // Generate a random ID
   private generateRandomId(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 }

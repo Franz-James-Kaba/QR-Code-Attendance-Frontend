@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { IconComponent } from '@shared/components/icon/icon.component';
 
 import { NotificationItem } from '../../models/notification.model';
 import { AdminNotificationService } from '../../services/admin-notification.service';
@@ -9,9 +8,9 @@ import { AdminNotificationService } from '../../services/admin-notification.serv
 @Component({
   selector: 'app-notification-dropdown',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './notification-dropdown.component.html',
-  styleUrls: ['./notification-dropdown.component.scss']
+  styleUrls: ['./notification-dropdown.component.scss'],
 })
 export class NotificationDropdownComponent {
   @Output() closeDropdown = new EventEmitter<void>();
@@ -33,9 +32,8 @@ export class NotificationDropdownComponent {
     event.stopPropagation();
     this.notificationService.removeNotification(notificationId);
   }
-
   getNotificationTypeIcon(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
         return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'success':
@@ -50,17 +48,17 @@ export class NotificationDropdownComponent {
   }
 
   getNotificationTypeClass(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
-        return 'bg-blue-100 text-blue-600';
+        return 'bg-blue-500 text-white';
       case 'success':
-        return 'bg-green-100 text-green-600';
+        return 'bg-green-500 text-white';
       case 'warning':
-        return 'bg-yellow-100 text-yellow-600';
+        return 'bg-yellow-500 text-white';
       case 'error':
-        return 'bg-red-100 text-red-600';
+        return 'bg-red-500 text-white';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-gray-500 text-white';
     }
   }
 

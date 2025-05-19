@@ -16,16 +16,15 @@
     </div>
     <div class="action-controls">
       <!-- Action button if provided -->
-      <button *ngIf="notification.actionLabel && notification.onAction"
-              (click)="handleAction()"
-              class="action-button"
-              type="button">
+      <button
+        *ngIf="notification.actionLabel && notification.onAction"
+        (click)="handleAction()"
+        class="action-button"
+        type="button"
+      >
         {{ notification.actionLabel }}
       </button>
-      <button (click)="close()"
-              class="close-button"
-              aria-label="Close notification"
-              type="button">
+      <button (click)="close()" class="close-button" aria-label="Close notification" type="button">
         <span class="icon icon-x" aria-hidden="true"></span>
       </button>
     </div>

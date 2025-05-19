@@ -74,7 +74,7 @@ export const mapToViewModel = (nsp: NSPResponse): NSPViewModel => {
     email: nsp.email,
     role: nsp.role,
     passwordResetRequired: nsp.passwordResetRequired,
-    createdAt: nsp.createdAt
+    createdAt: nsp.createdAt,
   };
 };
 
@@ -83,6 +83,6 @@ export const mapToApiModel = (nsp: NSPViewModel): NSPRequest => {
     firstName: nsp.firstName,
     middleName: nsp.middleName,
     lastName: nsp.lastName,
-    email: nsp.email
+    email: nsp.email,
   };
 };

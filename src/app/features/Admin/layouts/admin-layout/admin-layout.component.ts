@@ -8,13 +8,7 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    HeaderComponent,
-    SidebarComponent,
-    MobileWarningComponent
-  ],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, SidebarComponent, MobileWarningComponent],
   template: `
     <!-- Mobile warning for screens below md breakpoint -->
     @if (isMobileView()) {
@@ -32,10 +26,12 @@ import { RouterOutlet } from '@angular/router';
       />
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto transition-all duration-300 bg-gray-50"
-            [class.ml-16]="sidebarMinimized() && sidebarOpen()"
-            [class.ml-64]="!sidebarMinimized() && sidebarOpen()"
-            [class.ml-0]="!sidebarOpen()">
+      <main
+        class="flex-1 overflow-y-auto transition-all duration-300 bg-gray-50"
+        [class.ml-16]="sidebarMinimized() && sidebarOpen()"
+        [class.ml-64]="!sidebarMinimized() && sidebarOpen()"
+        [class.ml-0]="!sidebarOpen()"
+      >
         <!-- Header -->
         <app-header
           [sidebarOpen]="sidebarOpen()"
@@ -50,12 +46,14 @@ import { RouterOutlet } from '@angular/router';
       </main>
     </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-      height: 100vh;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+        height: 100vh;
+      }
+    `,
+  ],
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   private readonly MOBILE_BREAKPOINT = 768; // md breakpoint in pixels

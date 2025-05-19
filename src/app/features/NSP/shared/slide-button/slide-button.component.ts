@@ -18,7 +18,7 @@ import { IconComponent } from '@app/shared/components/icon/icon.component';
         [svgHeight]="16"
         path="M15.5 9L19.5 5M19.5 5L15.5 1M19.5 5H6.5C3.73858 5 1.5 7.23858 1.5 10C1.5 12.7614 3.73858 15 6.5 15H11.5"
       />
-      <span>{{ isCheckedIn ? 'Slide to Check Out' : 'Slide to Check In' }}</span>
+      <span>{{ isCheckedIn ? 'Click to Check Out' : 'Click to Check In' }}</span>
     </button>
   `,
 })

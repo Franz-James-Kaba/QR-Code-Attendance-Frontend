@@ -4,7 +4,10 @@ import { Router } from '@angular/router';
 import { Subject, finalize, takeUntil } from 'rxjs';
 
 import { ModalService, ModalType } from '../../../core/services/modal.service';
-import { FacilitatorViewModel, mapToApiModel as mapFacilitatorToApiModel } from '../../models/facilitator.model';
+import {
+  FacilitatorViewModel,
+  mapToApiModel as mapFacilitatorToApiModel,
+} from '../../models/facilitator.model';
 import { NSPViewModel, mapToApiModel as mapNspToApiModel } from '../../models/nsp.model';
 import { FacilitatorService } from '../../services/facilitator.service';
 import { NspService } from '../../services/nsp.service';
@@ -126,40 +129,46 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.submitAction = 'update';
       const nspId = parseInt(nsp.id);
 
-      this.nspService.updateNsp(nspId, apiModel)
-        .pipe(finalize(() => {
-          this.isSubmitting = false;
-          this.submitAction = null;
-        }))
+      this.nspService
+        .updateNsp(nspId, apiModel)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+            this.submitAction = null;
+          })
+        )
         .subscribe({
-          next: (response) => {
+          next: response => {
             this.modalService.closeModal();
             // Redirect with success message
             this.navigateWithSuccess(`${nsp.firstName} ${nsp.lastName} updated successfully`);
           },
-          error: (error) => {
+          error: error => {
             console.error('Error updating NSP:', error);
             // We'll let the parent component handle errors instead of using an alert
-          }
+          },
         });
     } else {
       // Create new NSP
       this.submitAction = 'create';
-      this.nspService.createNsp(apiModel)
-        .pipe(finalize(() => {
-          this.isSubmitting = false;
-          this.submitAction = null;
-        }))
+      this.nspService
+        .createNsp(apiModel)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+            this.submitAction = null;
+          })
+        )
         .subscribe({
           next: () => {
             this.modalService.closeModal();
             // Redirect with success message
             this.navigateWithSuccess(`${nsp.firstName} ${nsp.lastName} created successfully`);
           },
-          error: (error) => {
+          error: error => {
             console.error('Error creating NSP:', error);
             // We'll let the parent component handle errors instead of using an alert
-          }
+          },
         });
     }
   }
@@ -176,40 +185,50 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.submitAction = 'update';
       const facilitatorId = parseInt(facilitator.id);
 
-      this.facilitatorService.updateFacilitator(facilitatorId, apiModel)
-        .pipe(finalize(() => {
-          this.isSubmitting = false;
-          this.submitAction = null;
-        }))
+      this.facilitatorService
+        .updateFacilitator(facilitatorId, apiModel)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+            this.submitAction = null;
+          })
+        )
         .subscribe({
-          next: (response) => {
+          next: response => {
             this.modalService.closeModal();
             // Redirect with success message
-            this.navigateWithSuccess(`${facilitator.firstName} ${facilitator.lastName} updated successfully`);
+            this.navigateWithSuccess(
+              `${facilitator.firstName} ${facilitator.lastName} updated successfully`
+            );
           },
-          error: (error) => {
+          error: error => {
             console.error('Error updating Facilitator:', error);
             // We'll let the parent component handle errors instead of using an alert
-          }
+          },
         });
     } else {
       // Create new Facilitator
       this.submitAction = 'create';
-      this.facilitatorService.createFacilitator(apiModel)
-        .pipe(finalize(() => {
-          this.isSubmitting = false;
-          this.submitAction = null;
-        }))
+      this.facilitatorService
+        .createFacilitator(apiModel)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+            this.submitAction = null;
+          })
+        )
         .subscribe({
           next: () => {
             this.modalService.closeModal();
             // Redirect with success message
-            this.navigateWithSuccess(`${facilitator.firstName} ${facilitator.lastName} created successfully`);
+            this.navigateWithSuccess(
+              `${facilitator.firstName} ${facilitator.lastName} created successfully`
+            );
           },
-          error: (error) => {
+          error: error => {
             console.error('Error creating Facilitator:', error);
             // We'll let the parent component handle errors instead of using an alert
-          }
+          },
         });
     }
   }
@@ -233,4 +252,3 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     });
   }
 }
-

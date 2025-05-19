@@ -81,7 +81,7 @@ export const mapToViewModel = (facilitator: FacilitatorResponse): FacilitatorVie
     role: facilitator.role,
     passwordResetRequired: facilitator.passwordResetRequired,
     hasReceptionPrivilege: facilitator.hasReceptionPrivilege,
-    createdAt: facilitator.createdAt
+    createdAt: facilitator.createdAt,
   };
 };
 
@@ -91,6 +91,6 @@ export const mapToApiModel = (facilitator: FacilitatorViewModel): FacilitatorReq
     middleName: facilitator.middleName,
     lastName: facilitator.lastName,
     email: facilitator.email,
-    program: facilitator.program
+    program: facilitator.program,
   };
 };
