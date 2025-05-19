@@ -16,17 +16,16 @@ export interface Breadcrumb {
   styleUrl: './breadcrumb.component.scss',
 })
 export class BreadcrumbComponent implements OnInit, OnDestroy {
-  @Input() items: { label: string; link?: string }[] = []; // Add items input property
+  @Input() items: Breadcrumb[] = [];
 
   public breadcrumbs: Breadcrumb[] = [];
-  public routerSubscription: Subscription | undefined;
+  private routerSubscription: Subscription | undefined;
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    // If items are provided, use them instead of generating breadcrumbs
     if (this.items && this.items.length > 0) {
-      this.mapItemsToBreadcrumbs();
+      this.breadcrumbs = this.items;
     } else {
       this.routerSubscription = this.router.events
         .pipe(filter(event => event instanceof NavigationEnd))
@@ -34,7 +33,6 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
           this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
         });
 
-      // Initialize breadcrumbs
       this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
     }
   }
@@ -45,36 +43,21 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Map external items to internal breadcrumbs format
-  private mapItemsToBreadcrumbs(): void {
-    this.breadcrumbs = this.items.map(item => ({
-      label: item.label,
-      url: item.link ?? '' // Map link to url
-    }));
-  }
-
   private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
-    // Add the first-level section if needed
     this.addFirstLevelBreadcrumb(breadcrumbs);
-
-    // Get the route's children
     const children: ActivatedRoute[] = route.children;
 
-    // Return if there are no more children
     if (children.length === 0) {
       return breadcrumbs;
     }
 
-    // Process the first child route
     const child = children[0];
     const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
 
-    // Append route to the URL if not empty
     if (routeURL !== '') {
       url += `/${routeURL}`;
     }
 
-    // Process breadcrumb from route data or URL
     this.processBreadcrumbFromRoute(child, routeURL, url, breadcrumbs);
 
     // Recursive call to process any child routes
