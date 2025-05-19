@@ -47,29 +47,24 @@ export class NspFormComponent implements OnInit {
    * Submit the form if valid
    */
   onSubmit(): void {
-    if (this.nspForm.valid) {
-      this.isSubmitting = true;
-      const formData = this.nspForm.getRawValue();
-
-      // Emit the form data to parent component
-      this.formSubmit.emit(formData);
-
-      // Reset form after submission (in a real app, we'd do this after successful API response)
-      setTimeout(() => {
-        this.isSubmitting = false;
-      }, 800);
-    } else {
-      this.nspForm.markAllAsTouched();
-    }
-  }
-
     if (this.form.invalid) {
       this.markFormGroupTouched(this.form);
       return;
     }
 
+    // Set submitting state
+    this.isSubmitting = true;
+
+    // Get form data
     const formData = this.form.value as NSPViewModel;
+
+    // Emit form data to parent
     this.formSubmit.emit(formData);
+
+    // For demo/testing only - remove in production
+    setTimeout(() => {
+      this.isSubmitting = false;
+    }, 800);
   }
 
   /**

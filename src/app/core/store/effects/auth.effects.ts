@@ -169,7 +169,6 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -181,9 +180,8 @@ export class AuthEffects {
                                     currentUrl.includes('/nsp') ||
                                     currentUrl.includes('/facilitator');
 
-          // Clear auth data
+          // Clear auth data using the auth service
           this.authService.logout();
-          localStorage.removeItem('auth_user');
 
           // Navigate back to login page with return URL for better UX
           if (isInProtectedRoute) {

@@ -15,13 +15,24 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       (click)="onBadgeClick()"
     >
       <div class="relative">
+        <!-- Avatar image or initials fallback -->
         <div
           [ngClass]="[
             sizeClasses,
-            'rounded-full bg-primary flex items-center justify-center text-white font-semibold',
+            'rounded-full flex items-center justify-center overflow-hidden',
           ]"
         >
-          {{ initials }}
+          @if (avatarSrc) {
+            <img
+              [src]="avatarSrc"
+              [alt]="firstName + ' ' + lastName + ' avatar'"
+              class="w-full h-full object-cover"
+            />
+          } @else {
+            <div class="w-full h-full bg-primary flex items-center justify-center text-white font-semibold">
+              {{ initials }}
+            </div>
+          }
         </div>
         @if (status !== 'none') {
           <span
@@ -56,6 +67,7 @@ export class UserBadgeComponent {
   @Input() checkedIn: boolean = false;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() showRole: boolean = true;
+  @Input() avatarSrc: string = '';
   @Input() clickable: boolean = false;
   @Input() customClass: string = '';
   @Input() avatarOnly: boolean = false;

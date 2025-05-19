@@ -1,15 +1,13 @@
 <nav aria-label="Breadcrumb">
   <ol class="flex items-center text-sm">
-    @for (breadcrumb of breadcrumbs; track breadcrumb.url; let last = $last; let i = $index) {
+    @for (breadcrumb of breadcrumbs; track breadcrumb.label; let last = $last; let i = $index) {
       <li class="flex items-center">
         @if (!last) {
           <a
             [routerLink]="breadcrumb.url"
             class="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            {{ breadcrumb.label }}
-          </a>
-          <span class="mx-2 text-gray-400">/</span>
+            >{{ breadcrumb.label }}</a
+          ><span class="mx-2 text-gray-400">/</span>
         } @else {
           <span class="font-medium text-gray-900">{{ breadcrumb.label }}</span>
         }

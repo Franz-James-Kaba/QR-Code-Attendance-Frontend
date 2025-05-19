@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { IconComponent } from '@shared/components/icon/icon.component';
+import { AuthActions } from '@app/core/store/actions/auth.actions';
 
 import { UserProfileService } from '../../services/user-profile.service';
 
@@ -16,13 +18,12 @@ export class ProfileDropdownComponent {
   @Output() closeDropdown = new EventEmitter<void>();
 
   private userProfileService = inject(UserProfileService);
-  
+  private store = inject(Store);
+
   currentUser = this.userProfileService.currentUser;
 
   onLogout(): void {
-    // In a real app, this would call the authentication service
-    console.log('Logging out...');
-    // Redirect to login page
-    window.location.href = '/auth/login';
+    this.closeDropdown.emit();
+    this.store.dispatch(AuthActions.logout());
   }
 }
