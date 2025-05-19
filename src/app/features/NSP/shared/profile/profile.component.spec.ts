@@ -1,15 +1,27 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { BELL_ICON } from '@app/core/data/svg-data';
 import { AuthService } from '@app/core/services/auth/auth.service';
 import { IconComponent } from '@app/shared/components/icon/icon.component';
 import { UserBadgeComponent } from '@app/shared/components/user-badge/user-badge.component';
 import { ExtendedAuthResponse } from '@app/shared/models/auth/auth.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 import { ProfileComponent } from './profile.component';
+
+const mockEnvironment = {
+  auth: {
+    tokenKey: 'auth_token',
+    baseUrl: 'https://api.example.com/auth',
+  },
+  api: {
+    baseUrl: 'https://api.example.com',
+  },
+};
 
 @Component({
   selector: 'app-icon',
@@ -31,6 +43,15 @@ class MockAuthService {
   }
 }
 
+const mockHttpClient = {
+  get: jest.fn(),
+  post: jest.fn(),
+};
+
+const mockRouter = {
+  navigate: jest.fn(),
+};
+
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
@@ -39,13 +60,19 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     mockAuthService = new MockAuthService();
 
+    jest.mock('@environments/environment', () => mockEnvironment, { virtual: true });
+
     await TestBed.configureTestingModule({
-      imports: [CommonModule, ProfileComponent],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      imports: [CommonModule, ProfileComponent, UserBadgeComponent, MockIconComponent],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: HttpClient, useValue: mockHttpClient },
+        { provide: Router, useValue: mockRouter },
+      ],
     })
       .overrideComponent(ProfileComponent, {
         set: {
-          imports: [CommonModule, UserBadgeComponent, IconComponent],
+          imports: [CommonModule, UserBadgeComponent, MockIconComponent],
         },
       })
       .compileComponents();
@@ -59,7 +86,6 @@ describe('ProfileComponent', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
@@ -130,8 +156,7 @@ describe('ProfileComponent', () => {
   }));
 
   it('should render bell icon with correct properties', () => {
-    const iconElement = fixture.debugElement.query(By.css('app-icon'))
-      .componentInstance as MockIconComponent;
+    const iconElement = fixture.debugElement.query(By.css('app-icon')).componentInstance as MockIconComponent;
     expect(iconElement).toBeTruthy();
 
     expect(iconElement.path).toBe(BELL_ICON.path);
