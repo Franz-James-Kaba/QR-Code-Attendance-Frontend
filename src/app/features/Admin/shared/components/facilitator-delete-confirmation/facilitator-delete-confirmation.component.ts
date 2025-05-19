@@ -13,7 +13,7 @@ import { FacilitatorViewModel } from '../../models/facilitator.model';
 export class FacilitatorDeleteConfirmationComponent {
   @Input() showModal = false;
   @Input() facilitator: FacilitatorViewModel | null = null;
-  
+
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -29,7 +29,7 @@ export class FacilitatorDeleteConfirmationComponent {
     if (!this.facilitator) {
       return '';
     }
-    
+
     return `${this.facilitator.firstName} ${this.facilitator.middleName ? this.facilitator.middleName + ' ' : ''}${this.facilitator.lastName}`;
   }
 }

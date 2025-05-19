@@ -266,7 +266,9 @@ describe('AuthService', () => {
       flushMicrotasks();
 
       expect(caughtError).not.toBeNull();
-      expect(caughtError!.message).toBe('Invalid credentials. Please check your email and password.');
+      expect(caughtError!.message).toBe(
+        'Invalid credentials. Please check your email and password.'
+      );
       expect(localStorageMock.setItem).not.toHaveBeenCalled();
       expect(currentUserSubject.getValue()).toBeNull();
 
@@ -327,7 +329,10 @@ describe('AuthService', () => {
 
       let caughtError: Error | null = null;
       const subscription = service
-        .resetPassword('test@example.com', 'token', { password: 'newpass', confirmPassword: 'newpass' })
+        .resetPassword('test@example.com', 'token', {
+          password: 'newpass',
+          confirmPassword: 'newpass',
+        })
         .subscribe({
           error: (err: Error) => {
             caughtError = err;
@@ -377,7 +382,10 @@ describe('AuthService', () => {
 
       let caughtError: Error | null = null;
       const subscription = service
-        .firstTimePasswordReset('test@example.com', { password: 'newpass', confirmPassword: 'newpass' })
+        .firstTimePasswordReset('test@example.com', {
+          password: 'newpass',
+          confirmPassword: 'newpass',
+        })
         .subscribe({
           error: (err: Error) => {
             caughtError = err;
@@ -584,7 +592,9 @@ describe('AuthService', () => {
       tick();
       flushMicrotasks();
       expect(caughtError).not.toBeNull();
-      expect(caughtError!.message).toBe('Invalid credentials. Please check your email and password.');
+      expect(caughtError!.message).toBe(
+        'Invalid credentials. Please check your email and password.'
+      );
       subscription.unsubscribe();
     }));
 

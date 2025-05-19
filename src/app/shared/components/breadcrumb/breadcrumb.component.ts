@@ -49,11 +49,15 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   private mapItemsToBreadcrumbs(): void {
     this.breadcrumbs = this.items.map(item => ({
       label: item.label,
-      url: item.link ?? '' // Map link to url
+      url: item.link ?? '', // Map link to url
     }));
   }
 
-  private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
+  private createBreadcrumbs(
+    route: ActivatedRoute,
+    url: string = '',
+    breadcrumbs: Breadcrumb[] = []
+  ): Breadcrumb[] {
     // Add the first-level section if needed
     this.addFirstLevelBreadcrumb(breadcrumbs);
 
@@ -103,11 +107,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   ): void {
     // Process title-based breadcrumb
     if (route.snapshot.data['title']) {
-      this.addBreadcrumbIfNotDuplicate(
-        route.snapshot.data['title'],
-        url,
-        breadcrumbs
-      );
+      this.addBreadcrumbIfNotDuplicate(route.snapshot.data['title'], url, breadcrumbs);
     }
     // Process URL-based breadcrumb when no title is available
     else if (routeURL !== '') {
@@ -117,13 +117,13 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   }
 
   private addBreadcrumbIfNotDuplicate(label: string, url: string, breadcrumbs: Breadcrumb[]): void {
-    const isDuplicate = breadcrumbs.length > 0 &&
-                        breadcrumbs[breadcrumbs.length - 1].label === label;
+    const isDuplicate =
+      breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].label === label;
 
     if (!isDuplicate) {
       breadcrumbs.push({
         label,
-        url
+        url,
       });
     }
   }

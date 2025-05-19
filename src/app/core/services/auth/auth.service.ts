@@ -42,10 +42,13 @@ export class AuthService {
   private fetchUserProfile(): void {
     const headers = { Authorization: `Bearer ${this.getToken()}` };
     this.http
-      .get<{ firstName: string; middleName: string | null; lastName: string; role: string; checkedIn: boolean }>(
-        `${environment.api.baseUrl}/metrics/user-info`,
-        { headers }
-      )
+      .get<{
+        firstName: string;
+        middleName: string | null;
+        lastName: string;
+        role: string;
+        checkedIn: boolean;
+      }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
       .pipe(
         tap(profile => {
           const currentUser = this.currentUserSubject.value;

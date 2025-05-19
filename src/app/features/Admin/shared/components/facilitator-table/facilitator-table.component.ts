@@ -14,7 +14,10 @@ export class FacilitatorTableComponent {
 
   @Output() edit = new EventEmitter<FacilitatorViewModel>();
   @Output() delete = new EventEmitter<FacilitatorViewModel>();
-  @Output() togglePrivilege = new EventEmitter<{facilitator: FacilitatorViewModel, grant: boolean}>();
+  @Output() togglePrivilege = new EventEmitter<{
+    facilitator: FacilitatorViewModel;
+    grant: boolean;
+  }>();
   @Output() create = new EventEmitter<void>();
 
   getFullName(facilitator: FacilitatorViewModel): string {

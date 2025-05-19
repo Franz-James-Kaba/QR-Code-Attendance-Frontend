@@ -1,6 +1,11 @@
 import { ModalService } from '@Admin/core/services/modal.service';
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
-import { Session, SessionFilter, SessionStatus, SessionListResponse } from '@Admin/shared/models/session/session.model';
+import {
+  Session,
+  SessionFilter,
+  SessionStatus,
+  SessionListResponse,
+} from '@Admin/shared/models/session/session.model';
 import { SessionService } from '@Admin/shared/services/session.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
@@ -11,13 +16,7 @@ import { finalize, Subscription } from 'rxjs';
 @Component({
   selector: 'app-session-management',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ButtonComponent,
-    ModalContainerComponent,
-    DatePipe
-  ],
+  imports: [CommonModule, FormsModule, ButtonComponent, ModalContainerComponent, DatePipe],
   templateUrl: './session-management.component.html',
 })
 export class SessionManagementComponent implements OnInit, OnDestroy {
@@ -55,7 +54,11 @@ export class SessionManagementComponent implements OnInit, OnDestroy {
 
     // Subscribe to modal closed events to refresh sessions list
     this.modalVisibilitySubscription = this.modalService.modalVisible$.subscribe(visible => {
-      if (!visible && (this.modalService.getModalType() === 'createSession' || this.modalService.getModalType() === 'editSession')) {
+      if (
+        !visible &&
+        (this.modalService.getModalType() === 'createSession' ||
+          this.modalService.getModalType() === 'editSession')
+      ) {
         this.loadSessions();
       }
     });
@@ -84,7 +87,7 @@ export class SessionManagementComponent implements OnInit, OnDestroy {
     // Build filter
     const filter: SessionFilter = {
       page: this.currentPage,
-      size: this.pageSize
+      size: this.pageSize,
     };
 
     // Add status filter if not "all"
@@ -103,16 +106,17 @@ export class SessionManagementComponent implements OnInit, OnDestroy {
       filter.endDate = this.dateFilter.endDate;
     }
 
-    this.sessionService.getSessions(filter)
-      .pipe(finalize(() => this.isLoading = false))
+    this.sessionService
+      .getSessions(filter)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (response: SessionListResponse) => {
           this.sessions = response.content;
           this.totalItems = response.totalElements;
         },
-        error: (error) => {
+        error: error => {
           this.notificationService.error(error.message ?? 'Failed to load sessions');
-        }
+        },
       });
   }
 
@@ -145,19 +149,24 @@ export class SessionManagementComponent implements OnInit, OnDestroy {
   }
 
   cancelSession(session: Session): void {
-    if (confirm(`Are you sure you want to cancel the session scheduled for ${this.sessionService.formatSessionTime(session.startTime)}?`)) {
+    if (
+      confirm(
+        `Are you sure you want to cancel the session scheduled for ${this.sessionService.formatSessionTime(session.startTime)}?`
+      )
+    ) {
       this.isLoading = true;
 
-      this.sessionService.cancelSession(session.id)
-        .pipe(finalize(() => this.isLoading = false))
+      this.sessionService
+        .cancelSession(session.id)
+        .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
             this.notificationService.success('Session cancelled successfully');
             this.loadSessions();
           },
-          error: (error) => {
+          error: error => {
             this.notificationService.error(error.message ?? 'Failed to cancel session');
-          }
+          },
         });
     }
   }
@@ -168,16 +177,17 @@ export class SessionManagementComponent implements OnInit, OnDestroy {
     this.qrCodeGenerating = true;
     this.showQrCodeModal = true;
 
-    this.sessionService.generateQrCode(session.id)
-      .pipe(finalize(() => this.qrCodeGenerating = false))
+    this.sessionService
+      .generateQrCode(session.id)
+      .pipe(finalize(() => (this.qrCodeGenerating = false)))
       .subscribe({
-        next: (url) => {
+        next: url => {
           this.qrCodeUrl = url;
         },
-        error: (error) => {
+        error: error => {
           this.notificationService.error(error.message ?? 'Failed to generate QR code');
           this.showQrCodeModal = false;
-        }
+        },
       });
   }
 

@@ -9,7 +9,7 @@ export interface UserProfile {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserProfileService {
   private currentUserSignal = signal<UserProfile>({
@@ -17,12 +17,12 @@ export class UserProfileService {
     name: 'Admin User',
     email: 'admin@example.com',
     role: 'Admin',
-    avatar: ''
+    avatar: '',
   });
 
   currentUser = this.currentUserSignal.asReadonly();
 
-  constructor() { }
+  constructor() {}
 
   // In a real application, this would come from an auth service
   // For now we'll mock it for demonstration

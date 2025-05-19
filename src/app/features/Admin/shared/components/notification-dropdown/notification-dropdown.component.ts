@@ -11,7 +11,7 @@ import { AdminNotificationService } from '../../services/admin-notification.serv
   standalone: true,
   imports: [CommonModule, RouterModule, IconComponent],
   templateUrl: './notification-dropdown.component.html',
-  styleUrls: ['./notification-dropdown.component.scss']
+  styleUrls: ['./notification-dropdown.component.scss'],
 })
 export class NotificationDropdownComponent {
   @Output() closeDropdown = new EventEmitter<void>();
@@ -35,7 +35,7 @@ export class NotificationDropdownComponent {
   }
 
   getNotificationTypeIcon(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
         return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'success':
@@ -50,7 +50,7 @@ export class NotificationDropdownComponent {
   }
 
   getNotificationTypeClass(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'info':
         return 'bg-blue-100 text-blue-600';
       case 'success':

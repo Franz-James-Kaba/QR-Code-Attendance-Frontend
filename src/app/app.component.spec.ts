@@ -20,12 +20,7 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        AppComponent,
-        NavigationLoadingComponent,
-        NotificationComponent,
-      ],
+      imports: [CommonModule, AppComponent, NavigationLoadingComponent, NotificationComponent],
       providers: [
         provideRouter([]),
         { provide: LoadingService, useValue: mockLoadingService },

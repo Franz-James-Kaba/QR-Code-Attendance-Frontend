@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
-export type ModalType = 'createNsp' | 'createFacilitator' | 'editNsp' | 'editFacilitator' | 'createSession' | 'editSession' | null;
+export type ModalType =
+  | 'createNsp'
+  | 'createFacilitator'
+  | 'editNsp'
+  | 'editFacilitator'
+  | 'createSession'
+  | 'editSession'
+  | null;
 
 @Injectable({
   providedIn: 'root',
@@ -20,12 +27,15 @@ export class ModalService {
   public modalData$: Observable<any> = this.modalDataSubject.asObservable();
 
   // Modal registry for dynamic components
-  private modalRegistry = new Map<string, {
-    component: any;
-    onOpen: (data?: any) => void
-  }>();
+  private modalRegistry = new Map<
+    string,
+    {
+      component: any;
+      onOpen: (data?: any) => void;
+    }
+  >();
 
-  constructor() { }
+  constructor() {}
 
   /**
    * Register a modal component

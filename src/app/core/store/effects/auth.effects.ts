@@ -31,8 +31,8 @@ export class AuthEffects {
                 token,
                 role: userData.role,
                 email: userData.email,
-                passwordResetRequired: userData.passwordResetRequired
-              }
+                passwordResetRequired: userData.passwordResetRequired,
+              },
             });
           } catch (e) {
             console.error('Error parsing auth user data:', e);
@@ -76,11 +76,14 @@ export class AuthEffects {
         ofType(AuthActions.loginSuccess),
         tap(({ response }) => {
           // Store user data in localStorage for persistence across page refreshes
-          localStorage.setItem('auth_user', JSON.stringify({
-            role: response.role,
-            email: response.email,
-            passwordResetRequired: response.passwordResetRequired
-          }));
+          localStorage.setItem(
+            'auth_user',
+            JSON.stringify({
+              role: response.role,
+              email: response.email,
+              passwordResetRequired: response.passwordResetRequired,
+            })
+          );
 
           // Handle password reset if required
           if (response.passwordResetRequired) {
@@ -144,13 +147,14 @@ export class AuthEffects {
 
             // Check for specific validation errors related to password
             if (errorMessage.includes('password')) {
-              errorMessage = 'Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.';
+              errorMessage =
+                'Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.';
             }
 
             this.notificationService.error(errorMessage);
             return of(
               AuthActions.firstTimePasswordResetFailure({
-                error: errorMessage
+                error: errorMessage,
               })
             );
           })
@@ -177,9 +181,10 @@ export class AuthEffects {
         tap(() => {
           // Get current URL to check if we're in a protected route
           const currentUrl = this.router.url;
-          const isInProtectedRoute = currentUrl.includes('/admin') ||
-                                    currentUrl.includes('/nsp') ||
-                                    currentUrl.includes('/facilitator');
+          const isInProtectedRoute =
+            currentUrl.includes('/admin') ||
+            currentUrl.includes('/nsp') ||
+            currentUrl.includes('/facilitator');
 
           // Clear auth data
           this.authService.logout();
@@ -189,7 +194,7 @@ export class AuthEffects {
           if (isInProtectedRoute) {
             // If in protected route, include returnUrl parameter
             this.router.navigate(['/auth/login'], {
-              queryParams: { returnUrl: currentUrl }
+              queryParams: { returnUrl: currentUrl },
             });
 
             // Show session expiration message if coming from a protected route

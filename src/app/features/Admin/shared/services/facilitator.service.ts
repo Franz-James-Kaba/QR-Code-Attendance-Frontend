@@ -3,10 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable, catchError, map, throwError } from 'rxjs';
 
-import { FacilitatorImportResult, FacilitatorRequest, FacilitatorResponse, FacilitatorViewModel, PagedResponse, mapToViewModel } from '../models/facilitator.model';
+import {
+  FacilitatorImportResult,
+  FacilitatorRequest,
+  FacilitatorResponse,
+  FacilitatorViewModel,
+  PagedResponse,
+  mapToViewModel,
+} from '../models/facilitator.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FacilitatorService {
   private readonly http = inject(HttpClient);
@@ -16,22 +23,24 @@ export class FacilitatorService {
    * Create a new facilitator user
    */
   createFacilitator(facilitator: FacilitatorRequest): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/admin/create-facilitator`, facilitator, {
-      responseType: 'text' as 'json' // Handle text response correctly
-    })
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http
+      .post<string>(`${this.apiUrl}/admin/create-facilitator`, facilitator, {
+        responseType: 'text' as 'json', // Handle text response correctly
+      })
+      .pipe(catchError(error => this.handleError(error)));
   }
 
   /**
    * Get all facilitators with pagination
    */
-  getAllFacilitators(page = 0, size = 10): Observable<{data: FacilitatorViewModel[], total: number}> {
+  getAllFacilitators(
+    page = 0,
+    size = 10
+  ): Observable<{ data: FacilitatorViewModel[]; total: number }> {
     // Convert to 1-based pagination for the backend API
     // The backend expects page to start at 1, not 0
     const pageIndexForBackend = page; // Use 0-based indexing as the API actually expects
-    
+
     // Create new HttpParams using set() method to ensure proper URL encoding
     let params = new HttpParams();
     params = params.set('page', pageIndexForBackend.toString());
@@ -40,13 +49,16 @@ export class FacilitatorService {
     // Log the actual request parameters for debugging
     console.log('Making Facilitator API request with params:', { page: pageIndexForBackend, size });
 
-    return this.http.get<PagedResponse<FacilitatorResponse>>(`${this.apiUrl}/admin/users/facilitators`, { params })
+    return this.http
+      .get<
+        PagedResponse<FacilitatorResponse>
+      >(`${this.apiUrl}/admin/users/facilitators`, { params })
       .pipe(
         map(response => {
           console.log('API response:', response); // Add debug logging
           return {
             data: response.content.map(facilitator => mapToViewModel(facilitator)),
-            total: response.totalElements
+            total: response.totalElements,
           };
         }),
         catchError(error => {
@@ -62,18 +74,21 @@ export class FacilitatorService {
   getFacilitatorByEmail(email: string): Observable<FacilitatorViewModel> {
     const params = new HttpParams().set('email', email);
 
-    return this.http.get<FacilitatorResponse>(`${this.apiUrl}/admin/users`, { params })
-      .pipe(
-        map(response => mapToViewModel(response)),
-        catchError(error => this.handleError(error))
-      );
+    return this.http.get<FacilitatorResponse>(`${this.apiUrl}/admin/users`, { params }).pipe(
+      map(response => mapToViewModel(response)),
+      catchError(error => this.handleError(error))
+    );
   }
 
   /**
    * Update existing facilitator
    */
-  updateFacilitator(userId: number, facilitator: FacilitatorRequest): Observable<FacilitatorViewModel> {
-    return this.http.put<FacilitatorResponse>(`${this.apiUrl}/admin/users/${userId}`, facilitator)
+  updateFacilitator(
+    userId: number,
+    facilitator: FacilitatorRequest
+  ): Observable<FacilitatorViewModel> {
+    return this.http
+      .put<FacilitatorResponse>(`${this.apiUrl}/admin/users/${userId}`, facilitator)
       .pipe(
         map(response => mapToViewModel(response)),
         catchError(error => this.handleError(error))
@@ -84,12 +99,11 @@ export class FacilitatorService {
    * Delete facilitator
    */
   deleteFacilitator(userId: number): Observable<string> {
-    return this.http.delete<string>(`${this.apiUrl}/admin/users/${userId}`, {
-      responseType: 'text' as 'json' // Handle text response correctly
-    })
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http
+      .delete<string>(`${this.apiUrl}/admin/users/${userId}`, {
+        responseType: 'text' as 'json', // Handle text response correctly
+      })
+      .pipe(catchError(error => this.handleError(error)));
   }
 
   /**
@@ -97,10 +111,9 @@ export class FacilitatorService {
    * This is a custom endpoint that would need to be implemented on the backend
    */
   bulkImportFacilitators(facilitators: FacilitatorRequest[]): Observable<FacilitatorImportResult> {
-    return this.http.post<FacilitatorImportResult>(`${this.apiUrl}/admin/bulk-create-facilitators`, facilitators)
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http
+      .post<FacilitatorImportResult>(`${this.apiUrl}/admin/bulk-create-facilitators`, facilitators)
+      .pipe(catchError(error => this.handleError(error)));
   }
 
   /**
@@ -109,12 +122,15 @@ export class FacilitatorService {
    * @returns Observable of the operation result
    */
   grantReceptionPrivilege(email: string): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/admin/grant-reception-privilege/${email}`, {}, {
-      responseType: 'text' as 'json' // Handle text response correctly
-    })
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http
+      .post<string>(
+        `${this.apiUrl}/admin/grant-reception-privilege/${email}`,
+        {},
+        {
+          responseType: 'text' as 'json', // Handle text response correctly
+        }
+      )
+      .pipe(catchError(error => this.handleError(error)));
   }
 
   /**
@@ -123,18 +139,23 @@ export class FacilitatorService {
    * @returns Observable of the operation result
    */
   revokeReceptionPrivilege(email: string): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/admin/revoke-reception-privilege/${email}`, {}, {
-      responseType: 'text' as 'json' // Handle text response correctly
-    })
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http
+      .post<string>(
+        `${this.apiUrl}/admin/revoke-reception-privilege/${email}`,
+        {},
+        {
+          responseType: 'text' as 'json', // Handle text response correctly
+        }
+      )
+      .pipe(catchError(error => this.handleError(error)));
   }
 
   /**
    * Error handling
    */
-  private handleError(error: Error | { status: number; error?: { message?: string }; statusText: string }): Observable<never> {
+  private handleError(
+    error: Error | { status: number; error?: { message?: string }; statusText: string }
+  ): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
 
     if ('error' in error && error.error instanceof ErrorEvent) {
@@ -153,7 +174,7 @@ export class FacilitatorService {
           errorMessage = 'Unauthorized: Please log in again';
           break;
         case 403:
-          errorMessage = 'Forbidden: You don\'t have permission to perform this action';
+          errorMessage = "Forbidden: You don't have permission to perform this action";
           break;
         case 404:
           errorMessage = `Not Found: ${message}`;

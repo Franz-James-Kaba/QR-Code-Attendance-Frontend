@@ -10,13 +10,13 @@ import { UserProfileService } from '../../services/user-profile.service';
   standalone: true,
   imports: [CommonModule, RouterModule, IconComponent],
   templateUrl: './profile-dropdown.component.html',
-  styleUrls: ['./profile-dropdown.component.scss']
+  styleUrls: ['./profile-dropdown.component.scss'],
 })
 export class ProfileDropdownComponent {
   @Output() closeDropdown = new EventEmitter<void>();
 
   private userProfileService = inject(UserProfileService);
-  
+
   currentUser = this.userProfileService.currentUser;
 
   onLogout(): void {

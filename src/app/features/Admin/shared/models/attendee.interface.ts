@@ -59,13 +59,13 @@ export function mapToAttendeeViewModel(attendee: EarlyAttendeeResponse): Attende
   const formattedTime = checkInTimeDate.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 
   // Construct the name from user info or fallback to "Unknown User"
-  const name = attendee.user ?
-    `${attendee.user.firstName} ${attendee.user.middleName ? attendee.user.middleName + ' ' : ''}${attendee.user.lastName}` :
-    `Unknown User (ID: ${attendee.userId})`;
+  const name = attendee.user
+    ? `${attendee.user.firstName} ${attendee.user.middleName ? attendee.user.middleName + ' ' : ''}${attendee.user.lastName}`
+    : `Unknown User (ID: ${attendee.userId})`;
 
   // Get program from user info or use a placeholder
   const program = attendee.user?.program || 'Unknown Program';
@@ -73,6 +73,6 @@ export function mapToAttendeeViewModel(attendee: EarlyAttendeeResponse): Attende
   return {
     name,
     program,
-    time: formattedTime
+    time: formattedTime,
   };
 }

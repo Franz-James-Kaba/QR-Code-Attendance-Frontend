@@ -66,13 +66,14 @@ export const authReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  
+
   on(AuthActions.firstTimePasswordResetSuccess, state => ({
     ...state,
     passwordResetRequired: false,
     isLoading: false,
     error: null,
-    successMessage: 'Your password has been updated successfully. Please login with your new password.',
+    successMessage:
+      'Your password has been updated successfully. Please login with your new password.',
   })),
 
   on(AuthActions.firstTimePasswordResetFailure, (state, { error }) => ({

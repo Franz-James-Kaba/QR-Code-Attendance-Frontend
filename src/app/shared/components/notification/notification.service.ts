@@ -29,7 +29,7 @@ export class NotificationService {
   success(message: string, options?: NotificationOptions): string {
     return this.addNotification('success', message, {
       title: options?.title || 'Success',
-      ...options
+      ...options,
     });
   }
 
@@ -42,7 +42,7 @@ export class NotificationService {
     return this.addNotification('error', message, {
       title: options?.title || 'Error',
       duration: options?.duration || 8000, // Errors stay longer by default
-      ...options
+      ...options,
     });
   }
 
@@ -54,7 +54,7 @@ export class NotificationService {
   info(message: string, options?: NotificationOptions): string {
     return this.addNotification('info', message, {
       title: options?.title || 'Information',
-      ...options
+      ...options,
     });
   }
 
@@ -67,7 +67,7 @@ export class NotificationService {
     return this.addNotification('warning', message, {
       title: options?.title || 'Warning',
       duration: options?.duration || 7000, // Warnings stay a bit longer by default
-      ...options
+      ...options,
     });
   }
 

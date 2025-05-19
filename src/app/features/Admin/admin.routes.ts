@@ -71,11 +71,13 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'sessions',
-        loadComponent: () => import('@Admin/features/dashboard/pages/session-management/session-management.component')
-          .then(m => m.SessionManagementComponent),
+        loadComponent: () =>
+          import(
+            '@Admin/features/dashboard/pages/session-management/session-management.component'
+          ).then(m => m.SessionManagementComponent),
         data: {
-          title: 'Session Management'
-        }
+          title: 'Session Management',
+        },
       },
       {
         path: 'settings',

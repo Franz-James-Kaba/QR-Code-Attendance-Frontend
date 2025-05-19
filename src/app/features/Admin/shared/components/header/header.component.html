@@ -16,10 +16,7 @@
       </button>
 
       <!-- Breadcrumbs -->
-      <app-breadcrumb
-        [items]="breadcrumbs"
-        class="hidden md:block"
-      ></app-breadcrumb>
+      <app-breadcrumb [items]="breadcrumbs" class="hidden md:block"></app-breadcrumb>
     </div>
 
     <!-- Right side: Notification + User Badge -->
@@ -36,19 +33,13 @@
 
           <!-- Notification indicator -->
           @if (unreadCount > 0) {
-            <span
-              class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"
-            ></span>
+            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
           }
         </button>
 
         <!-- Notification dropdown -->
         @if (showNotificationDropdown) {
-          <div
-            class="absolute right-0 mt-2 z-50"
-            clickOutside
-            (clickOutside)="onClickOutside()"
-          >
+          <div class="absolute right-0 mt-2 z-50" clickOutside (clickOutside)="onClickOutside()">
             <app-notification-dropdown
               (closeDropdown)="showNotificationDropdown = false"
             ></app-notification-dropdown>
@@ -75,14 +66,8 @@
 
         <!-- User dropdown menu -->
         @if (showUserDropdown) {
-          <div
-            class="absolute right-0 mt-2 z-50"
-            clickOutside
-            (clickOutside)="onClickOutside()"
-          >
-            <app-profile-dropdown
-              (closeDropdown)="showUserDropdown = false"
-            ></app-profile-dropdown>
+          <div class="absolute right-0 mt-2 z-50" clickOutside (clickOutside)="onClickOutside()">
+            <app-profile-dropdown (closeDropdown)="showUserDropdown = false"></app-profile-dropdown>
           </div>
         }
       </div>
