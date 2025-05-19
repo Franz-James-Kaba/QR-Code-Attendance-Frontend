@@ -10,8 +10,6 @@ import { catchError, map, tap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly TOKEN_KEY = environment.auth.tokenKey;
-  private readonly API_URL = environment.auth.baseUrl;
   private readonly currentUserSubject = new BehaviorSubject<ExtendedAuthResponse | null>(null);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
@@ -40,7 +38,15 @@ export class AuthService {
   }
 
   private fetchUserProfile(): void {
-    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    const token = this.getToken();
+    if (!token) {
+      return;
+    }
+    if (!environment?.api?.baseUrl) {
+      console.error('Environment.api.baseUrl is undefined:', environment);
+      return;
+    }
+    const headers = { Authorization: `Bearer ${token}` };
     this.http
       .get<{
         firstName: string;
@@ -81,13 +87,22 @@ export class AuthService {
   }
 
   public login(credentials: LoginCredentials): Observable<ExtendedAuthResponse> {
-    return this.http.post<ExtendedAuthResponse>(`${this.API_URL}/login`, credentials).pipe(
+    if (!environment?.auth?.baseUrl) {
+      console.error('Environment.auth.baseUrl is undefined:', environment);
+      return throwError(() => new Error('Environment configuration missing'));
+    }
+    return this.http.post<ExtendedAuthResponse>(`${environment.auth.baseUrl}/login`, credentials).pipe(
       tap(response => {
         const responseWithEmail: ExtendedAuthResponse = {
           ...response,
           email: credentials.email ?? null,
         };
-        localStorage.setItem(this.TOKEN_KEY, responseWithEmail.token);
+        if (!environment?.auth?.tokenKey) {
+          console.error('Environment.auth.tokenKey is undefined:', environment);
+          localStorage.setItem('auth_token', responseWithEmail.token);
+        } else {
+          localStorage.setItem(environment.auth.tokenKey, responseWithEmail.token);
+        }
         localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
         this.currentUserSubject.next(responseWithEmail);
         this.fetchUserProfile();
@@ -101,8 +116,12 @@ export class AuthService {
     token: string,
     passwords: { password: string; confirmPassword: string }
   ): Observable<string> {
+    if (!environment?.auth?.baseUrl) {
+      console.error('Environment.auth.baseUrl is undefined:', environment);
+      return throwError(() => new Error('Environment configuration missing'));
+    }
     return this.http
-      .post<string>(`${this.API_URL}/reset-password?email=${email}&token=${token}`, passwords)
+      .post<string>(`${environment.auth.baseUrl}/reset-password?email=${email}&token=${token}`, passwords)
       .pipe(catchError(this.handleError));
   }
 
@@ -110,29 +129,44 @@ export class AuthService {
     email: string,
     passwords: { password: string; confirmPassword: string }
   ): Observable<string> {
+    if (!environment?.auth?.baseUrl) {
+      console.error('Environment.auth.baseUrl is undefined:', environment);
+      return throwError(() => new Error('Environment configuration missing'));
+    }
     return this.http
-      .post<string>(`${this.API_URL}/first-password-reset?email=${email}`, passwords)
+      .post<string>(`${environment.auth.baseUrl}/first-password-reset?email=${email}`, passwords)
       .pipe(catchError(this.handleError));
   }
+
   public requestPasswordReset(email: string): Observable<string> {
+    if (!environment?.auth?.baseUrl) {
+      console.error('Environment.auth.baseUrl is undefined:', environment);
+      return throwError(() => new Error('Environment configuration missing'));
+    }
     return this.http
-      .post<string>(`${this.API_URL}/reset-password-request?email=${email}`, {})
+      .post<string>(`${environment.auth.baseUrl}/reset-password-request?email=${email}`, {})
       .pipe(catchError(this.handleError));
   }
 
   public logout(): void {
-    // Clear all authentication-related data from localStorage
-    localStorage.removeItem(this.TOKEN_KEY);
+    if (!environment?.auth?.tokenKey) {
+      console.error('Environment.auth.tokenKey is undefined:', environment);
+      localStorage.removeItem('auth_token');
+    } else {
+      localStorage.removeItem(environment.auth.tokenKey);
+    }
     localStorage.removeItem('current_user');
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_token');
-
-    // Clear the current user from the BehaviorSubject
     this.currentUserSubject.next(null);
   }
 
   public getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    if (!environment?.auth?.tokenKey) {
+      console.error('Environment.auth.tokenKey is undefined:', environment);
+      return localStorage.getItem('auth_token');
+    }
+    return localStorage.getItem(environment.auth.tokenKey);
   }
 
   public isLoggedIn(): boolean {
