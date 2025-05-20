@@ -14,7 +14,7 @@ import { NotificationService } from '@shared/components/notification/notificatio
   selector: 'app-session-management',
   templateUrl: './session-management.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, ModalContainerComponent, SessionFormComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, ModalContainerComponent],
   styleUrls: ['../../../../../../shared/styles/table.css']
 })
 export class SessionManagementComponent implements OnInit {
