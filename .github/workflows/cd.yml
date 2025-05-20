@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - testing
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -38,8 +39,28 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Check if image already exists in ECR
+        id: check_image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: qrcode-frontend-repo
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: us-east-1
+        run: |
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+          set -e
+          aws ecr describe-images \
+            --repository-name $ECR_REPOSITORY \
+            --image-ids imageTag=$IMAGE_TAG \
+            --region $AWS_REGION > /dev/null 2>&1 && echo "Image exists" && exit 0 || echo "Image does not exist" && exit 1
+        continue-on-error: true
 
       - name: Build, tag, and push image to Amazon ECR
+        if: steps.check_image.outcome == 'failure'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: qrcode-frontend-repo
