@@ -204,7 +204,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
         error: err => {
           console.error('Error loading early attendees:', err);
-          this.notificationService.error('Failed to load early attendees', { duration: 5000 });
+          this.earlyAttendees = [];
+          this.earlyAttendeesTotal = 0;
           this.isLoadingEarlyAttendees = false;
         },
       });
