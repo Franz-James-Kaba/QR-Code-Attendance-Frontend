@@ -45,17 +45,19 @@ jobs:
           ECR_REPOSITORY: qrcode-frontend-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
           echo "Building Angular app and Docker image..."
           npm install
           npm run build --prod
 
-          docker build \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $IMAGE_URI .
 
           echo "Pushing image..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $IMAGE_URI
+
 
       - name: Clone Terraform Repository
         uses: actions/checkout@v4
@@ -69,7 +71,7 @@ jobs:
           cat <<EOF > terraform-infra/terraform.tfvars
           vpc_id     = "${{ secrets.VPC_ID }}"
           subnet_ids = ["${{ secrets.SUBNET_ID_1 }}", "${{ secrets.SUBNET_ID_2 }}"]
-          image_uri  = "${{ steps.login-ecr.outputs.registry }}/qrcode-frontend-repo:${{ github.sha }}"
+          image_uri  = "${{env.IMAGE_URI}}"
           EOF
 
       - name: Apply Terraform
