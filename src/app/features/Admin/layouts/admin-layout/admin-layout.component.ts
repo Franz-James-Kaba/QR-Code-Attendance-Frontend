@@ -27,7 +27,7 @@ import { RouterOutlet } from '@angular/router';
 
       <!-- Main Content -->
       <main
-        class="flex-1 overflow-y-auto transition-all duration-300 bg-gray-50"
+        class="flex-1 overflow-y-auto transition-all duration-300 bg-nspBg"
         [class.ml-16]="sidebarMinimized() && sidebarOpen()"
         [class.ml-64]="!sidebarMinimized() && sidebarOpen()"
         [class.ml-0]="!sidebarOpen()"
@@ -40,7 +40,7 @@ import { RouterOutlet } from '@angular/router';
         />
 
         <!-- Page Content -->
-        <div class="p-4 md:p-6">
+        <div class="p-4 md:p-6 max-w-7xl mx-auto">
           <router-outlet />
         </div>
       </main>

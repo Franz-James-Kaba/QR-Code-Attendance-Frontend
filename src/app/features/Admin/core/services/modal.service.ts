@@ -102,4 +102,12 @@ export class ModalService {
   getModalData(): any {
     return this.modalDataSubject.value;
   }
+
+  /**
+   * Gets a registered modal configuration
+   */
+  getModal(type: ModalType): { component: any; onOpen: (data?: any) => void } | undefined {
+    if (!type) return undefined;
+    return this.modalRegistry.get(type.toString());
+  }
 }

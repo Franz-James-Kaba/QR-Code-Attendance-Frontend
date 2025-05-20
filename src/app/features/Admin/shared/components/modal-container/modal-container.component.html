@@ -26,4 +26,15 @@
     >
     </app-facilitator-form>
   </ng-container>
+  
+  <!-- Session Form -->
+  <ng-container *ngIf="modalType === 'createSession' || modalType === 'editSession'">
+    <app-session-form
+      [initialData]="modalData"
+      [isSubmitting]="isSubmitting"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    >
+    </app-session-form>
+  </ng-container>
 </app-modal>

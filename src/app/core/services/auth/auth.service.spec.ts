@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { environment } from '@environments/environment';
 import { ExtendedAuthResponse, LoginCredentials } from '@shared/models/auth/auth.model';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
@@ -28,16 +29,6 @@ interface LocalStorageMock {
   removeItem: jest.Mock<void, [string]>;
   clear: jest.Mock<void, []>;
 }
-
-const mockEnvironment = {
-  auth: {
-    tokenKey: 'auth_token',
-    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api/auth',
-  },
-  api: {
-    baseUrl: 'http://qrcode-alb-1355304988.us-east-1.elb.amazonaws.com/api',
-  },
-};
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -68,10 +59,7 @@ describe('AuthService', () => {
     email: 'test@example.com',
     password: 'password123',
   };
-
   beforeEach(() => {
-    jest.mock('@environments/environment', () => mockEnvironment, { virtual: true });
-
     const httpClientMock: PartialHttpClient = {
       get: jest.fn(),
       post: jest.fn(),
@@ -147,7 +135,7 @@ describe('AuthService', () => {
       (service as unknown as AuthServiceWithPrivate).loadStoredUser();
       tick();
 
-      expect(localStorageMock.getItem).toHaveBeenCalledWith(mockEnvironment.auth.tokenKey);
+      expect(localStorageMock.getItem).toHaveBeenCalledWith(environment.auth.tokenKey);
       expect(localStorageMock.getItem).toHaveBeenCalledWith('current_user');
       expect(currentUserSubject.getValue()).toEqual(mockUser);
       expect(fetchUserProfileSpy).toHaveBeenCalled();
@@ -213,7 +201,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
       });
       expect(httpClient.get).toHaveBeenCalledWith(
-        `${mockEnvironment.api.baseUrl}/metrics/user-info`,
+        `${environment.api.baseUrl}/metrics/user-info`,
         { headers: { Authorization: 'Bearer mock-token' } }
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -250,18 +238,16 @@ describe('AuthService', () => {
       httpClient.get.mockReturnValue(throwError(() => error));
       currentUserSubject.next(mockUser);
       localStorageMock.getItem.mockReturnValue('mock-token');
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      try {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();      try {
         (service as unknown as AuthServiceWithPrivate).fetchUserProfile();
         tick();
         flushMicrotasks();
       } catch (err) {
-        // Suppress uncaught error
+        console.log('Caught expected error during test:', err);
       }
 
       expect(httpClient.get).toHaveBeenCalledWith(
-        `${mockEnvironment.api.baseUrl}/metrics/user-info`,
+        `${environment.api.baseUrl}/metrics/user-info`,
         { headers: { Authorization: 'Bearer mock-token' } }
       );
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching user profile:', error);
@@ -291,11 +277,11 @@ describe('AuthService', () => {
 
       expect(emittedUser).toEqual({ ...mockUser, email: mockCredentials.email });
       expect(httpClient.post).toHaveBeenCalledWith(
-        `${mockEnvironment.auth.baseUrl}/login`,
+        `${environment.auth.baseUrl}/login`,
         mockCredentials
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        mockEnvironment.auth.tokenKey,
+        environment.auth.tokenKey,
         mockUser.token
       );
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -304,7 +290,7 @@ describe('AuthService', () => {
       );
       expect(currentUserSubject.getValue()).toEqual({ ...mockUser, email: mockCredentials.email });
       expect(httpClient.get).toHaveBeenCalledWith(
-        `${mockEnvironment.api.baseUrl}/metrics/user-info`,
+        `${environment.api.baseUrl}/metrics/user-info`,
         { headers: { Authorization: 'Bearer mock-token' } }
       );
 
@@ -348,7 +334,7 @@ describe('AuthService', () => {
 
       service.logout();
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith(mockEnvironment.auth.tokenKey);
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(environment.auth.tokenKey);
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('current_user');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_user');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_token');
@@ -377,7 +363,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Password reset successful');
       expect(httpClient.post).toHaveBeenCalledWith(
-        `${mockEnvironment.auth.baseUrl}/reset-password?email=${email}&token=${token}`,
+        `${environment.auth.baseUrl}/reset-password?email=${email}&token=${token}`,
         passwords
       );
 
@@ -430,7 +416,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Password reset successful');
       expect(httpClient.post).toHaveBeenCalledWith(
-        `${mockEnvironment.auth.baseUrl}/first-password-reset?email=${email}`,
+        `${environment.auth.baseUrl}/first-password-reset?email=${email}`,
         passwords
       );
 
@@ -481,7 +467,7 @@ describe('AuthService', () => {
 
       expect(result).toBe('Reset link sent');
       expect(httpClient.post).toHaveBeenCalledWith(
-        `${mockEnvironment.auth.baseUrl}/reset-password-request?email=test@example.com`,
+        `${environment.auth.baseUrl}/reset-password-request?email=test@example.com`,
         {}
       );
 
@@ -517,7 +503,7 @@ describe('AuthService', () => {
     it('should return token from localStorage', () => {
       localStorageMock.getItem.mockReturnValue('mock-token');
       expect(service.getToken()).toBe('mock-token');
-      expect(localStorageMock.getItem).toHaveBeenCalledWith(mockEnvironment.auth.tokenKey);
+      expect(localStorageMock.getItem).toHaveBeenCalledWith(environment.auth.tokenKey);
     });
 
     it('should return null if no token', () => {

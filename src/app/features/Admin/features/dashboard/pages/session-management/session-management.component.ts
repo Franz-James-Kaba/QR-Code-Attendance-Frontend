@@ -1,241 +1,241 @@
 import { ModalService } from '@Admin/core/services/modal.service';
 import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
-import {
-  Session,
-  SessionFilter,
-  SessionStatus,
-  SessionListResponse,
-} from '@Admin/shared/models/session/session.model';
+import { SessionFormComponent } from '@Admin/shared/components/session-form/session-form.component';
+import { CreateSessionRequest, Session } from '@Admin/shared/models/session/session.model';
 import { SessionService } from '@Admin/shared/services/session.service';
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { StorageService } from '@Admin/shared/services/storage.service';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
-import { finalize, Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-session-management',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, ModalContainerComponent, DatePipe],
   templateUrl: './session-management.component.html',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, ModalContainerComponent],
+  styleUrls: ['../../../../../../shared/styles/table.css']
 })
-export class SessionManagementComponent implements OnInit, OnDestroy {
-  // Dependencies
+export class SessionManagementComponent implements OnInit {
   private readonly sessionService = inject(SessionService);
-  private readonly notificationService = inject(NotificationService);
+  private readonly storageService = inject(StorageService);
   private readonly modalService = inject(ModalService);
+  private readonly notificationService = inject(NotificationService);
 
-  // Component state
-  sessions: Session[] = [];
-  selectedSession: Session | null = null;
+  sessions: { sessionData: Session; qrCodeUrl: string; createdAt: string }[] = [];
+  searchQuery: string = '';
+  private allSessions: { sessionData: Session; qrCodeUrl: string; createdAt: string }[] = [];
   isLoading = false;
-  showQrCodeModal = false;
-  qrCodeUrl = '';
-  qrCodeGenerating = false;
-
-  // Pagination
-  currentPage = 0;
-  pageSize = 10;
-  totalItems = 0;
-
-  // Filters
-  selectedStatus: string = 'all';
-  statusOptions: string[] = ['all', 'SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'];
-
-  // Date filter
-  dateFilter: { startDate?: string; endDate?: string } = {};
-
-  // Subscriptions
-  private modalClosedSubscription: Subscription | null = null;
-  private modalVisibilitySubscription: Subscription | null = null;
+  qrCodeUrl: string | null = null;
+  currentSession: Session | null = null;
+  error: string | null = null;
+  showQrModal = false;
 
   ngOnInit(): void {
-    this.loadSessions();
+    this.loadSavedSessions();
+    this.registerSessionFormModal();
+  }
 
-    // Subscribe to modal closed events to refresh sessions list
-    this.modalVisibilitySubscription = this.modalService.modalVisible$.subscribe(visible => {
-      if (
-        !visible &&
-        (this.modalService.getModalType() === 'createSession' ||
-          this.modalService.getModalType() === 'editSession')
-      ) {
-        this.loadSessions();
-      }
+  private loadSavedSessions(): void {
+    this.allSessions = this.storageService.getStoredSessions();
+    this.sessions = [...this.allSessions];
+  }  private registerSessionFormModal(): void {
+    // Register create session modal
+    this.modalService.registerModal('createSession', {
+      component: this,
+      onOpen: () => {
+        // Clear any previous data
+        this.currentSession = null;
+      },
     });
 
-    // Also subscribe to the explicit modalClosed event for direct handling
-    this.modalClosedSubscription = this.modalService.modalClosed.subscribe(event => {
-      if (event && (event.id === 'createSession' || event.id === 'editSession')) {
-        this.loadSessions();
+    // Register edit session modal
+    this.modalService.registerModal('editSession', {
+      component: this,
+      onOpen: (session: Session) => {
+        // Initialize with session data for editing
+        if (session) {
+          this.currentSession = session;
+        } else {
+          this.notificationService.error('No session data provided for editing');
+          this.modalService.closeModal();
+        }
+      },
+    });
+  }openCreateSessionModal(): void {
+    // Make sure QR modal is closed first
+    if (this.showQrModal) {
+      this.closeQrModal();
+      // Wait for QR modal to close before opening create modal
+      setTimeout(() => {
+        this.modalService.openModal('createSession');
+      }, 300);
+    } else {
+      this.modalService.openModal('createSession');
+    }
+  }
+  openEditSessionModal(session: Session): void {
+    // Make sure QR modal is closed first
+    if (this.showQrModal) {
+      this.closeQrModal();
+      // Wait for QR modal to close before opening edit modal
+      setTimeout(() => {
+        this.modalService.openModal('editSession', session);
+      }, 300);
+    } else {
+      this.modalService.openModal('editSession', session);
+    }
+  }
+  createSession(sessionData: CreateSessionRequest): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.sessionService.generateQrCode(sessionData).subscribe({
+      next: (qrBlob) => {
+        // Create a session object to store (normally would come from backend)
+        const generatedSession: Session = {
+          id: crypto.randomUUID(), // Generate a unique ID locally
+          name: sessionData.name,
+          startTime: sessionData.startTime,
+          endTime: sessionData.endTime,
+          status: 'SCHEDULED',
+          location: sessionData.location,
+          description: sessionData.description,
+        };
+
+        // Convert blob to data URL for display and storage
+        this.storageService.blobToDataUrl(qrBlob).then(qrDataUrl => {
+          // Store in local storage
+          this.storageService.saveSession(generatedSession, qrDataUrl);
+
+          // Close modal before showing QR code
+          this.modalService.closeModal();
+
+          // Update UI
+          setTimeout(() => {
+            this.qrCodeUrl = qrDataUrl;
+            this.currentSession = generatedSession;
+            this.showQrModal = true;
+            this.loadSavedSessions(); // Refresh the sessions list
+            this.isLoading = false;
+            this.notificationService.success('Session created successfully');
+          }, 300);
+        });
+      },
+      error: (err) => {
+        this.error = `Failed to generate QR code: ${err.message}`;
+        this.isLoading = false;
+        this.modalService.closeModal();
+        this.notificationService.error(this.error);
       }
     });
   }
 
-  ngOnDestroy(): void {
-    // Clean up subscriptions to prevent memory leaks
-    if (this.modalVisibilitySubscription) {
-      this.modalVisibilitySubscription.unsubscribe();
+  updateSession(sessionData: CreateSessionRequest): void {
+    if (!this.currentSession) {
+      this.notificationService.error('No session selected for update');
+      return;
     }
-    if (this.modalClosedSubscription) {
-      this.modalClosedSubscription.unsubscribe();
-    }
-  }
 
-  loadSessions(): void {
     this.isLoading = true;
 
-    // Build filter
-    const filter: SessionFilter = {
-      page: this.currentPage,
-      size: this.pageSize,
+    // Update the session (with the same ID)
+    const updatedSession: Session = {
+      ...this.currentSession,
+      name: sessionData.name,
+      startTime: sessionData.startTime,
+      endTime: sessionData.endTime,
+      location: sessionData.location,
+      description: sessionData.description,
     };
 
-    // Add status filter if not "all"
-    if (this.selectedStatus !== 'all') {
-      // Type check to ensure only valid SessionStatus values are used
-      if (this.isValidSessionStatus(this.selectedStatus)) {
-        filter.status = this.selectedStatus;
-      }
+    // Re-generate QR code if needed (for this demo we'll reuse the existing QR code)
+    const existingSessionWithQr = this.sessions.find(s => s.sessionData.id === this.currentSession?.id);
+    if (existingSessionWithQr) {
+      // Store the updated session with the existing QR code
+      this.storageService.updateSession(updatedSession, existingSessionWithQr.qrCodeUrl);
+
+      // Update UI
+      this.loadSavedSessions();
+      this.modalService.closeModal();
+      this.notificationService.success('Session updated successfully');
+    } else {
+      this.notificationService.error('Session not found');
     }
 
-    // Add date filters if provided
-    if (this.dateFilter.startDate) {
-      filter.startDate = this.dateFilter.startDate;
+    this.isLoading = false;
+    this.currentSession = null;
+  }
+  viewQrCode(session: Session, qrCodeUrl: string): void {
+    // Make sure to close any open modals first
+    if (this.modalService.isModalVisible()) {
+      this.modalService.closeModal();
     }
-    if (this.dateFilter.endDate) {
-      filter.endDate = this.dateFilter.endDate;
-    }
 
-    this.sessionService
-      .getSessions(filter)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (response: SessionListResponse) => {
-          this.sessions = response.content;
-          this.totalItems = response.totalElements;
-        },
-        error: error => {
-          this.notificationService.error(error.message ?? 'Failed to load sessions');
-        },
-      });
-  }
-
-  onFilterChange(): void {
-    this.currentPage = 0; // Reset pagination when filters change
-    this.loadSessions();
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.loadSessions();
-  }
-
-  onStatusChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedStatus = select.value;
-    this.onFilterChange();
-  }
-
-  onDateFilterChange(): void {
-    this.onFilterChange();
-  }
-
-  createSession(): void {
-    this.modalService.openModal('createSession');
-  }
-
-  editSession(session: Session): void {
-    this.modalService.openModal('editSession', session);
-  }
-
-  cancelSession(session: Session): void {
-    if (
-      confirm(
-        `Are you sure you want to cancel the session scheduled for ${this.sessionService.formatSessionTime(session.startTime)}?`
-      )
-    ) {
-      this.isLoading = true;
-
-      this.sessionService
-        .cancelSession(session.id)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: () => {
-            this.notificationService.success('Session cancelled successfully');
-            this.loadSessions();
-          },
-          error: error => {
-            this.notificationService.error(error.message ?? 'Failed to cancel session');
-          },
-        });
-    }
-  }
-
-  generateQrCode(session: Session): void {
-    this.selectedSession = session;
-    this.qrCodeUrl = '';
-    this.qrCodeGenerating = true;
-    this.showQrCodeModal = true;
-
-    this.sessionService
-      .generateQrCode(session.id)
-      .pipe(finalize(() => (this.qrCodeGenerating = false)))
-      .subscribe({
-        next: url => {
-          this.qrCodeUrl = url;
-        },
-        error: error => {
-          this.notificationService.error(error.message ?? 'Failed to generate QR code');
-          this.showQrCodeModal = false;
-        },
-      });
-  }
-
-  closeQrCodeModal(): void {
-    this.showQrCodeModal = false;
-    this.selectedSession = null;
-
-    // Revoke object URL to prevent memory leaks
-    if (this.qrCodeUrl) {
-      URL.revokeObjectURL(this.qrCodeUrl);
-      this.qrCodeUrl = '';
-    }
+    // Wait a bit for modal to close before showing QR
+    setTimeout(() => {
+      this.qrCodeUrl = qrCodeUrl;
+      this.currentSession = session;
+      this.showQrModal = true;
+    }, 300);
   }
 
   downloadQrCode(): void {
-    if (!this.qrCodeUrl || !this.selectedSession) return;
+    if (!this.qrCodeUrl) return;
 
-    const link = document.createElement('a');
-    link.href = this.qrCodeUrl;
-    link.download = `session-qr-${this.selectedSession.id}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement('a');
+    a.href = this.qrCodeUrl;
+    a.download = `qr-code-${this.currentSession?.name ?? 'session'}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
-  /**
-   * Get a formatted status text
-   */
-  getStatusText(status: string): string {
-    // Only process if it's a valid SessionStatus
-    if (this.isValidSessionStatus(status)) {
-      return status.charAt(0) + status.slice(1).toLowerCase();
+  closeQrModal(): void {
+    this.showQrModal = false;
+    this.qrCodeUrl = null;
+    this.currentSession = null;
+  }
+
+  deleteSession(sessionId: string): void {
+    if (confirm('Are you sure you want to delete this session?')) {
+      this.storageService.removeSession(sessionId);
+      this.loadSavedSessions();
+      this.notificationService.success('Session deleted successfully');
     }
-    return status; // Return as-is if not a valid SessionStatus
   }
 
-  /**
-   * Get CSS classes for status badge
-   */
-  getStatusClass(status: SessionStatus): string {
-    const color = this.sessionService.getStatusColor(status);
-    return `bg-${color}-100 text-${color}-800`;
+  formatSessionTime(time: string | Date): string {
+    return this.sessionService.formatSessionTime(typeof time === 'string' ? time : time.toISOString());
   }
 
-  /**
-   * Type guard to check if a string is a valid SessionStatus
-   */
-  private isValidSessionStatus(status: string): status is SessionStatus {
-    return ['SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'].includes(status);
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'SCHEDULED':
+        return 'bg-blue-100 text-blue-800';
+      case 'ONGOING':
+        return 'bg-green-100 text-green-800';
+      case 'COMPLETED':
+        return 'bg-gray-100 text-gray-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  onSearch(): void {
+    if (!this.searchQuery) {
+      this.sessions = [...this.allSessions];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase();
+    this.sessions = this.allSessions.filter(session =>
+      session.sessionData.name.toLowerCase().includes(query) ||
+      session.sessionData.location?.toLowerCase().includes(query) ||
+      session.sessionData.description?.toLowerCase().includes(query)
+    );
   }
 }

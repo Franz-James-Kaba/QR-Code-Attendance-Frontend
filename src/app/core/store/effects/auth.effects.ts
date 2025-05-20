@@ -13,17 +13,24 @@ export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly notificationService = inject(NotificationService);
-
-  initAuth$ = createEffect(() =>
+  private readonly notificationService = inject(NotificationService);  initAuth$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.initAuth),
       map(() => {
-        const token = localStorage.getItem('auth_token');
+        const token = this.authService.getToken();
         if (token) {
+          const userStr = localStorage.getItem('current_user');
+          if (userStr) {
+            try {
+              const userData = JSON.parse(userStr);
+              return AuthActions.loginSuccess({ response: userData });
+            } catch (e) {
+              console.error('Error parsing stored user data during init', e);
+              return AuthActions.logout();
+            }
+          }
           return AuthActions.initAuthSuccess({ token });
         } else {
-          // If no token found, log out
           return AuthActions.logout();
         }
       })
@@ -134,7 +141,6 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -142,6 +148,8 @@ export class AuthEffects {
         tap(() => {
           this.authService.logout();
           this.notificationService.info('You have been logged out');
+          // Navigate to login page
+          this.router.navigate(['/auth/login']);
         })
       ),
     { dispatch: false }

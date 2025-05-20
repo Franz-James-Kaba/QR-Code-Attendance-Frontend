@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { IconComponent } from '@shared/components/icon/icon.component';
+
 import { Notification } from '../../../models/notification/notification.model';
 
 @Component({
   selector: 'app-notification-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './notification-item.component.html',
   styleUrls: ['./notification-item.component.scss'],
 })
@@ -50,29 +52,27 @@ export class NotificationItemComponent implements OnInit, OnDestroy {
     if (this.notification.onAction) {
       this.notification.onAction();
     }
-    // Optional: close the notification after action if needed
-    // this.close();
   }
 
   /**
-   * Get the icon based on notification type
+   * Get the icon path based on notification type
    */
-  get icon(): string {
+  getIconPath(): string {
     if (this.notification.icon) {
       return this.notification.icon;
     }
 
     switch (this.notification.type) {
       case 'success':
-        return 'check-circle';
+        return 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'error':
-        return 'x-circle';
+        return 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'warning':
-        return 'alert-triangle';
+        return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z';
       case 'info':
-        return 'info';
+        return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
       default:
-        return 'bell';
+        return 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0';
     }
   }
 

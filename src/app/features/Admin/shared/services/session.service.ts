@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { environment } from 'environments/environment';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 
 import {
   CreateSessionRequest,
@@ -77,25 +77,16 @@ export class SessionService {
           throwError(() => new Error(`Error cancelling session: ${error.message}`))
         )
       );
-  }
-
-  // Generate QR code for a session
-  generateQrCode(sessionId: string, width: number = 300, height: number = 300): Observable<string> {
-    const params = new HttpParams().set('width', width.toString()).set('height', height.toString());
-
-    // Return observable that resolves to QR code image URL
+  }  // Generate QR code for a session
+  generateQrCode(sessionData: CreateSessionRequest): Observable<Blob> {
+    // Direct implementation based on the provided endpoint
     return this.http
-      .post<Blob>(
+      .post(
         `${this.apiUrl}/generate-qrcode`,
-        { sessionId },
-        { params, responseType: 'blob' as 'json', observe: 'response' }
+        sessionData,
+        { responseType: 'blob' }
       )
       .pipe(
-        map(response => {
-          // Convert blob to object URL
-          const blob = response.body;
-          return blob ? URL.createObjectURL(blob) : '';
-        }),
         catchError(error =>
           throwError(() => new Error(`Error generating QR code: ${error.message}`))
         )
