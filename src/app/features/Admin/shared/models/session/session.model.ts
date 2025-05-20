@@ -1,9 +1,10 @@
 export type SessionStatus = 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
 
 export interface Session {
-  id: string; // Changed from number to string to match service
-  startTime: string; // ISO string
-  endTime: string; // ISO string
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
   status: SessionStatus;
   attendees?: number;
   location?: string;
@@ -50,6 +51,7 @@ export interface SessionListResponse {
 }
 
 export interface CreateSessionRequest {
+  name: string;
   startTime: string;
   endTime: string;
   location?: string;
@@ -58,6 +60,7 @@ export interface CreateSessionRequest {
 
 export interface UpdateSessionRequest {
   id: string;
+  name: string;
   startTime: string;
   endTime: string;
   location?: string;
@@ -65,6 +68,7 @@ export interface UpdateSessionRequest {
 }
 
 export interface SessionFormData {
+  name: string;
   startTime: string;
   endTime: string;
   location?: string;

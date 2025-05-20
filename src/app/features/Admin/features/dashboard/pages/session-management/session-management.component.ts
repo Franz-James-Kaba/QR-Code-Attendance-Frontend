@@ -1,241 +1,141 @@
-import { ModalService } from '@Admin/core/services/modal.service';
-import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
-import {
-  Session,
-  SessionFilter,
-  SessionStatus,
-  SessionListResponse,
-} from '@Admin/shared/models/session/session.model';
+import { CreateSessionRequest, Session } from '@Admin/shared/models/session/session.model';
 import { SessionService } from '@Admin/shared/services/session.service';
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ButtonComponent } from '@shared/components/button/button.component';
-import { NotificationService } from '@shared/components/notification/notification.service';
-import { finalize, Subscription } from 'rxjs';
+import { StorageService } from '@Admin/shared/services/storage.service';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+
 @Component({
   selector: 'app-session-management',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, ModalContainerComponent, DatePipe],
   templateUrl: './session-management.component.html',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
 })
-export class SessionManagementComponent implements OnInit, OnDestroy {
-  // Dependencies
+export class SessionManagementComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   private readonly sessionService = inject(SessionService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly modalService = inject(ModalService);
+  private readonly storageService = inject(StorageService);
 
-  // Component state
-  sessions: Session[] = [];
-  selectedSession: Session | null = null;
+  sessionForm!: FormGroup;
+  sessions: { sessionData: Session; qrCodeUrl: string; createdAt: string }[] = [];
   isLoading = false;
-  showQrCodeModal = false;
-  qrCodeUrl = '';
-  qrCodeGenerating = false;
-
-  // Pagination
-  currentPage = 0;
-  pageSize = 10;
-  totalItems = 0;
-
-  // Filters
-  selectedStatus: string = 'all';
-  statusOptions: string[] = ['all', 'SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'];
-
-  // Date filter
-  dateFilter: { startDate?: string; endDate?: string } = {};
-
-  // Subscriptions
-  private modalClosedSubscription: Subscription | null = null;
-  private modalVisibilitySubscription: Subscription | null = null;
+  qrCodeUrl: string | null = null;
+  currentSession: Session | null = null;
+  error: string | null = null;
+  showQrModal = false;
 
   ngOnInit(): void {
-    this.loadSessions();
+    this.initForm();
+    this.loadSavedSessions();
+  }
 
-    // Subscribe to modal closed events to refresh sessions list
-    this.modalVisibilitySubscription = this.modalService.modalVisible$.subscribe(visible => {
-      if (
-        !visible &&
-        (this.modalService.getModalType() === 'createSession' ||
-          this.modalService.getModalType() === 'editSession')
-      ) {
-        this.loadSessions();
-      }
-    });
-
-    // Also subscribe to the explicit modalClosed event for direct handling
-    this.modalClosedSubscription = this.modalService.modalClosed.subscribe(event => {
-      if (event && (event.id === 'createSession' || event.id === 'editSession')) {
-        this.loadSessions();
-      }
+  private initForm(): void {
+    this.sessionForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      startTime: ['', [Validators.required]],
+      endTime: ['', [Validators.required]],
+      location: [''],
+      description: [''],
     });
   }
 
-  ngOnDestroy(): void {
-    // Clean up subscriptions to prevent memory leaks
-    if (this.modalVisibilitySubscription) {
-      this.modalVisibilitySubscription.unsubscribe();
-    }
-    if (this.modalClosedSubscription) {
-      this.modalClosedSubscription.unsubscribe();
-    }
+  private loadSavedSessions(): void {
+    this.sessions = this.storageService.getStoredSessions();
   }
 
-  loadSessions(): void {
+  onSubmit(): void {
+    if (this.sessionForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.sessionForm.controls).forEach(key => {
+        const control = this.sessionForm.get(key);
+        control?.markAsTouched();
+      });
+      return;
+    }
+
     this.isLoading = true;
+    this.error = null;
 
-    // Build filter
-    const filter: SessionFilter = {
-      page: this.currentPage,
-      size: this.pageSize,
+    const sessionData: CreateSessionRequest = {
+      name: this.sessionForm.value.name,
+      startTime: new Date(this.sessionForm.value.startTime).toISOString(),
+      endTime: new Date(this.sessionForm.value.endTime).toISOString(),
+      location: this.sessionForm.value.location,
+      description: this.sessionForm.value.description,
     };
 
-    // Add status filter if not "all"
-    if (this.selectedStatus !== 'all') {
-      // Type check to ensure only valid SessionStatus values are used
-      if (this.isValidSessionStatus(this.selectedStatus)) {
-        filter.status = this.selectedStatus;
-      }
-    }
+    this.sessionService.generateQrCode(sessionData).subscribe({
+      next: (qrBlob) => {
+        // Create a session object to store (normally would come from backend)
+        const generatedSession: Session = {
+          id: crypto.randomUUID(), // Generate a unique ID locally
+          name: sessionData.name,
+          startTime: sessionData.startTime,
+          endTime: sessionData.endTime,
+          status: 'SCHEDULED',
+          location: sessionData.location,
+          description: sessionData.description,
+        };
 
-    // Add date filters if provided
-    if (this.dateFilter.startDate) {
-      filter.startDate = this.dateFilter.startDate;
-    }
-    if (this.dateFilter.endDate) {
-      filter.endDate = this.dateFilter.endDate;
-    }
-
-    this.sessionService
-      .getSessions(filter)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (response: SessionListResponse) => {
-          this.sessions = response.content;
-          this.totalItems = response.totalElements;
-        },
-        error: error => {
-          this.notificationService.error(error.message ?? 'Failed to load sessions');
-        },
-      });
-  }
-
-  onFilterChange(): void {
-    this.currentPage = 0; // Reset pagination when filters change
-    this.loadSessions();
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.loadSessions();
-  }
-
-  onStatusChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedStatus = select.value;
-    this.onFilterChange();
-  }
-
-  onDateFilterChange(): void {
-    this.onFilterChange();
-  }
-
-  createSession(): void {
-    this.modalService.openModal('createSession');
-  }
-
-  editSession(session: Session): void {
-    this.modalService.openModal('editSession', session);
-  }
-
-  cancelSession(session: Session): void {
-    if (
-      confirm(
-        `Are you sure you want to cancel the session scheduled for ${this.sessionService.formatSessionTime(session.startTime)}?`
-      )
-    ) {
-      this.isLoading = true;
-
-      this.sessionService
-        .cancelSession(session.id)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: () => {
-            this.notificationService.success('Session cancelled successfully');
-            this.loadSessions();
-          },
-          error: error => {
-            this.notificationService.error(error.message ?? 'Failed to cancel session');
-          },
+        // Convert blob to data URL for display and storage
+        this.storageService.blobToDataUrl(qrBlob).then(qrDataUrl => {
+          // Store in local storage
+          this.storageService.saveSession(generatedSession, qrDataUrl);
+          
+          // Update UI
+          this.qrCodeUrl = qrDataUrl;
+          this.currentSession = generatedSession;
+          this.showQrModal = true;
+          this.loadSavedSessions(); // Refresh the sessions list
+          this.isLoading = false;
+          this.sessionForm.reset();
         });
-    }
-  }
-
-  generateQrCode(session: Session): void {
-    this.selectedSession = session;
-    this.qrCodeUrl = '';
-    this.qrCodeGenerating = true;
-    this.showQrCodeModal = true;
-
-    this.sessionService
-      .generateQrCode(session.id)
-      .pipe(finalize(() => (this.qrCodeGenerating = false)))
-      .subscribe({
-        next: url => {
-          this.qrCodeUrl = url;
-        },
-        error: error => {
-          this.notificationService.error(error.message ?? 'Failed to generate QR code');
-          this.showQrCodeModal = false;
-        },
-      });
-  }
-
-  closeQrCodeModal(): void {
-    this.showQrCodeModal = false;
-    this.selectedSession = null;
-
-    // Revoke object URL to prevent memory leaks
-    if (this.qrCodeUrl) {
-      URL.revokeObjectURL(this.qrCodeUrl);
-      this.qrCodeUrl = '';
-    }
+      },
+      error: (err) => {
+        this.error = `Failed to generate QR code: ${err.message}`;
+        this.isLoading = false;
+      }
+    });
   }
 
   downloadQrCode(): void {
-    if (!this.qrCodeUrl || !this.selectedSession) return;
-
-    const link = document.createElement('a');
-    link.href = this.qrCodeUrl;
-    link.download = `session-qr-${this.selectedSession.id}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!this.qrCodeUrl) return;
+    
+    const a = document.createElement('a');
+    a.href = this.qrCodeUrl;
+    a.download = `qr-code-${this.currentSession?.name ?? 'session'}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
-  /**
-   * Get a formatted status text
-   */
-  getStatusText(status: string): string {
-    // Only process if it's a valid SessionStatus
-    if (this.isValidSessionStatus(status)) {
-      return status.charAt(0) + status.slice(1).toLowerCase();
+  closeQrModal(): void {
+    this.showQrModal = false;
+    this.qrCodeUrl = null;
+    this.currentSession = null;
+  }
+
+  deleteSession(sessionId: string): void {
+    if (confirm('Are you sure you want to delete this session?')) {
+      this.storageService.removeSession(sessionId);
+      this.loadSavedSessions();
     }
-    return status; // Return as-is if not a valid SessionStatus
   }
 
-  /**
-   * Get CSS classes for status badge
-   */
-  getStatusClass(status: SessionStatus): string {
-    const color = this.sessionService.getStatusColor(status);
-    return `bg-${color}-100 text-${color}-800`;
+  isStartDateValid(): boolean {
+    const startDate = this.sessionForm.get('startTime')?.value;
+    return !startDate || new Date(startDate) >= new Date();
   }
 
-  /**
-   * Type guard to check if a string is a valid SessionStatus
-   */
-  private isValidSessionStatus(status: string): status is SessionStatus {
-    return ['SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'].includes(status);
+  isEndDateValid(): boolean {
+    const startDate = this.sessionForm.get('startTime')?.value;
+    const endDate = this.sessionForm.get('endTime')?.value;
+    
+    return !startDate || !endDate || new Date(endDate) > new Date(startDate);
+  }
+
+  formatSessionTime(time: string | Date): string {
+    return this.sessionService.formatSessionTime(typeof time === 'string' ? time : time.toISOString());
   }
 }
