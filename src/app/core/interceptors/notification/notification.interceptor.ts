@@ -87,9 +87,6 @@ export class NotificationInterceptor implements HttpInterceptor {
     );
   }
 
-  /**
-   * Get appropriate success message based on response
-   */
   private getSuccessMessage(
     response: HttpResponse<ResponseWithMessage>,
     request: HttpRequest<unknown>
@@ -97,6 +94,11 @@ export class NotificationInterceptor implements HttpInterceptor {
     // Try to get message from response body if it exists
     if (response.body?.message) {
       return response.body.message;
+    }
+
+    // Check if it's a login request
+    if (request.url.includes('/login')) {
+      return 'Login successful';
     }
 
     // Default success messages based on method
