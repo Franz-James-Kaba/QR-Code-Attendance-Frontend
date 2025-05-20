@@ -6,6 +6,7 @@ import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
 import { NspService } from '@Admin/shared/services/nsp.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { AuthService } from '@app/core/services/auth/auth.service';
 import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { ChartComponent } from '@shared/components/chart/chart.component';
@@ -30,7 +31,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
-  public readonly userName = 'Franz';
+  userName: string = 'Admin';
 
   nspCount: number = 0;
   facilitatorCount: number = 0;
@@ -39,6 +40,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   earlyAttendees: Attendee[] = [];
   isLoadingEarlyAttendees: boolean = false;
   earlyAttendeesTotal: number = 0;
+  earlyAttendeesPage: number = 0;
+  earlyAttendeesSize: number = 5;
 
   attendanceChartData: ChartDataSet | null = null;
   stayingTimeChartData: ChartDataSet | null = null;
@@ -83,6 +86,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly facilitatorService = inject(FacilitatorService);
   private readonly attendanceService = inject(AttendanceService);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   ngOnInit(): void {
     this.loadUserCounts();
@@ -90,6 +94,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadStayingTimeChartData();
     this.loadProgramDistributionData();
     this.loadEarlyAttendees();
+    this.loadUserName();
   }
 
   ngOnDestroy(): void {
@@ -158,9 +163,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadUserCounts(): void {
     this.isLoadingCounts = true;
 
-    // Use forkJoin to make both API calls in parallel
     forkJoin({
-      nsps: this.nspService.getAllNsps(0, 1), // Just need the total count, not all records
+      nsps: this.nspService.getAllNsps(0, 1),
       facilitators: this.facilitatorService.getAllFacilitators(0, 1),
     })
       .pipe(takeUntil(this.destroy$))
@@ -177,23 +181,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Load early attendees from the API
-   */
   loadEarlyAttendees(): void {
     this.isLoadingEarlyAttendees = true;
+    this.earlyAttendees = [];
+    this.earlyAttendeesTotal = 0;
 
-    // Calculate date range (today and yesterday)
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    // Format dates as YYYY-MM-DD
     const startDate = yesterday.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
     this.attendanceService
-      .getEarlyAttendees(startDate, endDate)
+      .getEarlyAttendees(startDate, endDate, this.earlyAttendeesPage, this.earlyAttendeesSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: result => {
@@ -205,19 +206,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
           console.error('Error loading early attendees:', err);
           this.notificationService.error('Failed to load early attendees', { duration: 5000 });
           this.isLoadingEarlyAttendees = false;
-
-          // Fallback to mock data in case of error
-          this.earlyAttendees = [
-            { name: 'John Doe', program: 'Web Development NSP', time: '8:02 AM' },
-            { name: 'Sarah Johnson', program: 'Data Science NSP', time: '8:05 AM' },
-            { name: 'Mark Williams', program: 'UI/UX Design NSP', time: '8:12 AM' },
-            { name: 'Emily Davis', program: 'Mobile Development NSP', time: '8:15 AM' },
-            { name: 'Daniel Brown', program: 'Cloud Computing NSP', time: '8:20 AM' },
-          ];
         },
       });
   }
-
+  loadUserName(): void {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (user?.firstName && user?.lastName) {
+          // If both first and last name exist, use firstName
+          this.userName = user.firstName;
+        } else if (user?.firstName) {
+          // If only first name exists
+          this.userName = user.firstName;
+        } else if (user?.lastName) {
+          // If only last name exists
+          this.userName = user.lastName;
+        } else if (user?.email) {
+          // Fallback to email username if no names
+          const emailName = user.email.split('@')[0];
+          // Capitalize the first letter
+          this.userName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+        } else {
+          // Default fallback
+          this.userName = 'Admin';
+        }
+      });
+  }
   // Event handlers for time range changes
   onAttendanceTimeRangeChange(timeRange: TimeRange): void {
     this.selectedAttendanceTimeRange = timeRange;
@@ -229,12 +244,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadStayingTimeChartData();
   }
 
-  // Action button handlers
-  onCreateNsp(): void {
-    this.modalService.openModal('createNsp');
+  onEarlyAttendeesPageChange(page: number): void {
+    this.earlyAttendeesPage = page;
+    this.loadEarlyAttendees();
   }
 
-  onCreateFacilitator(): void {
-    this.modalService.openModal('createFacilitator');
+  onEarlyAttendeesSizeChange(size: number): void {
+    this.earlyAttendeesSize = size;
+    this.loadEarlyAttendees();
+  }
+
+  // Action button handler
+  onCreateSession(): void {
+    this.modalService.openModal('createSession');
   }
 }

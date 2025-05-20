@@ -19,32 +19,20 @@ export class NspService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  /**
-   * Create a new NSP user
-   */
   createNsp(nsp: NSPRequest): Observable<string> {
     return this.http
       .post<string>(`${this.apiUrl}/admin/create-nsp`, nsp, {
-        responseType: 'text' as 'json', // Handle text response correctly
+        responseType: 'text' as 'json',
       })
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Get all NSPs with pagination
-   */
   getAllNsps(page = 0, size = 10): Observable<{ data: NSPViewModel[]; total: number }> {
-    // Convert to 1-based pagination for the backend API
-    // The backend expects page to start at 1, not 0
     const pageIndexForBackend = Math.max(1, page + 1);
 
-    // Create new HttpParams using set() method to ensure proper URL encoding
     let params = new HttpParams();
     params = params.set('page', pageIndexForBackend.toString());
     params = params.set('size', size.toString());
-
-    // Log the actual request parameters for debugging
-    console.log('Making NSP API request with params:', { page: pageIndexForBackend, size });
 
     return this.http
       .get<PagedResponse<NSPResponse>>(`${this.apiUrl}/admin/users/nsps`, { params })
@@ -60,9 +48,6 @@ export class NspService {
       );
   }
 
-  /**
-   * Get NSP by email
-   */
   getNspByEmail(email: string): Observable<NSPViewModel> {
     const params = new HttpParams().set('email', email);
 
@@ -72,9 +57,6 @@ export class NspService {
     );
   }
 
-  /**
-   * Update existing NSP
-   */
   updateNsp(userId: number, nsp: NSPRequest): Observable<NSPViewModel> {
     return this.http.put<NSPResponse>(`${this.apiUrl}/admin/users/${userId}`, nsp).pipe(
       map(response => mapToViewModel(response)),
@@ -82,13 +64,10 @@ export class NspService {
     );
   }
 
-  /**
-   * Delete NSP
-   */
   deleteNsp(userId: number): Observable<string> {
     return this.http
       .delete<string>(`${this.apiUrl}/admin/users/${userId}`, {
-        responseType: 'text' as 'json', // Handle text response correctly
+        responseType: 'text' as 'json',
       })
       .pipe(catchError(error => this.handleError(error)));
   }

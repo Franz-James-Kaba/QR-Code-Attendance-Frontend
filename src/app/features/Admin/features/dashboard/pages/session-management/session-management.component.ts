@@ -1,24 +1,31 @@
+import { ModalService } from '@Admin/core/services/modal.service';
+import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
+import { SessionFormComponent } from '@Admin/shared/components/session-form/session-form.component';
 import { CreateSessionRequest, Session } from '@Admin/shared/models/session/session.model';
 import { SessionService } from '@Admin/shared/services/session.service';
 import { StorageService } from '@Admin/shared/services/storage.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import { NotificationService } from '@shared/components/notification/notification.service';
 
 @Component({
   selector: 'app-session-management',
   templateUrl: './session-management.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, ModalContainerComponent, SessionFormComponent],
+  styleUrls: ['../../../../../../shared/styles/table.css']
 })
 export class SessionManagementComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
   private readonly sessionService = inject(SessionService);
   private readonly storageService = inject(StorageService);
+  private readonly modalService = inject(ModalService);
+  private readonly notificationService = inject(NotificationService);
 
-  sessionForm!: FormGroup;
   sessions: { sessionData: Session; qrCodeUrl: string; createdAt: string }[] = [];
+  searchQuery: string = '';
+  private allSessions: { sessionData: Session; qrCodeUrl: string; createdAt: string }[] = [];
   isLoading = false;
   qrCodeUrl: string | null = null;
   currentSession: Session | null = null;
@@ -26,44 +33,63 @@ export class SessionManagementComponent implements OnInit {
   showQrModal = false;
 
   ngOnInit(): void {
-    this.initForm();
     this.loadSavedSessions();
-  }
-
-  private initForm(): void {
-    this.sessionForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      startTime: ['', [Validators.required]],
-      endTime: ['', [Validators.required]],
-      location: [''],
-      description: [''],
-    });
+    this.registerSessionFormModal();
   }
 
   private loadSavedSessions(): void {
-    this.sessions = this.storageService.getStoredSessions();
-  }
+    this.allSessions = this.storageService.getStoredSessions();
+    this.sessions = [...this.allSessions];
+  }  private registerSessionFormModal(): void {
+    // Register create session modal
+    this.modalService.registerModal('createSession', {
+      component: this,
+      onOpen: () => {
+        // Clear any previous data
+        this.currentSession = null;
+      },
+    });
 
-  onSubmit(): void {
-    if (this.sessionForm.invalid) {
-      // Mark all fields as touched to show validation errors
-      Object.keys(this.sessionForm.controls).forEach(key => {
-        const control = this.sessionForm.get(key);
-        control?.markAsTouched();
-      });
-      return;
+    // Register edit session modal
+    this.modalService.registerModal('editSession', {
+      component: this,
+      onOpen: (session: Session) => {
+        // Initialize with session data for editing
+        if (session) {
+          this.currentSession = session;
+        } else {
+          this.notificationService.error('No session data provided for editing');
+          this.modalService.closeModal();
+        }
+      },
+    });
+  }openCreateSessionModal(): void {
+    // Make sure QR modal is closed first
+    if (this.showQrModal) {
+      this.closeQrModal();
+      // Wait for QR modal to close before opening create modal
+      setTimeout(() => {
+        this.modalService.openModal('createSession');
+      }, 300);
+    } else {
+      this.modalService.openModal('createSession');
     }
-
+  }
+  openEditSessionModal(session: Session): void {
+    // Make sure QR modal is closed first
+    if (this.showQrModal) {
+      this.closeQrModal();
+      // Wait for QR modal to close before opening edit modal
+      setTimeout(() => {
+        this.modalService.openModal('editSession', session);
+      }, 300);
+    } else {
+      this.modalService.openModal('editSession', session);
+    }
+  }
+  createSession(sessionData: CreateSessionRequest): void {
     this.isLoading = true;
     this.error = null;
-
-    const sessionData: CreateSessionRequest = {
-      name: this.sessionForm.value.name,
-      startTime: new Date(this.sessionForm.value.startTime).toISOString(),
-      endTime: new Date(this.sessionForm.value.endTime).toISOString(),
-      location: this.sessionForm.value.location,
-      description: this.sessionForm.value.description,
-    };
 
     this.sessionService.generateQrCode(sessionData).subscribe({
       next: (qrBlob) => {
@@ -82,26 +108,82 @@ export class SessionManagementComponent implements OnInit {
         this.storageService.blobToDataUrl(qrBlob).then(qrDataUrl => {
           // Store in local storage
           this.storageService.saveSession(generatedSession, qrDataUrl);
-          
+
+          // Close modal before showing QR code
+          this.modalService.closeModal();
+
           // Update UI
-          this.qrCodeUrl = qrDataUrl;
-          this.currentSession = generatedSession;
-          this.showQrModal = true;
-          this.loadSavedSessions(); // Refresh the sessions list
-          this.isLoading = false;
-          this.sessionForm.reset();
+          setTimeout(() => {
+            this.qrCodeUrl = qrDataUrl;
+            this.currentSession = generatedSession;
+            this.showQrModal = true;
+            this.loadSavedSessions(); // Refresh the sessions list
+            this.isLoading = false;
+            this.notificationService.success('Session created successfully');
+          }, 300);
         });
       },
       error: (err) => {
         this.error = `Failed to generate QR code: ${err.message}`;
         this.isLoading = false;
+        this.modalService.closeModal();
+        this.notificationService.error(this.error);
       }
     });
   }
 
+  updateSession(sessionData: CreateSessionRequest): void {
+    if (!this.currentSession) {
+      this.notificationService.error('No session selected for update');
+      return;
+    }
+
+    this.isLoading = true;
+
+    // Update the session (with the same ID)
+    const updatedSession: Session = {
+      ...this.currentSession,
+      name: sessionData.name,
+      startTime: sessionData.startTime,
+      endTime: sessionData.endTime,
+      location: sessionData.location,
+      description: sessionData.description,
+    };
+
+    // Re-generate QR code if needed (for this demo we'll reuse the existing QR code)
+    const existingSessionWithQr = this.sessions.find(s => s.sessionData.id === this.currentSession?.id);
+    if (existingSessionWithQr) {
+      // Store the updated session with the existing QR code
+      this.storageService.updateSession(updatedSession, existingSessionWithQr.qrCodeUrl);
+
+      // Update UI
+      this.loadSavedSessions();
+      this.modalService.closeModal();
+      this.notificationService.success('Session updated successfully');
+    } else {
+      this.notificationService.error('Session not found');
+    }
+
+    this.isLoading = false;
+    this.currentSession = null;
+  }
+  viewQrCode(session: Session, qrCodeUrl: string): void {
+    // Make sure to close any open modals first
+    if (this.modalService.isModalVisible()) {
+      this.modalService.closeModal();
+    }
+
+    // Wait a bit for modal to close before showing QR
+    setTimeout(() => {
+      this.qrCodeUrl = qrCodeUrl;
+      this.currentSession = session;
+      this.showQrModal = true;
+    }, 300);
+  }
+
   downloadQrCode(): void {
     if (!this.qrCodeUrl) return;
-    
+
     const a = document.createElement('a');
     a.href = this.qrCodeUrl;
     a.download = `qr-code-${this.currentSession?.name ?? 'session'}.png`;
@@ -120,22 +202,40 @@ export class SessionManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this session?')) {
       this.storageService.removeSession(sessionId);
       this.loadSavedSessions();
+      this.notificationService.success('Session deleted successfully');
     }
-  }
-
-  isStartDateValid(): boolean {
-    const startDate = this.sessionForm.get('startTime')?.value;
-    return !startDate || new Date(startDate) >= new Date();
-  }
-
-  isEndDateValid(): boolean {
-    const startDate = this.sessionForm.get('startTime')?.value;
-    const endDate = this.sessionForm.get('endTime')?.value;
-    
-    return !startDate || !endDate || new Date(endDate) > new Date(startDate);
   }
 
   formatSessionTime(time: string | Date): string {
     return this.sessionService.formatSessionTime(typeof time === 'string' ? time : time.toISOString());
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'SCHEDULED':
+        return 'bg-blue-100 text-blue-800';
+      case 'ONGOING':
+        return 'bg-green-100 text-green-800';
+      case 'COMPLETED':
+        return 'bg-gray-100 text-gray-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  onSearch(): void {
+    if (!this.searchQuery) {
+      this.sessions = [...this.allSessions];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase();
+    this.sessions = this.allSessions.filter(session =>
+      session.sessionData.name.toLowerCase().includes(query) ||
+      session.sessionData.location?.toLowerCase().includes(query) ||
+      session.sessionData.description?.toLowerCase().includes(query)
+    );
   }
 }

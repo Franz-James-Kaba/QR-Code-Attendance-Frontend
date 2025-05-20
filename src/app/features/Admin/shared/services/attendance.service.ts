@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
 import { environment } from '@environments/environment';
+import { Observable, catchError, map, throwError } from 'rxjs';
+
 import {
   Attendee,
   EarlyAttendeePagedResponse,
@@ -28,21 +29,19 @@ export class AttendanceService {
     page: number = 0,
     size: number = 5
   ): Observable<{ data: Attendee[]; total: number }> {
-    let params = new HttpParams();
-    params = params.set('startDate', startDate);
-    params = params.set('endDate', endDate);
-    params = params.set('page', page.toString());
-    params = params.set('size', size.toString());
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('page', page.toString())
+      .set('size', size.toString());
 
     return this.http
       .get<EarlyAttendeePagedResponse>(`${this.apiUrl}/admin/early-attendees`, { params })
       .pipe(
-        map(response => {
-          return {
-            data: response.content.map(attendee => mapToAttendeeViewModel(attendee)),
-            total: response.totalElements,
-          };
-        }),
+        map(response => ({
+          data: response.content.map(attendee => mapToAttendeeViewModel(attendee)),
+          total: response.totalElements,
+        })),
         catchError(this.handleError)
       );
   }

@@ -65,4 +65,21 @@ export class StorageService {
       reader.readAsDataURL(blob);
     });
   }
+
+  // Update an existing session
+  updateSession(updatedSession: Session, qrCodeUrl: string): void {
+    const storedSessions = this.getStoredSessions();
+    const sessionIndex = storedSessions.findIndex(
+      session => session.sessionData.id === updatedSession.id
+    );
+    
+    if (sessionIndex !== -1) {
+      storedSessions[sessionIndex] = {
+        sessionData: updatedSession,
+        qrCodeUrl,
+        createdAt: storedSessions[sessionIndex].createdAt, // Keep original creation date
+      };
+      localStorage.setItem(this.sessionsKey, JSON.stringify(storedSessions));
+    }
+  }
 }

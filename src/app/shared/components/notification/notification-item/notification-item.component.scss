@@ -101,7 +101,11 @@
     border-left: 4px solid #059669;
     .notification-icon {
       color: #059669;
-      background-color: rgba(5, 150, 105, 0.1);
+      background-color: #f0fdf4;
+
+      :host ::ng-deep svg {
+        stroke: currentColor;
+      }
     }
     .progress {
       background-color: #059669;
@@ -112,7 +116,11 @@
     border-left: 4px solid #dc2626;
     .notification-icon {
       color: #dc2626;
-      background-color: rgba(220, 38, 38, 0.1);
+      background-color: #fef2f2;
+
+      :host ::ng-deep svg {
+        stroke: currentColor;
+      }
     }
     .progress {
       background-color: #dc2626;
@@ -123,7 +131,11 @@
     border-left: 4px solid #f59e0b;
     .notification-icon {
       color: #f59e0b;
-      background-color: rgba(245, 158, 11, 0.1);
+      background-color: #fffbeb;
+
+      :host ::ng-deep svg {
+        stroke: currentColor;
+      }
     }
     .progress {
       background-color: #f59e0b;
@@ -134,7 +146,11 @@
     border-left: 4px solid #3b82f6;
     .notification-icon {
       color: #3b82f6;
-      background-color: rgba(59, 130, 246, 0.1);
+      background-color: #eff6ff;
+
+      :host ::ng-deep svg {
+        stroke: currentColor;
+      }
     }
     .progress {
       background-color: #3b82f6;
@@ -156,7 +172,14 @@
     height: 32px;
     width: 32px;
     border-radius: 50%;
-    font-size: 16px;
+
+    app-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+    }
   }
 
   .notification-text {

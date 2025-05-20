@@ -14,11 +14,12 @@ import { NspService } from '../../services/nsp.service';
 import { FacilitatorFormComponent } from '../facilitator-form/facilitator-form.component';
 import { ModalComponent } from '../modal/modal.component';
 import { NspFormComponent } from '../nsp-form/nsp-form.component';
+import { SessionFormComponent } from '../session-form/session-form.component';
 
 @Component({
   selector: 'app-modal-container',
   standalone: true,
-  imports: [CommonModule, ModalComponent, FacilitatorFormComponent, NspFormComponent],
+  imports: [CommonModule, ModalComponent, FacilitatorFormComponent, NspFormComponent, SessionFormComponent],
   templateUrl: './modal-container.component.html',
 })
 export class ModalContainerComponent implements OnInit, OnDestroy {
@@ -58,10 +59,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  /**
-   * Updates the modal title based on the modal type
-   */
   private updateModalTitle(): void {
     switch (this.modalType) {
       case 'createNsp':
@@ -76,6 +73,12 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       case 'editFacilitator':
         this.modalTitle = 'Edit Facilitator';
         break;
+      case 'createSession':
+        this.modalTitle = 'Create New Session';
+        break;
+      case 'editSession':
+        this.modalTitle = 'Edit Session';
+        break;
       default:
         this.modalTitle = 'Modal';
     }
@@ -89,31 +92,41 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.modalService.closeModal();
     }
   }
-
   /**
    * Handles form submission events
    */
   onFormSubmit(data: any): void {
-    console.log('Form submitted:', data);
-
-    // TODO: Handle the form data (e.g., API calls)
-    // For now, just close the modal
-    setTimeout(() => {
-      this.modalService.closeModal();
-    }, 500);
     this.isSubmitting = true;
 
     if (this.modalType === 'createNsp' || this.modalType === 'editNsp') {
       this.handleNspFormSubmit(data as NSPViewModel);
     } else if (this.modalType === 'createFacilitator' || this.modalType === 'editFacilitator') {
       this.handleFacilitatorFormSubmit(data as FacilitatorViewModel);
-    } else {
-      // Unknown modal type, just close it
-      console.log('Unknown modal type submitted:', this.modalType, data);
-      setTimeout(() => {
+    } else if (this.modalType === 'createSession' || this.modalType === 'editSession') {
+      // For session forms, we need to forward the data to the correct component
+      const modalConfig = this.modalService.getModal(this.modalType);
+      
+      if (modalConfig && modalConfig.component) {
+        try {
+          // Call the appropriate method on the component
+          if (this.modalType === 'createSession' && modalConfig.component.createSession) {
+            modalConfig.component.createSession(data);
+          } else if (this.modalType === 'editSession' && modalConfig.component.updateSession) {
+            modalConfig.component.updateSession(data);
+          }
+        } catch (error) {
+          console.error('Error handling session form:', error);
+        } finally {
+          this.isSubmitting = false;
+        }
+      } else {
         this.modalService.closeModal();
         this.isSubmitting = false;
-      }, 500);
+      }
+    } else {
+      // Unknown modal type, just close it
+      this.modalService.closeModal();
+      this.isSubmitting = false;
     }
   }
 
@@ -220,7 +233,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.modalService.closeModal();
-            // Redirect with success message
             this.navigateWithSuccess(
               `${facilitator.firstName} ${facilitator.lastName} created successfully`
             );
