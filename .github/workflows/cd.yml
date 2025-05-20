@@ -20,9 +20,9 @@ jobs:
           mkdir -p src/environments
 
           cat <<EOF > src/environments/environment.ts
-          export const environment {
-            production = false;
-            apiUrl = '';
+          export const environment = {
+            production: false,
+            apiUrl: '',
           }
           EOF
 
@@ -46,7 +46,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          
+
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
           echo "Building Angular app and Docker image..."
@@ -66,12 +66,18 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: terraform-infra
       
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.12.0
+      
       - name: Generate terraform.tfvars file
+        working-directory: terraform-infra
         run: |
-          cat <<EOF > terraform-infra/terraform.tfvars
+          cat <<EOF > terraform.tfvars
           vpc_id     = "${{ secrets.VPC_ID }}"
           subnet_ids = ["${{ secrets.SUBNET_ID_1 }}", "${{ secrets.SUBNET_ID_2 }}"]
-          image_uri  = "${{env.IMAGE_URI}}"
+          image_uri  = "${IMAGE_URI}"
           EOF
 
       - name: Apply Terraform
