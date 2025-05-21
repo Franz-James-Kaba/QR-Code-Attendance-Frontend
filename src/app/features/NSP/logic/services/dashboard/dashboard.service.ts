@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { AWARD_ICON, CALENDER_ICON, CHECK_IN_ICON, CHECK_OUT_ICON } from '@app/core/data/svg-data';
 import {
   AttendancePositionResponse,
+  AttendanceWorkingDaysResponse,
   AverageTimeResponse,
   CheckInResponse,
   SummaryCard,
@@ -35,6 +36,10 @@ export class DashboardService {
 
   private getAverageCheckOutData(endDate?: string): Observable<AverageTimeResponse> {
     return this.getAverageTimeData('average-check-out-time', endDate);
+  }
+
+  private getTotalWorkingDays(): Observable<AttendanceWorkingDaysResponse> {
+    return this.http.get<AttendanceWorkingDaysResponse>(`${environment.api.baseUrl}/attendance/working-days`);
   }
 
   private getAttendancePosition(): Observable<SummaryCard> {
@@ -82,19 +87,15 @@ export class DashboardService {
         }))
       ),
       this.getAttendancePosition(),
-    ]).pipe(
-      map(([checkIn, checkOut, position]) => [
-        checkIn,
-        checkOut,
-        position,
-        {
+      this.getTotalWorkingDays().pipe(
+        map(response => ({
           icon: CALENDER_ICON,
           title: 'Total Days',
-          value: '16/28',
+          value: response.workingDays,
           description: 'Working Days',
-        },
-      ])
-    );
+        }))
+      ),
+    ]);
   }
 
   public checkIn(sessionCode: string): Observable<CheckInResponse> {
