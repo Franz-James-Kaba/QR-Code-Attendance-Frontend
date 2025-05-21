@@ -9,7 +9,7 @@ import { IconComponent } from '@app/shared/components/icon/icon.component';
   template: `
     <button
       class="w-full bg-primary text-white py-4 px-6 rounded-xl shadow-(#00000026) flex items-center justify-center text-base font-bold gap-2"
-      (click)="startScan()"
+      (click)="onClick()"
     >
       <app-icon
         viewBox="0 0 21 16"
@@ -24,9 +24,12 @@ import { IconComponent } from '@app/shared/components/icon/icon.component';
 })
 export class SlideButtonComponent {
   @Input() isCheckedIn = false;
+  @Input() disabled = false;
   @Output() scanRequested = new EventEmitter<void>();
 
-  public startScan(): void {
-    this.scanRequested.emit();
+  onClick(): void {
+    if (!this.disabled) {
+      this.scanRequested.emit();
+    }
   }
 }

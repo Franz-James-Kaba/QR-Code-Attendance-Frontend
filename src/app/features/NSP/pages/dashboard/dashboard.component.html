@@ -19,27 +19,34 @@
     <div>
       <div class="flex justify-between items-center mt-6 mb-4">
         <h2 class="text-base font-bold text-nspText">Today's Activity</h2>
-        <a routerLink="" class="font-normal text-sm text-primary">View All</a>
+        <a routerLink="/history" class="font-normal text-sm text-primary">View All</a>
       </div>
       <app-activity-list />
     </div>
   </div>
   <div class="flex-none px-4 py-4 bg-nspBg">
-    <app-slide-button [isCheckedIn]="isCheckedIn" (scanRequested)="startQRScanner()" />
+    <app-slide-button
+      [isCheckedIn]="isCheckedIn()"
+      [disabled]="isProcessing()"
+      (scanRequested)="startQRScanner()"
+    />
   </div>
 </div>
 
-@if (isScanning) {
+@if (isScanning()) {
   <div class="fixed inset-0 bg-black z-50">
     <zxing-scanner
-      [enable]="isScanning"
-      [torch]="false"
+      [enable]="isScanning()"
+      [torch]="torchEnabled()"
       [formats]="allowedFormats"
+      [device]="selectedDevice()"
       (scanSuccess)="onScanSuccess($event)"
       (scanError)="onScanError($event)"
+      (camerasFound)="onCamerasFound($event)"
       [previewFitMode]="'cover'"
+      [tryHarder]="true"
       class="w-full h-full"
-    ></zxing-scanner>
+    />
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div class="w-64 h-64 border-opacity-50 rounded-lg relative">
         <div
@@ -56,22 +63,71 @@
         ></div>
       </div>
     </div>
-    <button
-      (click)="stopQRScanner()"
-      class="absolute top-12 right-4 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-white"
-        viewBox="0 0 20 20"
-        fill="currentColor"
+    @if (errorMessage()) {
+      <div class="error-message">{{ errorMessage() }}</div>
+    }
+    <div class="scanner-controls">
+      <button
+        (click)="stopQRScanner()"
+        class="w-10 h-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center"
       >
-        <path
-          fill-rule="evenodd"
-          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 text-white"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
+      @if (availableDevices().length > 1) {
+        <select
+          (change)="onCameraSelect($event)"
+          class="bg-black bg-opacity-50 text-white rounded px-2 py-1"
+        >
+          @for (device of availableDevices(); track device.deviceId) {
+            <option [value]="device.deviceId">
+              {{ device.label || 'Camera ' + ($index + 1) }}
+            </option>
+          }
+        </select>
+      } @else {
+        <div></div>
+      }
+      <button
+        (click)="toggleTorch()"
+        class="w-10 h-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center"
+      >
+        @if (torchEnabled()) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#e3e3e3"
+          >
+            <path
+              d="M792-56 640-208v128H320v-448L56-792l56-56 736 736-56 56ZM400-160h160v-128L400-448v288Zm240-274-80-80v-30l80-120v-16H394l-80-80h326v-40H274l-34-34v-46h480v240l-80 120v86Zm-160 66Zm17-209Z"
+            />
+          </svg>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#e3e3e3"
+          >
+            <path
+              d="M320-80v-440l-80-120v-240h480v240l-80 120v440H320Zm160-260q-25 0-42.5-17.5T420-400q0-25 17.5-42.5T480-460q25 0 42.5 17.5T540-400q0 25-17.5 42.5T480-340ZM320-760h320v-40H320v40Zm320 80H320v16l80 120v384h160v-384l80-120v-16ZM480-480Z"
+            />
+          </svg>
+        }
+      </button>
+    </div>
   </div>
 }
