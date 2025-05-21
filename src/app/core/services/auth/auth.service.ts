@@ -167,6 +167,26 @@ export class AuthService {
             ...response,
             email: credentials.email ?? null,
           };
+          if (!environment?.auth?.tokenKey) {
+            console.error('Environment.auth.tokenKey is undefined:', environment);
+            localStorage.setItem('auth_token', responseWithEmail.token);
+          } else {
+            localStorage.setItem(environment.auth.tokenKey, responseWithEmail.token);
+          }
+          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
+          this.currentUserSubject.next(responseWithEmail);
+          this.fetchUserProfile();
+        }),
+        catchError(this.handleError)
+      );
+    return this.http
+      .post<ExtendedAuthResponse>(`${environment.auth.baseUrl}/login`, credentials)
+      .pipe(
+        tap(response => {
+          const responseWithEmail: ExtendedAuthResponse = {
+            ...response,
+            email: credentials.email ?? null,
+          };
 
           this.setToken(responseWithEmail.token);
 
