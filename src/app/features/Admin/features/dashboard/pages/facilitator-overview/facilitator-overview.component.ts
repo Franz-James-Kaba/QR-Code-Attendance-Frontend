@@ -1,22 +1,24 @@
+import { FacilitatorDeleteConfirmationComponent } from '@Admin/shared/components/facilitator-delete-confirmation/facilitator-delete-confirmation.component';
+import { FacilitatorTableComponent } from '@Admin/shared/components/facilitator-table/facilitator-table.component';
+import { ModalContainerComponent } from '@Admin/shared/components/modal-container/modal-container.component';
+import { FacilitatorViewModel } from '@Admin/shared/models/facilitator.model';
+import { FacilitatorService } from '@Admin/shared/services/facilitator.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { ModalService } from '@app/features/Admin/core/services/modal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { finalize } from 'rxjs';
 
-import { ModalService } from '@app/features/Admin/core/services/modal.service';
-import { FacilitatorDeleteConfirmationComponent } from '../../../../shared/components/facilitator-delete-confirmation/facilitator-delete-confirmation.component';
-import { FacilitatorTableComponent } from '../../../../shared/components/facilitator-table/facilitator-table.component';
-import { ModalContainerComponent } from '../../../../shared/components/modal-container/modal-container.component';
-import { FacilitatorViewModel, mapToApiModel } from '../../../../shared/models/facilitator.model';
-import { FacilitatorService } from '../../../../shared/services/facilitator.service';
 
 @Component({
   selector: 'app-facilitator-overview',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ButtonComponent,
     FacilitatorTableComponent,
     FacilitatorDeleteConfirmationComponent,
@@ -33,6 +35,8 @@ export class FacilitatorOverviewComponent implements OnInit {
   totalItems = 0;
   isLoading = false;
   facilitators: FacilitatorViewModel[] = [];
+  allFacilitators: FacilitatorViewModel[] = [];
+  searchQuery = '';
 
   private readonly route = inject(ActivatedRoute);
   private readonly modalService = inject(ModalService);
@@ -64,18 +68,10 @@ export class FacilitatorOverviewComponent implements OnInit {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: result => {
-          console.log('Received facilitators data:', result);
           this.facilitators = result.data;
           this.totalItems = result.total;
-
-          // Update UI state
           this.hasRecords = this.facilitators.length > 0;
-          console.log(
-            'Has records:',
-            this.hasRecords,
-            'Facilitator count:',
-            this.facilitators.length
-          );
+          this.allFacilitators = result.data; // Store all facilitators for search
         },
         error: error => {
           console.error('Error loading facilitators:', error);
@@ -84,7 +80,6 @@ export class FacilitatorOverviewComponent implements OnInit {
       });
   }
 
-  // Methods for handling facilitator actions using the shared modal service
   createFacilitator(): void {
     this.modalService.openModal('createFacilitator');
   }
@@ -93,7 +88,6 @@ export class FacilitatorOverviewComponent implements OnInit {
     this.modalService.openModal('editFacilitator', facilitator);
   }
 
-  // Delete confirmation methods
   confirmDelete(facilitator: FacilitatorViewModel): void {
     this.facilitatorToDelete = facilitator;
     this.showDeleteModal = true;
@@ -119,14 +113,11 @@ export class FacilitatorOverviewComponent implements OnInit {
         .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: () => {
-            // Show success message
             const fullName = this.getFullName(this.facilitatorToDelete!);
             this.showNotification('success', `${fullName} has been successfully deleted`);
 
-            // Reload the facilitator list
             this.loadFacilitators();
 
-            // Close modal
             this.showDeleteModal = false;
             this.facilitatorToDelete = null;
           },
@@ -138,7 +129,6 @@ export class FacilitatorOverviewComponent implements OnInit {
     }
   }
 
-  // Handle reception privilege toggle
   toggleReceptionPrivilege(event: { facilitator: FacilitatorViewModel; grant: boolean }): void {
     const { facilitator, grant } = event;
     const facilitatorName = this.getFullName(facilitator);
@@ -146,14 +136,12 @@ export class FacilitatorOverviewComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Call the appropriate service method based on whether we're granting or revoking
     const serviceCall = grant
       ? this.facilitatorService.grantReceptionPrivilege(facilitator.email)
       : this.facilitatorService.revokeReceptionPrivilege(facilitator.email);
 
     serviceCall.pipe(finalize(() => (this.isLoading = false))).subscribe({
       next: () => {
-        // Update the local state to reflect the new privilege status
         const updatedFacilitators = this.facilitators.map(f => {
           if (f.id === facilitator.id) {
             return { ...f, hasReceptionPrivilege: grant };
@@ -163,7 +151,6 @@ export class FacilitatorOverviewComponent implements OnInit {
 
         this.facilitators = updatedFacilitators;
 
-        // Show success message
         this.showNotification(
           'success',
           `Reception privilege ${actionText}ed for ${facilitatorName}`
@@ -183,15 +170,34 @@ export class FacilitatorOverviewComponent implements OnInit {
     this.currentPage = page;
     this.loadFacilitators();
   }
+  /**
+   * Handle search query change
+   */
+  onSearch(): void {
+    if (!this.searchQuery.trim()) {
+      // If search is empty, restore all facilitators
+      this.facilitators = [...this.allFacilitators];
+    } else {
+      // Filter facilitators based on search query
+      const query = this.searchQuery.toLowerCase().trim();
+      this.facilitators = this.allFacilitators.filter(
+        facilitator => 
+          facilitator.firstName.toLowerCase().includes(query) ||
+          facilitator.lastName.toLowerCase().includes(query) ||
+          facilitator.email.toLowerCase().includes(query) ||
+          (facilitator.middleName && facilitator.middleName.toLowerCase().includes(query)) ||
+          (facilitator.program && facilitator.program.toLowerCase().includes(query))
+      );
+    }
+    
+    // Update hasRecords flag
+    this.hasRecords = this.facilitators.length > 0;
+  }
 
-  // Helper methods
   private getFullName(facilitator: FacilitatorViewModel): string {
     return `${facilitator.firstName} ${facilitator.middleName ? facilitator.middleName + ' ' : ''}${facilitator.lastName}`;
   }
 
-  /**
-   * Display a notification using the global notification service
-   */
   private showNotification(
     type: 'success' | 'error' | 'info',
     message: string,

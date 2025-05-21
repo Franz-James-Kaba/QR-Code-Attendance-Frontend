@@ -17,6 +17,7 @@ export interface NSP {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './nsp-table.component.html',
+  styleUrls: ['../../../../../shared/styles/table.css']
 })
 export class NspTableComponent {
   @Input() nsps: NSP[] = [];

@@ -25,25 +25,10 @@ import { DashboardEffects } from '@store/effects/attendance.effects';
 import { AuthEffects } from '@store/effects/auth.effects';
 import { dashboardReducer } from '@store/reducers/attendance.reducers';
 import { authReducer } from '@store/reducers/auth.reducer';
+import { CookieService } from 'ngx-cookie-service';
 import { Observable } from 'rxjs';
 
 import { routes } from './app.routes';
-
-const authInterceptorFn = (
-  req: HttpRequest<unknown>,
-  next: HttpHandlerFn
-): Observable<HttpEvent<unknown>> => {
-  const token = localStorage.getItem('auth_token');
-
-  if (token) {
-    const authReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`),
-    });
-    return next(authReq);
-  }
-
-  return next(req);
-};
 
 const notificationInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -58,7 +43,6 @@ const notificationInterceptorFn = (
   return interceptor.intercept(req, handler);
 };
 
-// Factory function that returns a function that initializes auth
 function initializeAuthFactory(store: Store) {
   return () => {
     store.dispatch(AuthActions.initAuth());
@@ -68,14 +52,14 @@ function initializeAuthFactory(store: Store) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZoneChangeDetection({ eventCoalescing: true }),    
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
     provideStore({ auth: authReducer, dashboard: dashboardReducer }),
     provideEffects([AuthEffects, DashboardEffects]),
     provideStoreDevtools({ maxAge: 25, logOnly: false }),
-    provideHttpClient(withInterceptors([authInterceptorFn, notificationInterceptorFn])),
-    // Use APP_INITIALIZER with the correct factory pattern
+    provideHttpClient(withInterceptors([authInterceptor, notificationInterceptorFn])),
+    CookieService,
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuthFactory,

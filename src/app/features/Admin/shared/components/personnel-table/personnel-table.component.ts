@@ -14,7 +14,7 @@ export interface Personnel {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './personnel-table.component.html',
-  styleUrls: ['./personnel-table.component.scss'],
+  styleUrls: ['./personnel-table.component.scss', '../../../../../shared/styles/table.css'],
 })
 export class PersonnelTableComponent implements OnInit {
   // Full list of personnel

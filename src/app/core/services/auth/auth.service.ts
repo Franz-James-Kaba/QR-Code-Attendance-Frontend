@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
 import { ExtendedAuthResponse, UserRole, LoginCredentials } from '@shared/models/auth/auth.model';
+import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -13,15 +14,28 @@ export class AuthService {
   private readonly currentUserSubject = new BehaviorSubject<ExtendedAuthResponse | null>(null);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly cookieService = inject(CookieService);
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public checkedIn$ = this.currentUser$.pipe(map(user => user?.checkedIn ?? false));
 
+  private readonly cookieOptions = {
+    expires: 1,
+    path: '/',
+    secure: true,
+    sameSite: 'Strict' as const,
+  };
+
   constructor() {
     this.loadStoredUser();
   }
-
   private loadStoredUser(): void {
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/auth/')) {
+      this.currentUserSubject.next(null);
+      return;
+    }
+
     const token = this.getToken();
     const userStr = localStorage.getItem('current_user');
 
@@ -29,23 +43,74 @@ export class AuthService {
       try {
         const userData: ExtendedAuthResponse = JSON.parse(userStr);
         this.currentUserSubject.next(userData);
-        this.fetchUserProfile();
+
+        const shouldFetchProfile = !currentPath.includes('/auth/') && !this.hasRecentProfileData();
+
+        if (shouldFetchProfile) {
+          this.fetchUserProfile();
+        }
       } catch (e) {
         console.error('Error parsing stored user data', e);
         this.logout();
       }
+    } else {
+      this.currentUserSubject.next(null);
+
+      if (!currentPath.includes('/auth/')) {
+        setTimeout(() => {
+          this.router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: currentPath },
+          });
+        }, 100);
+      }
     }
   }
 
+  private hasRecentProfileData(): boolean {
+    const lastFetchStr = localStorage.getItem('last_profile_fetch');
+    if (lastFetchStr) {
+      const lastFetch = parseInt(lastFetchStr, 10);
+      const now = Date.now();
+      return now - lastFetch < 5 * 60 * 1000;
+    }
+    return false;
+  }
+
   private fetchUserProfile(): void {
+    const currentPath = window.location.pathname;
+
+    if (
+      currentPath.includes('/auth/') ||
+      currentPath.includes('/unauthorized') ||
+      currentPath.includes('/not-found')
+    ) {
+      return;
+    }
+
     const token = this.getToken();
     if (!token) {
       return;
     }
+
     if (!environment?.api?.baseUrl) {
       console.error('Environment.api.baseUrl is undefined:', environment);
       return;
     }
+
+    const currentUser = this.currentUserSubject.value;
+    if (!currentUser) {
+      return;
+    }
+
+    const lastFetchStr = localStorage.getItem('last_profile_fetch');
+    if (lastFetchStr) {
+      const lastFetch = parseInt(lastFetchStr, 10);
+      const now = Date.now();
+      if (now - lastFetch < 5 * 60 * 1000) {
+        return;
+      }
+    }
+
     const headers = { Authorization: `Bearer ${token}` };
     this.http
       .get<{
@@ -57,7 +122,6 @@ export class AuthService {
       }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
       .pipe(
         tap(profile => {
-          const currentUser = this.currentUserSubject.value;
           if (currentUser) {
             const validRole: UserRole = this.isValidUserRole(profile.role)
               ? profile.role
@@ -71,11 +135,15 @@ export class AuthService {
               email: currentUser.email ?? null,
             };
             localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            localStorage.setItem('last_profile_fetch', Date.now().toString());
             this.currentUserSubject.next(updatedUser);
           }
         }),
         catchError(error => {
           console.error('Error fetching user profile:', error);
+          if (error.status === 401) {
+            this.logout();
+          }
           return throwError(() => new Error('Failed to load user profile'));
         })
       )
@@ -105,6 +173,9 @@ export class AuthService {
           } else {
             localStorage.setItem(environment.auth.tokenKey, responseWithEmail.token);
           }
+
+          this.setToken(responseWithEmail.token);
+
           localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
           this.currentUserSubject.next(responseWithEmail);
           this.fetchUserProfile();
@@ -154,24 +225,39 @@ export class AuthService {
   }
 
   public logout(): void {
-    if (!environment?.auth?.tokenKey) {
-      console.error('Environment.auth.tokenKey is undefined:', environment);
-      localStorage.removeItem('auth_token');
-    } else {
+    this.cookieService.delete('auth_token', '/');
+
+    if (environment?.auth?.tokenKey) {
       localStorage.removeItem(environment.auth.tokenKey);
     }
+    localStorage.removeItem('auth_token');
     localStorage.removeItem('current_user');
     localStorage.removeItem('auth_user');
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('last_profile_fetch');
+
     this.currentUserSubject.next(null);
   }
 
-  public getToken(): string | null {
-    if (!environment?.auth?.tokenKey) {
-      console.error('Environment.auth.tokenKey is undefined:', environment);
-      return localStorage.getItem('auth_token');
+  private setToken(token: string): void {
+    this.cookieService.set('auth_token', token, this.cookieOptions);
+
+    if (environment?.auth?.tokenKey) {
+      localStorage.setItem(environment.auth.tokenKey, token);
     }
-    return localStorage.getItem(environment.auth.tokenKey);
+    localStorage.setItem('auth_token', token);
+  }
+
+  public getToken(): string | null {
+    if (this.cookieService.check('auth_token')) {
+      return this.cookieService.get('auth_token');
+    }
+
+    if (environment?.auth?.tokenKey) {
+      const token = localStorage.getItem(environment.auth.tokenKey);
+      if (token) return token;
+    }
+
+    return localStorage.getItem('auth_token');
   }
 
   public isLoggedIn(): boolean {

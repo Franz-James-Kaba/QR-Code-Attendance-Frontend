@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow-md p-6">
+<div class="bg-white shadow p-6">
   <!-- Quick Access Header -->
   <div class="text-sm text-gray-500 font-medium mb-4">Quick Access</div>
 
@@ -62,9 +62,8 @@
       </select>
     </div>
   </div>
-
   <!-- Personnel Table -->
-  <div class="overflow-x-auto">
+  <div>
     @if (isLoading) {
       <div class="flex justify-center items-center py-8">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
@@ -74,33 +73,18 @@
         No personnel found matching your search criteria.
       </div>
     } @else {
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-blue-600">
+      <table class="standard-table">
+        <thead>
           <tr>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Personnel Name
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Stack
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Status
-            </th>
+            <th scope="col">Personnel Name</th>
+            <th scope="col">Stack</th>
+            <th scope="col">Status</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           @for (person of filteredPersonnel; track person.name; let even = $even) {
-            <tr [class.bg-gray-50]="even">
-              <td class="px-6 py-4 whitespace-nowrap">
+            <tr>
+              <td>
                 <div class="flex items-center">
                   <div
                     class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3"
@@ -112,14 +96,13 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="text-sm text-gray-500">
                 {{ person.stack }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td>
                 <span
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  [class.bg-green-100]="person.status === 'NSP'"
-                  [class.text-green-800]="person.status === 'NSP'"
+                  [class.bg-green-100]="person.status === 'NSP'"                  [class.text-green-800]="person.status === 'NSP'"
                   [class.bg-blue-100]="person.status === 'Facilitator'"
                   [class.text-blue-800]="person.status === 'Facilitator'"
                 >
