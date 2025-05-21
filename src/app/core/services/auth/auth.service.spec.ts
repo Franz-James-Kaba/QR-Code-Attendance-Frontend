@@ -118,10 +118,7 @@ describe('AuthService', () => {
 
   describe('constructor', () => {
     it('should call loadStoredUser', () => {
-      const loadStoredUserSpy = jest.spyOn(
-        AuthService.prototype as any,
-        'loadStoredUser'
-      );
+      const loadStoredUserSpy = jest.spyOn(AuthService.prototype as any, 'loadStoredUser');
       TestBed.inject(AuthService);
       expect(loadStoredUserSpy).toHaveBeenCalled();
       loadStoredUserSpy.mockRestore();

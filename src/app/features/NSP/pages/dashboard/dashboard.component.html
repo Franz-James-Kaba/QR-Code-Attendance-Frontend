@@ -90,7 +90,9 @@
           class="bg-black bg-opacity-50 text-white rounded px-2 py-1"
         >
           @for (device of availableDevices(); track device.deviceId) {
-            <option [value]="device.deviceId">{{ device.label || 'Camera ' + ($index + 1) }}</option>
+            <option [value]="device.deviceId">
+              {{ device.label || 'Camera ' + ($index + 1) }}
+            </option>
           }
         </select>
       } @else {

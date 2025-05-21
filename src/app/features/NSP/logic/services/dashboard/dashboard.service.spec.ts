@@ -13,7 +13,6 @@ import { environment } from '@environments/environment';
 
 import { DashboardService } from './dashboard.service';
 
-
 jest.mock('@app/core/data/svg-data', () => ({
   CHECK_IN_ICON: {
     path: 'M15 9L19 5M19 5L15 1M19 5H6C3.23858 5 1 7.23858 1 10C1 12.7614 3.23858 15 6 15H11',
@@ -55,11 +54,7 @@ describe('DashboardService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        DashboardService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
+      providers: [DashboardService, provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(DashboardService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -74,12 +69,20 @@ describe('DashboardService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should fetch attendance summary data with four summary cards', (done) => {
+  it('should fetch attendance summary data with four summary cards', done => {
     const mockDate = new Date('2025-05-20');
     const mockCheckIn: AverageTimeResponse = { data: '08:00:00', message: 'Success' };
     const mockCheckOut: AverageTimeResponse = { data: '17:00:00', message: 'Success' };
-    const mockPosition: AttendancePositionResponse = { position: 3, success: true, message: 'Success' };
-    const mockWorkingDays: AttendanceWorkingDaysResponse = { workingDays: '20', success: true, message: 'Success' };
+    const mockPosition: AttendancePositionResponse = {
+      position: 3,
+      success: true,
+      message: 'Success',
+    };
+    const mockWorkingDays: AttendanceWorkingDaysResponse = {
+      workingDays: '20',
+      success: true,
+      message: 'Success',
+    };
 
     (formatTime as jest.Mock).mockImplementation((time: string | null) =>
       time === '08:00:00' ? '08:00 AM' : '05:00 PM'
@@ -136,11 +139,15 @@ describe('DashboardService', () => {
     });
 
     const endDate = '2025-05-20';
-    const req1 = httpMock.expectOne(`${environment.api.baseUrl}/metrics/average-check-in-time?endDate=${endDate}`);
+    const req1 = httpMock.expectOne(
+      `${environment.api.baseUrl}/metrics/average-check-in-time?endDate=${endDate}`
+    );
     expect(req1.request.method).toBe('GET');
     req1.flush(mockCheckIn);
 
-    const req2 = httpMock.expectOne(`${environment.api.baseUrl}/metrics/average-check-out-time?endDate=${endDate}`);
+    const req2 = httpMock.expectOne(
+      `${environment.api.baseUrl}/metrics/average-check-out-time?endDate=${endDate}`
+    );
     expect(req2.request.method).toBe('GET');
     req2.flush(mockCheckOut);
 
@@ -153,11 +160,15 @@ describe('DashboardService', () => {
     req4.flush(mockWorkingDays);
   });
 
-  it('should handle 404 error for attendance position', (done) => {
+  it('should handle 404 error for attendance position', done => {
     const mockDate = new Date('2025-05-20');
     const mockCheckIn: AverageTimeResponse = { data: '08:00:00', message: 'Success' };
     const mockCheckOut: AverageTimeResponse = { data: '17:00:00', message: 'Success' };
-    const mockWorkingDays: AttendanceWorkingDaysResponse = { workingDays: '20', success: true, message: 'Success' };
+    const mockWorkingDays: AttendanceWorkingDaysResponse = {
+      workingDays: '20',
+      success: true,
+      message: 'Success',
+    };
 
     (formatTime as jest.Mock).mockImplementation((time: string | null) =>
       time === '08:00:00' ? '08:00 AM' : '05:00 PM'
@@ -181,15 +192,19 @@ describe('DashboardService', () => {
     });
 
     const endDate = '2025-05-20';
-    httpMock.expectOne(`${environment.api.baseUrl}/metrics/average-check-in-time?endDate=${endDate}`).flush(mockCheckIn);
-    httpMock.expectOne(`${environment.api.baseUrl}/metrics/average-check-out-time?endDate=${endDate}`).flush(mockCheckOut);
+    httpMock
+      .expectOne(`${environment.api.baseUrl}/metrics/average-check-in-time?endDate=${endDate}`)
+      .flush(mockCheckIn);
+    httpMock
+      .expectOne(`${environment.api.baseUrl}/metrics/average-check-out-time?endDate=${endDate}`)
+      .flush(mockCheckOut);
     httpMock
       .expectOne(`${environment.api.baseUrl}/attendance/position`)
       .error(new ErrorEvent('error', { message: 'Not Found' }), { status: 404 });
     httpMock.expectOne(`${environment.api.baseUrl}/attendance/working-days`).flush(mockWorkingDays);
   });
 
-  it('should perform check-in with POST request', (done) => {
+  it('should perform check-in with POST request', done => {
     const sessionCode = 'test-session';
     const mockResponse: CheckInResponse = { success: true, message: 'Check-in successful' };
 
@@ -206,7 +221,7 @@ describe('DashboardService', () => {
     req.flush(mockResponse);
   });
 
-  it('should perform check-out with PUT request', (done) => {
+  it('should perform check-out with PUT request', done => {
     const sessionCode = 'test-session';
     const mockResponse: CheckInResponse = { success: true, message: 'Check-out successful' };
 

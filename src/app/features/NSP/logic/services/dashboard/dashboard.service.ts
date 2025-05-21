@@ -39,7 +39,9 @@ export class DashboardService {
   }
 
   private getTotalWorkingDays(): Observable<AttendanceWorkingDaysResponse> {
-    return this.http.get<AttendanceWorkingDaysResponse>(`${environment.api.baseUrl}/attendance/working-days`);
+    return this.http.get<AttendanceWorkingDaysResponse>(
+      `${environment.api.baseUrl}/attendance/working-days`
+    );
   }
 
   private getAttendancePosition(): Observable<SummaryCard> {

@@ -156,7 +156,8 @@ describe('ProfileComponent', () => {
   }));
 
   it('should render bell icon with correct properties', () => {
-    const iconElement = fixture.debugElement.query(By.css('app-icon')).componentInstance as MockIconComponent;
+    const iconElement = fixture.debugElement.query(By.css('app-icon'))
+      .componentInstance as MockIconComponent;
     expect(iconElement).toBeTruthy();
 
     expect(iconElement.path).toBe(BELL_ICON.path);

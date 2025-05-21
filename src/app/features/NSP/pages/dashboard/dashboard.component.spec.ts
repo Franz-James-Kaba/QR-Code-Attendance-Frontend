@@ -17,7 +17,6 @@ import { ZXingScannerModule } from '@zxing/ngx-scanner';
 
 import { DashboardComponent } from './dashboard.component';
 
-
 @Injectable()
 class AuthServiceStub {
   getUserProfile() {
@@ -236,8 +235,18 @@ describe('DashboardComponent', () => {
 
   it('should update available devices and select back camera on cameras found', async () => {
     const devices: MediaDeviceInfo[] = [
-      { deviceId: '1', kind: 'videoinput', label: 'Front Camera', groupId: 'group1' } as MediaDeviceInfo,
-      { deviceId: '2', kind: 'videoinput', label: 'Back Camera', groupId: 'group2' } as MediaDeviceInfo,
+      {
+        deviceId: '1',
+        kind: 'videoinput',
+        label: 'Front Camera',
+        groupId: 'group1',
+      } as MediaDeviceInfo,
+      {
+        deviceId: '2',
+        kind: 'videoinput',
+        label: 'Back Camera',
+        groupId: 'group2',
+      } as MediaDeviceInfo,
     ];
     component.onCamerasFound(devices);
     fixture.detectChanges();
@@ -273,5 +282,4 @@ describe('DashboardComponent', () => {
     expect(scanner.attributes['ng-reflect-enable']).toBe('true');
     expect(scanner.attributes['ng-reflect-formats']).toBe('11');
   });
-
 });
