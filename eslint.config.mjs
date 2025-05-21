@@ -22,6 +22,12 @@ export default [
         ...globals.browser,
         ...globals.node,
         ...globals.jest,
+      },
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module",
+        project: "./tsconfig.json"
       }
     }
   },
