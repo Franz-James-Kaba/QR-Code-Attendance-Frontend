@@ -34,6 +34,12 @@ export interface AttendancePositionResponse {
   position: number;
 }
 
+export interface AttendanceWorkingDaysResponse {
+  success: boolean;
+  message: string;
+  workingDays: string;
+}
+
 export interface DashboardState {
   selectedDate: Date | undefined;
   isCheckedIn: boolean;
