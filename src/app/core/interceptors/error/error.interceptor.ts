@@ -7,7 +7,9 @@ import {
 } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { NotificationService } from '@shared/services/notification.service';
+import { CookieService } from 'ngx-cookie-service';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -15,13 +17,13 @@ import { catchError } from 'rxjs/operators';
 export class ErrorInterceptor implements HttpInterceptor {
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly cookieService = inject(CookieService);
+  private readonly store = inject(Store);
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'An unexpected error occurred';
-
-        if (error.error instanceof ErrorEvent) {
+        let errorMessage = 'An unexpected error occurred';        if (error.error instanceof ErrorEvent) {
           // Client-side error
           errorMessage = `Error: ${error.error.message}`;
         } else {
@@ -29,15 +31,30 @@ export class ErrorInterceptor implements HttpInterceptor {
           switch (error.status) {
             case 400:
               errorMessage = error.error?.message ?? 'Bad request. Please check your input.';
-              break;
-            case 401:
+              break;            case 401:
               errorMessage = 'Session expired. Please log in again.';
-              // Clear auth data and redirect to login
+              // Clear tokens directly
+              this.cookieService.delete('auth_token', '/');
               localStorage.removeItem('auth_token');
               localStorage.removeItem('current_user');
-              this.router.navigate(['/login']);
+              localStorage.removeItem('auth_user');
+              // Dispatch logout action to update state
+              this.store.dispatch({ type: '[Auth] Logout' });
+              // Navigate to login
+              this.router.navigate(['/auth/login'], {
+                queryParams: { returnUrl: request.url }
+              });
               break;
             case 403:
+              // Special handling for metrics API calls that return 403
+              if (request.url.includes('/metrics/')) {
+                console.warn('Permission denied for metrics endpoint:', request.url);
+                // For metrics API calls with 403, we don't show an error notification
+                // This avoids flooding users with error messages for expected permission issues
+                return throwError(() => new Error('Permission denied for metrics endpoint'));
+              }
+              
+              // For other 403 errors, show a standard error message
               errorMessage = 'You do not have permission to perform this action.';
               break;
             case 404:

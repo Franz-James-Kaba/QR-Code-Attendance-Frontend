@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -18,6 +19,7 @@ import { NspService } from '../../../../shared/services/nsp.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ButtonComponent,
     NspTableComponent,
     DeleteConfirmationComponent,
@@ -36,6 +38,8 @@ export class NspOverviewComponent implements OnInit {
   totalItems = 0;
   isLoading = false;
   nsps: NSPViewModel[] = [];
+  allNsps: NSPViewModel[] = [];
+  searchQuery = '';
 
   private readonly route = inject(ActivatedRoute);
   private readonly modalService = inject(ModalService);
@@ -69,6 +73,7 @@ export class NspOverviewComponent implements OnInit {
         next: result => {
           this.nsps = result.data;
           this.totalItems = result.total;
+          this.allNsps = result.data;
 
           // Update UI state
           this.hasRecords = this.nsps.length > 0;
@@ -209,6 +214,42 @@ export class NspOverviewComponent implements OnInit {
           },
         });
     }
+  }
+
+  // Search functionality
+  onSearchQueryChange(): void {
+    const query = this.searchQuery.toLowerCase().trim();
+
+    // Filter allNsps based on the search query
+    this.nsps = this.allNsps.filter(nsp => {
+      const fullName = this.getFullName(nsp).toLowerCase();
+      return fullName.includes(query);
+    });
+
+    // Update the record presence state
+    this.hasRecords = this.nsps.length > 0;
+  }
+  /**
+   * Handle search query change
+   */
+  onSearch(): void {
+    if (!this.searchQuery.trim()) {
+      // If search is empty, restore all NSPs
+      this.nsps = [...this.allNsps];
+    } else {
+      // Filter NSPs based on search query
+      const query = this.searchQuery.toLowerCase().trim();
+      this.nsps = this.allNsps.filter(
+        nsp => 
+          nsp.firstName.toLowerCase().includes(query) ||
+          nsp.lastName.toLowerCase().includes(query) ||
+          nsp.middleName?.toLowerCase().includes(query) ||
+          nsp.email.toLowerCase().includes(query)
+      );
+    }
+    
+    // Update hasRecords flag
+    this.hasRecords = this.nsps.length > 0;
   }
 
   // Helper methods

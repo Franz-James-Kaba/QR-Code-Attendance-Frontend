@@ -8,6 +8,7 @@ import { FacilitatorViewModel } from '../../models/facilitator.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './facilitator-table.component.html',
+  styleUrls: ['../../../../../shared/styles/table.css']
 })
 export class FacilitatorTableComponent {
   @Input() facilitators: FacilitatorViewModel[] = [];

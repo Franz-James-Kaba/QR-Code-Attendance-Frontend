@@ -30,33 +30,22 @@ export class FacilitatorService {
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Get all facilitators with pagination
-   */
   getAllFacilitators(
     page = 0,
     size = 10
   ): Observable<{ data: FacilitatorViewModel[]; total: number }> {
-    // Convert to 1-based pagination for the backend API
-    // The backend expects page to start at 1, not 0
-    const pageIndexForBackend = page; // Use 0-based indexing as the API actually expects
+    const pageIndexForBackend = page;
 
-    // Create new HttpParams using set() method to ensure proper URL encoding
     let params = new HttpParams();
     params = params.set('page', pageIndexForBackend.toString());
     params = params.set('size', size.toString());
-
-    // Log the actual request parameters for debugging
-    console.log('Making Facilitator API request with params:', { page: pageIndexForBackend, size });
 
     return this.http
       .get<
         PagedResponse<FacilitatorResponse>
       >(`${this.apiUrl}/admin/users/facilitators`, { params })
       .pipe(
-        map(response => {
-          console.log('API response:', response); // Add debug logging
-          return {
+        map(response => {          return {
             data: response.content.map(facilitator => mapToViewModel(facilitator)),
             total: response.totalElements,
           };
@@ -68,9 +57,6 @@ export class FacilitatorService {
       );
   }
 
-  /**
-   * Get facilitator by email
-   */
   getFacilitatorByEmail(email: string): Observable<FacilitatorViewModel> {
     const params = new HttpParams().set('email', email);
 
@@ -80,9 +66,6 @@ export class FacilitatorService {
     );
   }
 
-  /**
-   * Update existing facilitator
-   */
   updateFacilitator(
     userId: number,
     facilitator: FacilitatorRequest
@@ -95,74 +78,52 @@ export class FacilitatorService {
       );
   }
 
-  /**
-   * Delete facilitator
-   */
   deleteFacilitator(userId: number): Observable<string> {
     return this.http
       .delete<string>(`${this.apiUrl}/admin/users/${userId}`, {
-        responseType: 'text' as 'json', // Handle text response correctly
+        responseType: 'text' as 'json',
       })
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Bulk import facilitators
-   * This is a custom endpoint that would need to be implemented on the backend
-   */
   bulkImportFacilitators(facilitators: FacilitatorRequest[]): Observable<FacilitatorImportResult> {
     return this.http
       .post<FacilitatorImportResult>(`${this.apiUrl}/admin/bulk-create-facilitators`, facilitators)
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Grant reception privilege to a facilitator
-   * @param email The email address of the facilitator
-   * @returns Observable of the operation result
-   */
   grantReceptionPrivilege(email: string): Observable<string> {
     return this.http
       .post<string>(
         `${this.apiUrl}/admin/grant-reception-privilege/${email}`,
         {},
         {
-          responseType: 'text' as 'json', // Handle text response correctly
+          responseType: 'text' as 'json',
         }
       )
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Revoke reception privilege from a facilitator
-   * @param email The email address of the facilitator
-   * @returns Observable of the operation result
-   */
   revokeReceptionPrivilege(email: string): Observable<string> {
     return this.http
       .post<string>(
         `${this.apiUrl}/admin/revoke-reception-privilege/${email}`,
         {},
         {
-          responseType: 'text' as 'json', // Handle text response correctly
+          responseType: 'text' as 'json',
         }
       )
       .pipe(catchError(error => this.handleError(error)));
   }
 
-  /**
-   * Error handling
-   */
   private handleError(
     error: Error | { status: number; error?: { message?: string }; statusText: string }
   ): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
 
     if ('error' in error && error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else if ('status' in error) {
-      // Server-side error
       const status = error.status;
       const message = error.error?.message ?? error.statusText;
 
