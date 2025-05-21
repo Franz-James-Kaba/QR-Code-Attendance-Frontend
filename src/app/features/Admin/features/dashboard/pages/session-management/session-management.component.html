@@ -36,9 +36,9 @@
     </div>
 
     <!-- Empty state / No items found state -->
-    <div *ngIf="!isLoading && (!sessions || sessions.length === 0)" class="bg-white rounded-lg shadow p-10 text-center">
+    <div *ngIf="!isLoading && (!sessions || sessions.length === 0)" class="text-center">
       <div class="flex justify-center mb-4">
-        <img src="/not-item.svg" alt="No items found" class="w-48 h-48" />
+        <img src="/not-item.svg" alt="No items found" class="w-4xl h-auto" />
       </div>
       <h3 class="text-xl font-semibold text-gray-700 mb-2">No Sessions Found</h3>
       <p class="text-gray-500 mb-6">Get started by creating your first session.</p>
