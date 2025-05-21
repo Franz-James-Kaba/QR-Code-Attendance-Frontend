@@ -1,121 +1,22 @@
+import { BreadcrumbService } from '@Admin/core/services/breadcrumb.service';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
-import { Router, NavigationEnd, ActivatedRoute, RouterModule } from '@angular/router';
-import { Subscription, filter } from 'rxjs';
-
-export interface Breadcrumb {
-  label: string;
-  url: string;
-}
+import { Component, Input, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { BreadcrumbItem } from '@shared/models/breadcrumb.model';
 
 @Component({
   selector: 'app-breadcrumb',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './breadcrumb.component.html',
-  styleUrl: './breadcrumb.component.scss',
 })
-export class BreadcrumbComponent implements OnInit, OnDestroy {
-  @Input() items: Breadcrumb[] = [];
+export class BreadcrumbComponent implements OnInit {
+  @Input() items: BreadcrumbItem[] = [];
+  private readonly breadcrumbService = inject(BreadcrumbService);
 
-  public breadcrumbs: Breadcrumb[] = [];
-  private routerSubscription: Subscription | undefined;
-  private readonly router = inject(Router);
-  private readonly activatedRoute = inject(ActivatedRoute);
-
-  ngOnInit(): void {
-    if (this.items && this.items.length > 0) {
-      this.breadcrumbs = this.items;
-    } else {
-      this.routerSubscription = this.router.events
-        .pipe(filter(event => event instanceof NavigationEnd))
-        .subscribe(() => {
-          this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
-        });
-
-      this.breadcrumbs = this.createBreadcrumbs(this.activatedRoute.root);
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
-  }
-
-  private createBreadcrumbs(
-    route: ActivatedRoute,
-    url: string = '',
-    breadcrumbs: Breadcrumb[] = []
-  ): Breadcrumb[] {
-    this.addFirstLevelBreadcrumb(breadcrumbs);
-    const children: ActivatedRoute[] = route.children;
-
-    if (children.length === 0) {
-      return breadcrumbs;
-    }
-
-    const child = children[0];
-    const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
-
-    if (routeURL !== '') {
-      url += `/${routeURL}`;
-    }
-
-    this.processBreadcrumbFromRoute(child, routeURL, url, breadcrumbs);
-
-    // Recursive call to process any child routes
-    return this.createBreadcrumbs(child, url, breadcrumbs);
-  }
-
-  private addFirstLevelBreadcrumb(breadcrumbs: Breadcrumb[]): void {
-    const firstPathSegment = this.router.url.split('/')[1];
-
-    if (breadcrumbs.length === 0 && firstPathSegment) {
-      const firstSegmentLabel = this.formatRouteLabel(firstPathSegment);
-      const firstSegmentUrl = `/${firstPathSegment}`;
-
-      breadcrumbs.push({
-        label: firstSegmentLabel,
-        url: firstSegmentUrl,
-      });
-    }
-  }
-
-  private processBreadcrumbFromRoute(
-    route: ActivatedRoute,
-    routeURL: string,
-    url: string,
-    breadcrumbs: Breadcrumb[]
-  ): void {
-    // Process title-based breadcrumb
-    if (route.snapshot.data['title']) {
-      this.addBreadcrumbIfNotDuplicate(route.snapshot.data['title'], url, breadcrumbs);
-    }
-    // Process URL-based breadcrumb when no title is available
-    else if (routeURL !== '') {
-      const label = this.formatRouteLabel(routeURL);
-      this.addBreadcrumbIfNotDuplicate(label, url, breadcrumbs);
-    }
-  }
-
-  private addBreadcrumbIfNotDuplicate(label: string, url: string, breadcrumbs: Breadcrumb[]): void {
-    const isDuplicate =
-      breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].label === label;
-
-    if (!isDuplicate) {
-      breadcrumbs.push({
-        label,
-        url,
-      });
-    }
-  }
-
-  private formatRouteLabel(route: string): string {
-    // Split the route on hyphens or underscores and capitalize each part
-    return route
-      .split(/[-_]/)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
+  ngOnInit() {
+    this.breadcrumbService.breadcrumbs$.subscribe((breadcrumbs) => {
+      this.items = breadcrumbs;
+    });
   }
 }

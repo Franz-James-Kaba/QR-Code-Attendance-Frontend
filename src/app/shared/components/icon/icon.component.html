@@ -3,20 +3,25 @@
   [style.width]="size + 'px'"
   [style.height]="size + 'px'"
 >
-  <svg
-    [attr.viewBox]="viewBox"
-    fill="none"
-    stroke="currentColor"
-    [class]="'w-full h-full ' + iconClass"
-    [attr.width]="svgwidth"
-    [attr.height]="svgHeight"
-  >
-    <path
-      [attr.d]="path"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      [attr.stroke-width]="strokeWidth"
-      [attr.stroke]="strokeColor"
-    />
-  </svg>
+  <ng-container *ngIf="path.endsWith('.svg'); else inlineSvg">
+    <img [src]="path" [class]="class" [alt]="'icon'" />
+  </ng-container>
+  <ng-template #inlineSvg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      [attr.width]="svgwidth"
+      [attr.height]="svgHeight"
+      [attr.viewBox]="viewBox"
+      fill="none"
+      [class]="class"
+    >
+      <path
+        [attr.d]="path"
+        [attr.stroke]="strokeColor"
+        [attr.stroke-width]="strokeWidth"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </ng-template>
 </div>
