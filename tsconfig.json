@@ -18,6 +18,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
+    "lib": ["dom", "es2022"],
     "baseUrl": "src",
     "paths": {
       // Main App paths
