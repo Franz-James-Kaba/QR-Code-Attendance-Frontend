@@ -1,10 +1,11 @@
-import { BreadcrumbItem, BreadcrumbService } from '@Admin/core/services/breadcrumb.service';
+import { BreadcrumbService } from '@Admin/core/services/breadcrumb.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
 import { filter, Subscription } from 'rxjs';
+import { BreadcrumbItem } from '@shared/models/breadcrumb.model';
 
 interface NavItem {
   label: string;
@@ -28,15 +29,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly breadcrumbService = inject(BreadcrumbService);
   private routerSubscription: Subscription | null = null;
-
   activeRoute = '';
-
   navItems: NavItem[] = [
     {
       label: 'Overview',
       icon: 'overview.svg',
       route: '/admin/dashboard',
-      breadcrumbs: [{ label: 'Dashboard', link: '/admin/dashboard' }],
+      breadcrumbs: [
+        { label: 'Dashboard', link: '/admin/dashboard' },
+        { label: 'Overview', link: '/admin/dashboard' }
+      ],
     },
     {
       label: 'NSPs',
@@ -44,7 +46,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/nsps',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'NSP Management', link: '/admin/nsps' },
+        { label: 'NSPs', link: '/admin/nsps' },
       ],
     },
     {
@@ -53,7 +55,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/facilitators',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'Facilitator Management', link: '/admin/facilitators' },
+        { label: 'Facilitators', link: '/admin/facilitators' },
       ],
     },
     {
@@ -62,20 +64,46 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/admin/sessions',
       breadcrumbs: [
         { label: 'Dashboard', link: '/admin/dashboard' },
-        { label: 'Session Management', link: '/admin/sessions' },
+        { label: 'Sessions', link: '/admin/sessions' },
       ],
     },
-  ];
-
-  ngOnInit(): void {
+  ];  ngOnInit(): void {
     // Set initial active route
     this.activeRoute = this.router.url;
 
-    // Update active route on navigation
+    // Set initial breadcrumbs based on current route
+    const dashboardRoute = '/admin/dashboard';
+    // First check specifically for dashboard
+    if (this.router.url === '/admin' || this.router.url === dashboardRoute) {
+      const dashboardItem = this.navItems.find(item => item.route === dashboardRoute);
+      if (dashboardItem) {
+        this.updateBreadcrumbs(dashboardItem.breadcrumbs);
+      }
+    } else {
+      // Handle other routes
+      const navItem = this.navItems.find(item => this.router.url.startsWith(item.route));
+      if (navItem) {
+        this.updateBreadcrumbs(navItem.breadcrumbs);
+      }
+    }    // Update active route on navigation
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.activeRoute = this.router.url;
+
+        // Find the matching nav item and update breadcrumbs
+        const dashboardRoute = '/admin/dashboard';
+        if (this.router.url === '/admin' || this.router.url === dashboardRoute) {
+          const dashboardItem = this.navItems.find(item => item.route === dashboardRoute);
+          if (dashboardItem) {
+            this.updateBreadcrumbs(dashboardItem.breadcrumbs);
+          }
+        } else {
+          const navItem = this.navItems.find(item => this.router.url.startsWith(item.route));
+          if (navItem) {
+            this.updateBreadcrumbs(navItem.breadcrumbs);
+          }
+        }
       });
   }
 
@@ -85,9 +113,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Only called explicitly when a user clicks a nav item
   updateBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
-    // Only manually update breadcrumbs when user explicitly clicks a navigation item
     this.breadcrumbService.updateBreadcrumbs(breadcrumbs);
   }
 
@@ -96,7 +122,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onClickOutside(): void {
-    // Only close the sidebar on mobile screens (will be handled by the parent component)
     if (window.innerWidth < 768 && this.isOpen) {
       this.closeSidebar.emit();
     }

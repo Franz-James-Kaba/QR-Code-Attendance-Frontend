@@ -1,26 +1,14 @@
 <nav class="flex" aria-label="Breadcrumb">
   <ol class="flex items-center space-x-2">
-    @for (item of items(); track $index; let last = $last) {
-      <li class="flex items-center">
-        @if (!last) {
-          <a [routerLink]="item.link" class="text-nspText hover:text-primary font-lato text-[15px] font-medium">{{ item.label }}</a>
-          <svg
-            class="w-4 h-4 mx-2 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        } @else {
-          <span class="text-nspText font-lato text-[15px] font-medium">{{ item.label }}</span>
-        }
-      </li>
-    }
+    <li class="flex items-center" *ngFor="let item of items; let last = last">
+      @if (!last) {
+        <a [routerLink]="item.link" class="text-nspText hover:text-primary font-lato text-[15px] font-medium">{{ item.label }}</a>
+        <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      } @else {
+        <span class="text-nspText font-lato text-[15px] font-bold">{{ item.label }}</span>
+      }
+    </li>
   </ol>
 </nav>

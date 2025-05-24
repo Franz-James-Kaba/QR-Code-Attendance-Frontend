@@ -317,9 +317,9 @@ export class ChartComponent implements OnInit, OnChanges {
     // Simple calculation based on number of data points
     return Math.max(300, this.chartData.length * 50);
   }
-
   getBarWidthPx(): string {
-    return `${this.barWidth}px`;
+    // Return the bar width from options (with fallback to default)
+    return `${this.options.barWidth ?? this.barWidth}px`;
   }
 
   // LINE CHART SPECIFIC METHODS

@@ -44,6 +44,7 @@ export class FacilitatorFormComponent implements OnInit {
       lastName: [this.initialData?.lastName ?? '', [Validators.required, Validators.minLength(3)]],
       email: [this.initialData?.email ?? '', [Validators.required, Validators.email]],
       program: [this.initialData?.program ?? '', [Validators.required]],
+      hasReceptionPrivilege: [this.initialData?.hasReceptionPrivilege ?? false],
     });
   }
 

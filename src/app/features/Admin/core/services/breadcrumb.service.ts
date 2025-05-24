@@ -1,12 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { BreadcrumbItem } from '@shared/models/breadcrumb.model';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-export interface BreadcrumbItem {
-  label: string;
-  link?: string;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -14,127 +11,111 @@ export interface BreadcrumbItem {
 export class BreadcrumbService {
   private readonly breadcrumbsSubject = new BehaviorSubject<BreadcrumbItem[]>([]);
   breadcrumbs$ = this.breadcrumbsSubject.asObservable();
-
-  // Add a readonly signal for Angular signals-based components
   private readonly breadcrumbsSignal = signal<BreadcrumbItem[]>([]);
-
-  // Public accessor for the signal
   breadcrumbs = this.breadcrumbsSignal.asReadonly();
-
   private readonly router = inject(Router);
+  private manuallySet = false;
 
   constructor() {
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
-      const root = this.router.routerState.snapshot.root;
-      const breadcrumbs = this.createBreadcrumbs(root);
-      this.breadcrumbsSubject.next(breadcrumbs);
-      this.breadcrumbsSignal.set(breadcrumbs); // Update signal when breadcrumbs change
-    });
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (!this.manuallySet) {
+          const root = this.router.routerState.snapshot.root;
+          const breadcrumbs = this.createBreadcrumbs(root);
+          this.breadcrumbsSubject.next(breadcrumbs);
+          this.breadcrumbsSignal.set(breadcrumbs);
+        }
+        this.manuallySet = false;
+      });
   }
-
   private createBreadcrumbs(
     route: ActivatedRouteSnapshot,
     url: string = '',
     breadcrumbs: BreadcrumbItem[] = []
   ): BreadcrumbItem[] {
-    // Initialize with Dashboard breadcrumb for admin routes
-    this.initializeAdminBreadcrumbs(breadcrumbs);
-
-    // Process current route
-    if (route.routeConfig && route.routeConfig.path !== '') {
-      // Build the current URL path
-      url = this.buildCurrentUrl(route, url);
-
-      // Add breadcrumb for current route if applicable
-      this.addCurrentRouteBreadcrumb(route, url, breadcrumbs);
-    }
-
-    // Process child routes
-    if (route.children.length > 0) {
-      return this.processChildRoutes(route, url, breadcrumbs);
-    }
-
-    return breadcrumbs;
+    this.addAdminBreadcrumbsIfNeeded(breadcrumbs);
+    const { currentPath, currentUrl } = this.getPathInfo(route, url);
+    this.addBreadcrumbForCurrentRoute(route, currentPath, currentUrl, breadcrumbs);
+    return this.processBreadcrumbChildren(route, currentUrl, breadcrumbs);
   }
 
-  // Helper to initialize admin dashboard breadcrumb
-  private initializeAdminBreadcrumbs(breadcrumbs: BreadcrumbItem[]): void {
-    if (breadcrumbs.length === 0 && this.router.url.startsWith('/admin')) {
+  private addAdminBreadcrumbsIfNeeded(breadcrumbs: BreadcrumbItem[]): void {
+    if (!this.router.url.startsWith('/admin') || breadcrumbs.length > 0) {
+      return;
+    }
+
+    breadcrumbs.push({
+      label: 'Dashboard',
+      link: '/admin/dashboard',
+    });
+
+    if (this.router.url === '/admin/dashboard' || this.router.url === '/admin') {
       breadcrumbs.push({
-        label: 'Dashboard',
+        label: 'Overview',
         link: '/admin/dashboard',
       });
     }
   }
 
-  // Helper to build the current URL
-  private buildCurrentUrl(route: ActivatedRouteSnapshot, baseUrl: string): string {
-    const routeUrl = route.url.map(segment => segment.path).join('/');
-    return routeUrl ? `${baseUrl}/${routeUrl}` : baseUrl;
+  private getPathInfo(route: ActivatedRouteSnapshot, baseUrl: string): { currentPath: string, currentUrl: string } {
+    const pathSegments = route.url.map(segment => segment.path);
+    const currentPath = pathSegments.length > 0 ? pathSegments.join('/') : '';
+    const currentUrl = currentPath ? `${baseUrl}/${currentPath}` : baseUrl;
+    return { currentPath, currentUrl };
   }
 
-  // Helper to add breadcrumb for the current route
-  private addCurrentRouteBreadcrumb(
+  private addBreadcrumbForCurrentRoute(
     route: ActivatedRouteSnapshot,
-    url: string,
+    currentPath: string,
+    currentUrl: string,
     breadcrumbs: BreadcrumbItem[]
   ): void {
-    const routeUrl = route.url.map(segment => segment.path).join('/');
+    if (!route.routeConfig || route.routeConfig.path === '') {
+      return;
+    }
 
     if (route.data['breadcrumb']) {
       breadcrumbs.push({
         label: route.data['breadcrumb'],
-        link: url,
+        link: currentUrl,
       });
     } else if (route.data['title']) {
       breadcrumbs.push({
         label: route.data['title'],
-        link: url,
+        link: currentUrl,
       });
-    } else if (routeUrl) {
+    } else if (currentPath) {
+      const label = currentPath
+        .split('-')
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+
       breadcrumbs.push({
-        label: this.formatRouteLabel(routeUrl),
-        link: url,
+        label: label,
+        link: currentUrl,
       });
     }
   }
 
-  // Helper to process child routes
-  private processChildRoutes(
+  private processBreadcrumbChildren(
     route: ActivatedRouteSnapshot,
-    url: string,
+    currentUrl: string,
     breadcrumbs: BreadcrumbItem[]
   ): BreadcrumbItem[] {
-    for (const child of route.children) {
-      if (child.routeConfig && this.isRouteActive(child)) {
-        return this.createBreadcrumbs(child, url, breadcrumbs);
+    if (route.children.length > 0) {
+      for (const child of route.children) {
+        if (child.routeConfig && child.routeConfig.path !== '**') {
+          return this.createBreadcrumbs(child, currentUrl, breadcrumbs);
+        }
       }
     }
     return breadcrumbs;
   }
-
-  // Helper method to check if a route is active (part of current navigation)
-  private isRouteActive(route: ActivatedRouteSnapshot): boolean {
-    // Explicitly handle potential null or undefined values
-    const hasUrl = !!route.url && Array.isArray(route.url) && route.url.length > 0;
-    const isParentRoute =
-      route.children.length > 0 && !!route.routeConfig && route.routeConfig.path === '';
-
-    return hasUrl || isParentRoute;
-  }
-
-  // Helper method to format route URL into readable label
-  private formatRouteLabel(routeUrl: string): string {
-    return routeUrl
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-  }
-
-  // Method for manual updates when needed (for example from sidebar navigation)
   updateBreadcrumbs(items: BreadcrumbItem[] | null) {
     const newItems = items ?? [];
+    this.manuallySet = true;
     this.breadcrumbsSubject.next(newItems);
-    this.breadcrumbsSignal.set(newItems); // Update signal as well
+    this.breadcrumbsSignal.set(newItems);
   }
 }

@@ -49,23 +49,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   attendanceChartLoading = true;
   stayingTimeChartLoading = true;
   programDistributionLoading = true;
-
-  selectedAttendanceTimeRange: TimeRange = 'Weekly';
-  selectedStayingTimeRange: TimeRange = 'Weekly';
+  selectedAttendanceTimeRange: TimeRange = 'Daily';
+  selectedStayingTimeRange: TimeRange = 'Daily';
 
   attendanceChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
-    defaultTimeRange: 'Weekly',
+    defaultTimeRange: 'Daily',
     responsive: true,
     tooltipEnabled: true,
     height: 300,
-    barWidth: 20,
-    barGap: 4,
+    barWidth: 40,
+    barGap: 8,
   };
-
   stayingTimeChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
-    defaultTimeRange: 'Weekly',
+    defaultTimeRange: 'Daily',
     responsive: true,
     tooltipEnabled: true,
     height: 300,
@@ -101,7 +99,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
   loadAttendanceChartData(): void {
     this.attendanceChartLoading = true;
 
@@ -110,7 +107,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => {
-          this.attendanceChartData = data;
+          // Add time labels for y-axis (6am to 6pm)
+          const timeLabels = ['6am', '7am', '8am', '9am', '10am', '11am', '12pm',
+                             '1pm', '2pm', '3pm', '4pm', '5pm', '6pm'];
+          this.attendanceChartData = {
+            ...data,
+            yAxisLabels: timeLabels
+          };
           this.attendanceChartLoading = false;
         },
         error: err => {
@@ -119,7 +122,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
       });
   }
-
   loadStayingTimeChartData(): void {
     this.stayingTimeChartLoading = true;
 
@@ -128,7 +130,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => {
-          this.stayingTimeChartData = data;
+          // Add time duration labels for y-axis (hours)
+          const timeLabels = ['1hr', '2hrs', '3hrs', '4hrs', '5hrs', '6hrs', '7hrs', '8hrs'];
+          this.stayingTimeChartData = {
+            ...data,
+            yAxisLabels: timeLabels
+          };
           this.stayingTimeChartLoading = false;
         },
         error: err => {
@@ -141,7 +148,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadProgramDistributionData(): void {
     this.programDistributionLoading = true;
 
-    // Use the chart service to fetch program distribution data
     this.chartService
       .getChartData('program-distribution', 'Monthly', 'pie')
       .pipe(takeUntil(this.destroy$))
@@ -157,9 +163,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Load NSP and Facilitator counts from the API simultaneously
-   */
   loadUserCounts(): void {
     this.isLoadingCounts = true;
 
@@ -215,21 +218,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         if (user?.firstName && user?.lastName) {
-          // If both first and last name exist, use firstName
           this.userName = user.firstName;
         } else if (user?.firstName) {
-          // If only first name exists
           this.userName = user.firstName;
         } else if (user?.lastName) {
-          // If only last name exists
           this.userName = user.lastName;
         } else if (user?.email) {
-          // Fallback to email username if no names
           const emailName = user.email.split('@')[0];
-          // Capitalize the first letter
           this.userName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
         } else {
-          // Default fallback
           this.userName = 'Admin';
         }
       });

@@ -126,45 +126,7 @@ export class FacilitatorOverviewComponent implements OnInit {
             this.showNotification('error', 'Failed to delete facilitator: ' + error.message);
           },
         });
-    }
-  }
-
-  toggleReceptionPrivilege(event: { facilitator: FacilitatorViewModel; grant: boolean }): void {
-    const { facilitator, grant } = event;
-    const facilitatorName = this.getFullName(facilitator);
-    const actionText = grant ? 'grant' : 'revoke';
-
-    this.isLoading = true;
-
-    const serviceCall = grant
-      ? this.facilitatorService.grantReceptionPrivilege(facilitator.email)
-      : this.facilitatorService.revokeReceptionPrivilege(facilitator.email);
-
-    serviceCall.pipe(finalize(() => (this.isLoading = false))).subscribe({
-      next: () => {
-        const updatedFacilitators = this.facilitators.map(f => {
-          if (f.id === facilitator.id) {
-            return { ...f, hasReceptionPrivilege: grant };
-          }
-          return f;
-        });
-
-        this.facilitators = updatedFacilitators;
-
-        this.showNotification(
-          'success',
-          `Reception privilege ${actionText}ed for ${facilitatorName}`
-        );
-      },
-      error: error => {
-        console.error(`Error ${actionText}ing reception privilege:`, error);
-        this.showNotification(
-          'error',
-          `Failed to ${actionText} reception privilege: ${error.message}`
-        );
-      },
-    });
-  }
+    }  }
 
   onPageChange(page: number): void {
     this.currentPage = page;

@@ -76,12 +76,10 @@
   </div>
 
   <!-- Data table showing list of facilitators -->
-  <div *ngIf="!isLoading && hasRecords">
-    <app-facilitator-table
+  <div *ngIf="!isLoading && hasRecords">    <app-facilitator-table
       [facilitators]="facilitators"
       (edit)="editFacilitator($event)"
       (delete)="confirmDelete($event)"
-      (togglePrivilege)="toggleReceptionPrivilege($event)"
     >
     </app-facilitator-table>
 
