@@ -23,7 +23,7 @@ export default {
         '14': '14px',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Lato', 'system-ui', 'sans-serif'],
         serif: ['Merriweather', 'serif'],
         mono: ['Menlo', 'monospace'],
       },

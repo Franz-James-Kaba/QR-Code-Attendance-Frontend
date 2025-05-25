@@ -88,6 +88,33 @@
     </div>
   </div>
 
+  <!-- Reception Privilege Toggle -->
+  <div class="space-y-2 pt-2">
+    <label class="flex items-center space-x-3">
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          id="hasReceptionPrivilege"
+          formControlName="hasReceptionPrivilege"
+          class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 hidden"
+        />
+        <button
+          type="button"
+          class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          [ngClass]="form.get('hasReceptionPrivilege')?.value ? 'bg-blue-600' : 'bg-gray-200'"
+          (click)="form.get('hasReceptionPrivilege')?.setValue(!form.get('hasReceptionPrivilege')?.value)"
+        >
+          <span
+            class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"
+            [ngClass]="form.get('hasReceptionPrivilege')?.value ? 'translate-x-6' : 'translate-x-1'"
+          ></span>
+        </button>
+        <span class="ml-3 text-sm font-medium text-gray-700">Reception Privilege</span>
+      </div>
+    </label>
+    <p class="text-sm text-gray-500 mt-1 ml-1">Enables this facilitator to access reception features</p>
+  </div>
+
   <!-- Action Buttons -->
   <div class="flex justify-center space-x-3 pt-4">
     <app-button type="button" variant="secondary" size="md" (buttonClick)="onCancel()">

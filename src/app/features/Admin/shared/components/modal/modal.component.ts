@@ -39,7 +39,6 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    // Listen for visible changes to trigger animations
     if (this.visible) {
       this.onVisibilityChange(true);
     }
@@ -53,50 +52,34 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    // Cleanup any potential animation timeouts
+
     this.showContent = false;
     document.body.style.overflow = '';
   }
 
-  /**
-   * Called when the visible input changes
-   */
   onVisibilityChange(isVisible: boolean): void {
     if (isVisible) {
-      // When opening, first render the component, then animate in
       setTimeout(() => {
         this.showContent = true;
-        // Prevent scrolling on the body when modal is open
         document.body.style.overflow = 'hidden';
-      }, 50); // Small delay to ensure DOM has updated
+      }, 50);
     } else {
-      // When closing, first animate out, then remove from DOM
       this.showContent = false;
-      // Re-enable scrolling
       document.body.style.overflow = '';
 
-      // Allow time for animation to complete before emitting closed event
       setTimeout(() => {
         this.modalClosed.emit();
-      }, 300); // Match this with your CSS transition duration
+      }, 300);
     }
   }
 
-  /**
-   * Closes the modal
-   */
   close(): void {
     if (!this.isLoading) {
       this.onVisibilityChange(false);
     }
   }
 
-  /**
-   * Handles backdrop clicks to close the modal
-   */
   onBackdropClick(event: MouseEvent): void {
-    // Only close if the backdrop itself was clicked, not modal content
-    // And don't close if we're in a loading state
     if (!this.isLoading && (event.target as HTMLElement).classList.contains('fixed')) {
       this.close();
     }

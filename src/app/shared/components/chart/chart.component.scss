@@ -1,5 +1,5 @@
 .chart-component {
-  --primary-color: #3b82f6;
+  --primary-color: #065186;
   --secondary-color: #1f2937;
   --grid-color: #e5e7eb;
   --label-color: #6b7280;
@@ -252,7 +252,7 @@
 
       &:hover {
         opacity: 0.9;
-        stroke-width: 12; // Slightly expand on hover
+        stroke-width: 18; // Increased hover thickness
       }
     }
 
