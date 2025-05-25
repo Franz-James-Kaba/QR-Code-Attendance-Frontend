@@ -195,15 +195,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     yesterday.setDate(yesterday.getDate() - 1);
 
     const startDate = yesterday.toISOString().split('T')[0];
-    const endDate = today.toISOString().split('T')[0];
 
     this.attendanceService
-      .getEarlyAttendees(startDate, endDate, this.earlyAttendeesPage, this.earlyAttendeesSize)
+      .getEarlyAttendees(startDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: result => {
-          this.earlyAttendees = result.data;
-          this.earlyAttendeesTotal = result.total;
           this.isLoadingEarlyAttendees = false;
         },
         error: err => {
