@@ -444,6 +444,8 @@ export class ChartComponent implements OnInit, OnChanges {
       const color = this.dataSet?.series?.[index]?.color ?? this.getDefaultColor(index);
 
       // Create percentage label at the midpoint of the arc
+      const midAngle = startAngle + angleSize / 2;
+      const labelPosition = this.getArcTextPosition(centerX, centerY, radius, midAngle);
       const percentageLabel = percentage >= 5 ? `${Math.round(percentage)}%` : '';
 
       this.pieChartArcs.push({

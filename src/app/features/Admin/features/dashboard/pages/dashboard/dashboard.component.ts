@@ -61,15 +61,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     barWidth: 40,
     barGap: 8,
   };
-
   stayingTimeChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
     defaultTimeRange: 'Weekly',
     responsive: true,
     tooltipEnabled: true,
     height: 300,
-    lineThickness: 2,
-    pointRadius: 4,
+    lineThickness: 1.5,
+    pointRadius: 3,
+    tooltipFollowCursor: true
   };
 
   programDistributionOptions: ChartOptions = {

@@ -278,50 +278,48 @@ export class ChartService {
 
   /**
    * Generate mock staying time data for the chart
-   */
-  private getMockStayingTimeData(timeRange: TimeRange): ChartDataSet {
+   */  private getMockStayingTimeData(timeRange: TimeRange): ChartDataSet {
     let data: ChartDataPoint[] = [];
-    const currentDate = new Date();
     let startDate: Date;
     let endDate: Date;
-    // Update y-axis labels to represent hours (0-8 hours)
-    const yAxisLabels: string[] = ['0h', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'];
+    // Update y-axis labels to represent times from 7 AM to 6 PM
+    const yAxisLabels: string[] = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
+                                 '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
 
     if (timeRange === 'Weekly') {
       startDate = new Date('2025-02-17');
       endDate = new Date('2025-02-21');
 
       data = [
-        { label: 'Mon', values: [4.5, 0.8], tooltips: ['4.5 hours avg stay', '±0.8h variation'] },
-        { label: 'Tue', values: [5.2, 1.1], tooltips: ['5.2 hours avg stay', '±1.1h variation'] },
-        { label: 'Wed', values: [4.8, 0.7], tooltips: ['4.8 hours avg stay', '±0.7h variation'] },
-        { label: 'Thu', values: [5.5, 1.2], tooltips: ['5.5 hours avg stay', '±1.2h variation'] },
-        { label: 'Fri', values: [4.2, 0.9], tooltips: ['4.2 hours avg stay', '±0.9h variation'] },
-      ];
-    } else if (timeRange === 'Monthly') {
+        { label: 'Mon', values: [9.5, 0.8], tooltips: ['Avg: 9:30 AM', '±48min variation'] },
+        { label: 'Tue', values: [8.8, 0.5], tooltips: ['Avg: 8:48 AM', '±30min variation'] },
+        { label: 'Wed', values: [9.2, 0.7], tooltips: ['Avg: 9:12 AM', '±42min variation'] },
+        { label: 'Thu', values: [8.5, 0.4], tooltips: ['Avg: 8:30 AM', '±24min variation'] },
+        { label: 'Fri', values: [9.0, 0.6], tooltips: ['Avg: 9:00 AM', '±36min variation'] },
+      ];    } else if (timeRange === 'Monthly') {
       startDate = new Date('2025-02-01');
       endDate = new Date('2025-02-28');
 
       data = [
         {
           label: 'Week 1',
-          values: [4.7, 0.9],
-          tooltips: ['4.7 hours avg stay', '±0.9h variation'],
+          values: [9.2, 0.7],
+          tooltips: ['Avg: 9:12 AM', '±42min variation'],
         },
         {
           label: 'Week 2',
-          values: [5.1, 1.0],
-          tooltips: ['5.1 hours avg stay', '±1.0h variation'],
+          values: [8.8, 0.5],
+          tooltips: ['Avg: 8:48 AM', '±30min variation'],
         },
         {
           label: 'Week 3',
-          values: [4.9, 0.8],
-          tooltips: ['4.9 hours avg stay', '±0.8h variation'],
+          values: [9.0, 0.6],
+          tooltips: ['Avg: 9:00 AM', '±36min variation'],
         },
         {
           label: 'Week 4',
-          values: [5.3, 1.1],
-          tooltips: ['5.3 hours avg stay', '±1.1h variation'],
+          values: [8.5, 0.4],
+          tooltips: ['Avg: 8:30 AM', '±24min variation'],
         },
       ];
     } else {
@@ -329,18 +327,18 @@ export class ChartService {
       endDate = new Date('2025-12-31');
 
       data = [
-        { label: 'Jan', values: [4.5, 0.8], tooltips: ['4.5 hours avg stay', '±0.8h variation'] },
-        { label: 'Feb', values: [4.7, 0.9], tooltips: ['4.7 hours avg stay', '±0.9h variation'] },
-        { label: 'Mar', values: [5.0, 1.0], tooltips: ['5.0 hours avg stay', '±1.0h variation'] },
-        { label: 'Apr', values: [5.2, 1.1], tooltips: ['5.2 hours avg stay', '±1.1h variation'] },
-        { label: 'May', values: [5.5, 1.2], tooltips: ['5.5 hours avg stay', '±1.2h variation'] },
-        { label: 'Jun', values: [5.3, 1.1], tooltips: ['5.3 hours avg stay', '±1.1h variation'] },
-        { label: 'Jul', values: [5.1, 1.0], tooltips: ['5.1 hours avg stay', '±1.0h variation'] },
-        { label: 'Aug', values: [4.9, 0.9], tooltips: ['4.9 hours avg stay', '±0.9h variation'] },
-        { label: 'Sep', values: [5.0, 1.0], tooltips: ['5.0 hours avg stay', '±1.0h variation'] },
-        { label: 'Oct', values: [5.2, 1.1], tooltips: ['5.2 hours avg stay', '±1.1h variation'] },
-        { label: 'Nov', values: [4.8, 0.9], tooltips: ['4.8 hours avg stay', '±0.9h variation'] },
-        { label: 'Dec', values: [4.6, 0.8], tooltips: ['4.6 hours avg stay', '±0.8h variation'] },
+        { label: 'Jan', values: [9.3, 0.7], tooltips: ['Avg: 9:18 AM', '±42min variation'] },
+        { label: 'Feb', values: [9.0, 0.6], tooltips: ['Avg: 9:00 AM', '±36min variation'] },
+        { label: 'Mar', values: [8.8, 0.5], tooltips: ['Avg: 8:48 AM', '±30min variation'] },
+        { label: 'Apr', values: [8.5, 0.4], tooltips: ['Avg: 8:30 AM', '±24min variation'] },
+        { label: 'May', values: [8.7, 0.5], tooltips: ['Avg: 8:42 AM', '±30min variation'] },
+        { label: 'Jun', values: [9.0, 0.6], tooltips: ['Avg: 9:00 AM', '±36min variation'] },
+        { label: 'Jul', values: [9.2, 0.7], tooltips: ['Avg: 9:12 AM', '±42min variation'] },
+        { label: 'Aug', values: [9.1, 0.6], tooltips: ['Avg: 9:06 AM', '±36min variation'] },
+        { label: 'Sep', values: [8.9, 0.5], tooltips: ['Avg: 8:54 AM', '±30min variation'] },
+        { label: 'Oct', values: [8.7, 0.4], tooltips: ['Avg: 8:42 AM', '±24min variation'] },
+        { label: 'Nov', values: [8.8, 0.5], tooltips: ['Avg: 8:48 AM', '±30min variation'] },
+        { label: 'Dec', values: [9.0, 0.6], tooltips: ['Avg: 9:00 AM', '±36min variation'] },
       ];
     }
 
