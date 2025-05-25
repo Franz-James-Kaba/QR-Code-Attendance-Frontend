@@ -90,7 +90,13 @@ export class ChartService {
     // This would be implemented based on your API structure
     // Below is just a placeholder implementation
     try {
-      const chartData: ChartDataPoint[] = apiResponse.data.map((item: any) => ({
+      interface ApiResponseItem {
+        label: string;
+        values: number[];
+        tooltips?: string[];
+      }
+
+      const chartData: ChartDataPoint[] = apiResponse.data.map((item: ApiResponseItem) => ({
         label: item.label,
         values: item.values,
       }));
@@ -131,7 +137,7 @@ export class ChartService {
       return {
         data: transformedData,
         series: [
-          { name: legacyData.label1 || 'Series 1', color: legacyData.color1 || '#3b82f6' },
+          { name: legacyData.label1 || 'Series 1', color: legacyData.color1 || '#065186' },
           { name: legacyData.label2 || 'Series 2', color: legacyData.color2 || '#1f2937' },
         ],
         startDate: legacyData.startDate || new Date(),
@@ -154,7 +160,7 @@ export class ChartService {
     return {
       data: [],
       series: [
-        { name: 'Series 1', color: '#3b82f6' },
+        { name: 'Series 1', color: '#065186' },
         { name: 'Series 2', color: '#1f2937' },
       ],
       startDate: new Date(),
@@ -200,31 +206,7 @@ export class ChartService {
     let yAxisLabels: string[] = [];
     let maxValue = 0;
 
-    // Generate different data sets based on time range
-    if (timeRange === 'Daily') {
-      startDate = new Date(currentDate);
-      endDate = new Date(currentDate);
-
-      data = [
-        { label: '6:00 AM', values: [8, 2], tooltips: ['8 NSPs', '2 Facilitators'] },
-        { label: '7:00 AM', values: [15, 5], tooltips: ['15 NSPs', '5 Facilitators'] },
-        { label: '8:00 AM', values: [42, 12], tooltips: ['42 NSPs', '12 Facilitators'] },
-        { label: '9:00 AM', values: [25, 8], tooltips: ['25 NSPs', '8 Facilitators'] },
-        { label: '10:00 AM', values: [10, 4], tooltips: ['10 NSPs', '4 Facilitators'] },
-        { label: '11:00 AM', values: [5, 2], tooltips: ['5 NSPs', '2 Facilitators'] },
-      ];
-
-      // Find maximum value for y-axis scaling
-      data.forEach(item => {
-        const sum = item.values.reduce((a, b) => a + b, 0);
-        maxValue = Math.max(maxValue, sum);
-      });
-
-      // Create dynamic y-axis labels starting from 0
-      const numberOfSteps = 5;
-      const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
-    } else if (timeRange === 'Weekly') {
+    if (timeRange === 'Weekly') {
       startDate = new Date(currentDate);
       startDate.setDate(startDate.getDate() - startDate.getDay());
       endDate = new Date(startDate);
@@ -237,17 +219,6 @@ export class ChartService {
         { label: 'Thu', values: [75, 30], tooltips: ['75 NSPs', '30 Facilitators'] },
         { label: 'Fri', values: [70, 26], tooltips: ['70 NSPs', '26 Facilitators'] },
       ];
-
-      // Find maximum value for y-axis scaling
-      data.forEach(item => {
-        const sum = item.values.reduce((a, b) => a + b, 0);
-        maxValue = Math.max(maxValue, sum);
-      });
-
-      // Create dynamic y-axis labels starting from 0
-      const numberOfSteps = 5;
-      const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     } else if (timeRange === 'Monthly') {
       startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -258,17 +229,6 @@ export class ChartService {
         { label: 'Week 3', values: [380, 145], tooltips: ['380 NSPs', '145 Facilitators'] },
         { label: 'Week 4', values: [365, 132], tooltips: ['365 NSPs', '132 Facilitators'] },
       ];
-
-      // Find maximum value for y-axis scaling
-      data.forEach(item => {
-        const sum = item.values.reduce((a, b) => a + b, 0);
-        maxValue = Math.max(maxValue, sum);
-      });
-
-      // Create dynamic y-axis labels starting from 0
-      const numberOfSteps = 5;
-      const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     } else {
       // Yearly data
       startDate = new Date(currentDate.getFullYear(), 0, 1);
@@ -288,23 +248,23 @@ export class ChartService {
         { label: 'Nov', values: [840, 330], tooltips: ['840 NSPs', '330 Facilitators'] },
         { label: 'Dec', values: [760, 290], tooltips: ['760 NSPs', '290 Facilitators'] },
       ];
-
-      // Find maximum value for y-axis scaling
-      data.forEach(item => {
-        const sum = item.values.reduce((a, b) => a + b, 0);
-        maxValue = Math.max(maxValue, sum);
-      });
-
-      // Create dynamic y-axis labels starting from 0
-      const numberOfSteps = 5;
-      const step = Math.ceil(maxValue / numberOfSteps);
-      yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
     }
+
+    // Calculate y-axis labels based on the maximum value
+    data.forEach(item => {
+      const sum = item.values.reduce((a, b) => a + b, 0);
+      maxValue = Math.max(maxValue, sum);
+    });
+
+    // Create dynamic y-axis labels starting from 0
+    const numberOfSteps = 5;
+    const step = Math.ceil(maxValue / numberOfSteps);
+    yAxisLabels = Array.from({ length: numberOfSteps + 1 }, (_, i) => (i * step).toString());
 
     return {
       data,
       series: [
-        { name: 'NSPs', color: '#3b82f6' },
+        { name: 'NSPs', color: '#065186' },
         { name: 'Facilitators', color: '#1f2937' },
       ],
       startDate,
@@ -387,7 +347,7 @@ export class ChartService {
     return {
       data,
       series: [
-        { name: 'Average stay (hours)', color: '#3b82f6' },
+        { name: 'Average stay (hours)', color: '#065186' },
         { name: 'Variation (±hours)', color: '#1f2937' },
       ],
       startDate,
@@ -430,7 +390,7 @@ export class ChartService {
     return {
       data,
       series: [
-        { name: 'NSPs', color: '#3b82f6' },
+        { name: 'NSPs', color: '#065186' },
         { name: 'Facilitators', color: '#1f2937' },
       ],
       startDate: currentDate,

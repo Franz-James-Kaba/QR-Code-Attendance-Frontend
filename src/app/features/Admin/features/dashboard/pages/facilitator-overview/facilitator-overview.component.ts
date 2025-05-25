@@ -12,6 +12,21 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { finalize } from 'rxjs';
 
+interface FacilitatorParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
+interface FacilitatorsResponse {
+  data: FacilitatorViewModel[];
+  total: number;
+}
+
+interface ModalData {
+  type: string;
+  data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
 
 @Component({
   selector: 'app-facilitator-overview',
@@ -34,6 +49,7 @@ export class FacilitatorOverviewComponent implements OnInit {
   pageSize = 10;
   totalItems = 0;
   isLoading = false;
+  isCreatingFacilitator = false;
   facilitators: FacilitatorViewModel[] = [];
   allFacilitators: FacilitatorViewModel[] = [];
   searchQuery = '';
@@ -48,135 +64,144 @@ export class FacilitatorOverviewComponent implements OnInit {
     this.currentPage = 0;
     this.pageSize = 10;
 
-    // Check for success messages from redirects (after edit/create/delete)
-    this.route.queryParams.subscribe(params => {
-      if (params['success']) {
-        this.showNotification('success', params['message'] ?? 'Operation successful');
+    // Subscribe to modal changes to refresh data
+    this.modalService.modalClosed.subscribe(() => {
+      const lastModalType = this.modalService.getModalType();
+      if (lastModalType === 'createFacilitator') {
+        this.showNotification('success', 'Facilitator created successfully');
+        this.loadFacilitators();
+        this.isCreatingFacilitator = false;
+      } else if (lastModalType === 'editFacilitator') {
+        this.showNotification('success', 'Facilitator updated successfully');
+        this.loadFacilitators();
       }
     });
 
-    // Load facilitators from service
     this.loadFacilitators();
   }
 
-  // Load facilitators from API with pagination
-  loadFacilitators(): void {
+  /**
+   * Load facilitators with optional search and pagination
+   */
+  private loadFacilitators(): void {
     this.isLoading = true;
+    const params: FacilitatorParams = {
+      page: this.currentPage,
+      pageSize: this.pageSize,
+    };
+
+    if (this.searchQuery) {
+      params.search = this.searchQuery;
+    }
 
     this.facilitatorService
-      .getAllFacilitators(this.currentPage, this.pageSize)
+      .getAllFacilitators(this.currentPage)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: result => {
+        next: (result: FacilitatorsResponse) => {
           this.facilitators = result.data;
           this.totalItems = result.total;
           this.hasRecords = this.facilitators.length > 0;
-          this.allFacilitators = result.data; // Store all facilitators for search
+          this.allFacilitators = result.data;
         },
-        error: error => {
+        error: (error: Error) => {
           console.error('Error loading facilitators:', error);
-          this.showNotification('error', 'Failed to load facilitator data: ' + error.message);
+          this.showNotification('error', 'Failed to load facilitators');
         },
       });
   }
 
+  /**
+   * Open modal to create a new facilitator
+   */
   createFacilitator(): void {
-    this.modalService.openModal('createFacilitator');
+    this.isCreatingFacilitator = true;
+    this.modalService.openModal('createFacilitator', null);
   }
 
+  /**
+   * Open modal to edit an existing facilitator
+   */
   editFacilitator(facilitator: FacilitatorViewModel): void {
-    this.modalService.openModal('editFacilitator', facilitator);
+    const modalData: ModalData = {
+      type: 'facilitator',
+      data: facilitator,
+    };
+    this.modalService.openModal('editFacilitator', modalData);
   }
 
+  /**
+   * Handle search input changes
+   */
+  onSearch(): void {
+    this.currentPage = 0; // Reset to first page on search
+    this.loadFacilitators();
+  }
+
+  /**
+   * Show delete confirmation dialog
+   */
   confirmDelete(facilitator: FacilitatorViewModel): void {
     this.facilitatorToDelete = facilitator;
     this.showDeleteModal = true;
   }
 
+  /**
+   * Cancel delete operation
+   */
   cancelDelete(): void {
     this.showDeleteModal = false;
     this.facilitatorToDelete = null;
   }
 
+  /**
+   * Execute delete operation
+   */
   executeDelete(): void {
-    if (this.facilitatorToDelete) {
-      const facilitatorId = parseInt(this.facilitatorToDelete.id);
-      if (isNaN(facilitatorId)) {
-        this.showNotification('error', 'Invalid Facilitator ID');
-        return;
-      }
+    if (!this.facilitatorToDelete?.id) return;
 
-      this.isLoading = true;
+    const facilitatorId = parseInt(this.facilitatorToDelete.id);
+    this.facilitatorService.deleteFacilitator(facilitatorId).subscribe({
+      next: () => {
+        this.showNotification('success', 'Facilitator deleted successfully');
+        this.loadFacilitators();
+      },
+      error: (error: Error) => {
+        console.error('Error deleting facilitator:', error);
+        this.showNotification('error', 'Failed to delete facilitator');
+      },
+      complete: () => {
+        this.showDeleteModal = false;
+        this.facilitatorToDelete = null;
+      },
+    });
+  }
 
-      this.facilitatorService
-        .deleteFacilitator(facilitatorId)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: () => {
-            const fullName = this.getFullName(this.facilitatorToDelete!);
-            this.showNotification('success', `${fullName} has been successfully deleted`);
-
-            this.loadFacilitators();
-
-            this.showDeleteModal = false;
-            this.facilitatorToDelete = null;
-          },
-          error: error => {
-            console.error('Error deleting facilitator:', error);
-            this.showNotification('error', 'Failed to delete facilitator: ' + error.message);
-          },
-        });
-    }  }
-
+  /**
+   * Handle page changes
+   */
   onPageChange(page: number): void {
     this.currentPage = page;
     this.loadFacilitators();
   }
+
   /**
-   * Handle search query change
+   * Show a notification message
    */
-  onSearch(): void {
-    if (!this.searchQuery.trim()) {
-      // If search is empty, restore all facilitators
-      this.facilitators = [...this.allFacilitators];
-    } else {
-      // Filter facilitators based on search query
-      const query = this.searchQuery.toLowerCase().trim();
-      this.facilitators = this.allFacilitators.filter(
-        facilitator => 
-          facilitator.firstName.toLowerCase().includes(query) ||
-          facilitator.lastName.toLowerCase().includes(query) ||
-          facilitator.email.toLowerCase().includes(query) ||
-          (facilitator.middleName && facilitator.middleName.toLowerCase().includes(query)) ||
-          (facilitator.program && facilitator.program.toLowerCase().includes(query))
-      );
-    }
-    
-    // Update hasRecords flag
-    this.hasRecords = this.facilitators.length > 0;
-  }
+  private showNotification(type: 'success' | 'error' | 'info', message: string): void {
+    const formattedMessage = message.charAt(0).toUpperCase() + message.slice(1);
+    const duration = 3000; // Short duration for snappy feedback
 
-  private getFullName(facilitator: FacilitatorViewModel): string {
-    return `${facilitator.firstName} ${facilitator.middleName ? facilitator.middleName + ' ' : ''}${facilitator.lastName}`;
-  }
-
-  private showNotification(
-    type: 'success' | 'error' | 'info',
-    message: string,
-    duration = 5000
-  ): void {
     switch (type) {
       case 'success':
-        this.notificationService.success(message, { duration });
+        this.notificationService?.success(formattedMessage, { duration });
         break;
       case 'error':
-        this.notificationService.error(message, { duration });
+        this.notificationService?.error(formattedMessage, { duration });
         break;
       case 'info':
-        this.notificationService.info(message, { duration });
+        this.notificationService?.info(formattedMessage, { duration });
         break;
-      default:
-        this.notificationService.info(message, { duration });
     }
   }
 }

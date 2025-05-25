@@ -49,21 +49,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   attendanceChartLoading = true;
   stayingTimeChartLoading = true;
   programDistributionLoading = true;
-  selectedAttendanceTimeRange: TimeRange = 'Daily';
-  selectedStayingTimeRange: TimeRange = 'Daily';
+  selectedAttendanceTimeRange: TimeRange = 'Weekly';
+  selectedStayingTimeRange: TimeRange = 'Weekly';
 
   attendanceChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
-    defaultTimeRange: 'Daily',
+    defaultTimeRange: 'Weekly',
     responsive: true,
     tooltipEnabled: true,
     height: 300,
     barWidth: 40,
     barGap: 8,
   };
+
   stayingTimeChartOptions: ChartOptions = {
     showTimeRangeSelector: true,
-    defaultTimeRange: 'Daily',
+    defaultTimeRange: 'Weekly',
     responsive: true,
     tooltipEnabled: true,
     height: 300,

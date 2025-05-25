@@ -86,16 +86,36 @@ export class SessionManagementComponent implements OnInit {
     } else {
       this.modalService.openModal('editSession', session);
     }
+  }  private generateUniqueId(): string {
+    // First try crypto.randomUUID()
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+
+    // Fallback implementation
+    const array = new Uint8Array(16);
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      crypto.getRandomValues(array);
+    } else {
+      // Last resort fallback
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+    }
+
+    // Convert to UUID format
+    const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
+
   createSession(sessionData: CreateSessionRequest): void {
     this.isLoading = true;
     this.error = null;
 
     this.sessionService.generateQrCode(sessionData).subscribe({
       next: (qrBlob) => {
-        // Create a session object to store (normally would come from backend)
         const generatedSession: Session = {
-          id: crypto.randomUUID(), // Generate a unique ID locally
+          id: this.generateUniqueId(), // Use our cross-platform UUID generator
           name: sessionData.name,
           startTime: sessionData.startTime,
           endTime: sessionData.endTime,

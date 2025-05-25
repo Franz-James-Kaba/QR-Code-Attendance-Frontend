@@ -99,7 +99,7 @@ export class ChartComponent implements OnInit, OnChanges {
   @ViewChild('chartContentWrapper') chartContentWrapper!: ElementRef;
 
   // Public properties
-  public timeRanges: TimeRange[] = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
+  public timeRanges: TimeRange[] = ['Weekly', 'Monthly', 'Yearly'];
   public selectedTimeRange: TimeRange = 'Weekly';
   public chartData: ChartDataPoint[] = [];
   public yAxisLabels: string[] = [];
@@ -444,8 +444,6 @@ export class ChartComponent implements OnInit, OnChanges {
       const color = this.dataSet?.series?.[index]?.color ?? this.getDefaultColor(index);
 
       // Create percentage label at the midpoint of the arc
-      const midAngle = startAngle + angleSize / 2;
-      const labelPosition = this.getArcTextPosition(centerX, centerY, radius, midAngle);
       const percentageLabel = percentage >= 5 ? `${Math.round(percentage)}%` : '';
 
       this.pieChartArcs.push({
@@ -585,8 +583,6 @@ export class ChartComponent implements OnInit, OnChanges {
       return `${startDate.getDate()}${this.getOrdinalSuffix(startDate.getDate())} - ${endDate.getDate()}${this.getOrdinalSuffix(endDate.getDate())} ${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
     } else if (this.selectedTimeRange === 'Monthly') {
       return `${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
-    } else if (this.selectedTimeRange === 'Daily') {
-      return `${startDate.getDate()}${this.getOrdinalSuffix(startDate.getDate())} ${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
     } else {
       return `${startDate.getFullYear()}`;
     }

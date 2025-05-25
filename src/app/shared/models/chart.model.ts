@@ -1,8 +1,3 @@
-/**
- * Unified Chart Model
- * A flexible model that supports multiple chart types and configurations
- */
-
 export interface ChartDataPoint {
   label: string; // X-axis label (e.g., day, category)
   values: number[]; // Array of values for each series
@@ -10,7 +5,7 @@ export interface ChartDataPoint {
 }
 
 export type ChartType = 'bar' | 'line' | 'pie';
-export type TimeRange = 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+export type TimeRange = 'Weekly' | 'Monthly' | 'Yearly';
 
 export interface ChartSeries {
   name: string;

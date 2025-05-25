@@ -9,7 +9,7 @@
           <input
             type="text"
             placeholder="Search sessions..."
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nspBg focus:border-nspBg bg-nspBg/50 w-64"
             [(ngModel)]="searchQuery"
             (input)="onSearch()"
           />
@@ -19,18 +19,18 @@
             </svg>
           </div>
         </div>
-        <!-- Create button -->
-        <app-button
+        <!-- Create button -->        <app-button
           (click)="openCreateSessionModal()"
           variant="primary"
           size="md"
           [disabled]="isLoading"
+          [loading]="isLoading"
           onkeydown="
             if (event.key === 'Enter') {
               openCreateSessionModal();
             }"
         >
-          Create New Session
+          {{ isLoading ? 'Creating Session...' : 'Create New Session' }}
         </app-button>
       </div>
     </div>
