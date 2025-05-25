@@ -10,14 +10,11 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterOutlet, HeaderComponent, SidebarComponent, MobileWarningComponent],
   template: `
-    <!-- Mobile warning for screens below md breakpoint -->
     @if (isMobileView()) {
       <app-mobile-warning />
     }
 
-    <!-- Admin Layout Structure - only visible on larger screens -->
     <div class="flex h-screen overflow-hidden" [class.hidden]="isMobileView()">
-      <!-- Sidebar -->
       <app-sidebar
         [isOpen]="sidebarOpen()"
         [isMinimized]="sidebarMinimized()"
@@ -25,21 +22,18 @@ import { RouterOutlet } from '@angular/router';
         (closeSidebar)="closeSidebar()"
       />
 
-      <!-- Main Content -->
       <main
         class="flex-1 overflow-y-auto transition-all duration-300 bg-nspBg"
-        [class.ml-16]="sidebarMinimized() && sidebarOpen()"
-        [class.ml-64]="!sidebarMinimized() && sidebarOpen()"
+        [class.ml-[120px]]="sidebarMinimized() && sidebarOpen()"
+        [class.ml-[292px]]="!sidebarMinimized() && sidebarOpen()"
         [class.ml-0]="!sidebarOpen()"
       >
-        <!-- Header -->
         <app-header
           [sidebarOpen]="sidebarOpen()"
           [sidebarMinimized]="sidebarMinimized()"
           (toggleSidebar)="toggleSidebar()"
         />
 
-        <!-- Page Content -->
         <div class="p-4 md:p-6 max-w-7xl mx-auto">
           <router-outlet />
         </div>
@@ -56,10 +50,9 @@ import { RouterOutlet } from '@angular/router';
   ],
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
-  private readonly MOBILE_BREAKPOINT = 768; // md breakpoint in pixels
+  private readonly MOBILE_BREAKPOINT = 768;
   private readonly storageKey = 'admin-sidebar-state';
 
-  // Reactive state using signals
   sidebarOpen = signal(true);
   sidebarMinimized = signal(false);
   isMobileView = signal(false);

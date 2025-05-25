@@ -35,7 +35,8 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   modalData: any = null;
   modalTitle = '';
   isSubmitting = false;
-  submitAction: 'create' | 'update' | null = null; // Track the current action
+  submitAction: 'create' | 'update' | null = null;
+  private modalDataCache: any = null; // Add this line
 
   ngOnInit(): void {
     // Subscribe to modal visibility changes
@@ -52,6 +53,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     // Subscribe to modal data changes
     this.modalService.modalData$.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.modalData = data;
+      this.modalDataCache = data; // Cache the original data
     });
   }
 
@@ -105,7 +107,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     } else if (this.modalType === 'createSession' || this.modalType === 'editSession') {
       // For session forms, we need to forward the data to the correct component
       const modalConfig = this.modalService.getModal(this.modalType);
-      
+
       if (modalConfig && modalConfig.component) {
         try {
           // Call the appropriate method on the component
@@ -188,8 +190,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
 
   /**
    * Handle Facilitator form submission
-   */
-  private handleFacilitatorFormSubmit(facilitator: FacilitatorViewModel): void {
+   */  private handleFacilitatorFormSubmit(facilitator: FacilitatorViewModel): void {
     const apiModel = mapFacilitatorToApiModel(facilitator);
     this.isSubmitting = true;
 
@@ -198,6 +199,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.submitAction = 'update';
       const facilitatorId = parseInt(facilitator.id);
 
+      // First update the facilitator details
       this.facilitatorService
         .updateFacilitator(facilitatorId, apiModel)
         .pipe(
@@ -208,11 +210,14 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
         )
         .subscribe({
           next: response => {
-            this.modalService.closeModal();
-            // Redirect with success message
-            this.navigateWithSuccess(
-              `${facilitator.firstName} ${facilitator.lastName} updated successfully`
-            );
+            // Now handle reception privilege if necessary
+            this.handleReceptionPrivilege(facilitator).then(() => {
+              this.modalService.closeModal();
+              // Redirect with success message
+              this.navigateWithSuccess(
+                `${facilitator.firstName} ${facilitator.lastName} updated successfully`
+              );
+            });
           },
           error: error => {
             console.error('Error updating Facilitator:', error);
@@ -231,11 +236,34 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
           })
         )
         .subscribe({
-          next: () => {
-            this.modalService.closeModal();
-            this.navigateWithSuccess(
-              `${facilitator.firstName} ${facilitator.lastName} created successfully`
-            );
+          next: (response) => {
+            // For new facilitator, we need to get the email from the form
+            // since the API might return only a success message
+            const email = facilitator.email;
+
+            // Handle reception privilege if enabled
+            if (facilitator.hasReceptionPrivilege) {
+              this.facilitatorService.grantReceptionPrivilege(email).subscribe({
+                next: () => {
+                  this.modalService.closeModal();
+                  this.navigateWithSuccess(
+                    `${facilitator.firstName} ${facilitator.lastName} created successfully with reception privileges`
+                  );
+                },
+                error: (error) => {
+                  console.error('Error granting reception privilege:', error);
+                  this.modalService.closeModal();
+                  this.navigateWithSuccess(
+                    `${facilitator.firstName} ${facilitator.lastName} created successfully, but reception privileges could not be granted`
+                  );
+                }
+              });
+            } else {
+              this.modalService.closeModal();
+              this.navigateWithSuccess(
+                `${facilitator.firstName} ${facilitator.lastName} created successfully`
+              );
+            }
           },
           error: error => {
             console.error('Error creating Facilitator:', error);
@@ -243,6 +271,47 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
           },
         });
     }
+  }
+
+  /**
+   * Handle reception privilege changes for a facilitator
+   * @param facilitator The facilitator with updated privilege status
+   * @returns Promise that resolves when the privilege update is complete
+   */
+  private handleReceptionPrivilege(facilitator: FacilitatorViewModel): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const originalData = this.modalDataCache as FacilitatorViewModel | null;
+
+      // If no original data or no change in privileges, just resolve
+      if (!originalData || originalData.hasReceptionPrivilege === facilitator.hasReceptionPrivilege) {
+        resolve();
+        return;
+      }
+
+      // Determine if we need to grant or revoke privileges
+      if (facilitator.hasReceptionPrivilege && !originalData.hasReceptionPrivilege) {
+        // Grant privileges
+        this.facilitatorService.grantReceptionPrivilege(facilitator.email).subscribe({
+          next: () => resolve(),
+          error: (err) => {
+            console.error('Error granting reception privilege:', err);
+            resolve(); // Still resolve to continue the flow
+          }
+        });
+      } else if (!facilitator.hasReceptionPrivilege && originalData.hasReceptionPrivilege) {
+        // Revoke privileges
+        this.facilitatorService.revokeReceptionPrivilege(facilitator.email).subscribe({
+          next: () => resolve(),
+          error: (err) => {
+            console.error('Error revoking reception privilege:', err);
+            resolve(); // Still resolve to continue the flow
+          }
+        });
+      } else {
+        // No change needed
+        resolve();
+      }
+    });
   }
 
   /**

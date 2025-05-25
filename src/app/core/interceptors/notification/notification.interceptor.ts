@@ -52,8 +52,6 @@ export class NotificationInterceptor implements HttpInterceptor {
    * Determine if notification should be skipped for this request
    */
   private shouldSkipNotification(request: HttpRequest<unknown>): boolean {
-    // Skip notification for GET requests or specific endpoints
-    // Customize this logic based on your app's needs
     const skipEndpoints = [
       '/api/auth/refresh-token',
       '/admin/create-nsp',
@@ -63,10 +61,12 @@ export class NotificationInterceptor implements HttpInterceptor {
       '/admin/users/facilitators',
       '/admin/bulk-create-facilitators',
       '/admin/create-facilitator',
+      '/admin/edit-facilitator',
+      '/admin/delete-facilitator',
     ];
 
     return (
-      request.method === 'GET' || // Skip GET requests
+      request.method === 'GET' ||
       skipEndpoints.some(endpoint => request.url.includes(endpoint))
     );
   }

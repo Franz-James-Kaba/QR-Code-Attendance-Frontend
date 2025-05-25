@@ -8,7 +8,7 @@
   <!-- NSP Form -->
   <ng-container *ngIf="modalType === 'createNsp' || modalType === 'editNsp'">
     <app-nsp-form
-      [initialData]="modalData"
+      [initialData]="modalData?.type === 'nsp' ? modalData.data : null"
       [isSubmitting]="isSubmitting"
       (formSubmit)="onFormSubmit($event)"
       (formCancel)="onFormCancel()"
@@ -19,18 +19,18 @@
   <!-- Facilitator Form -->
   <ng-container *ngIf="modalType === 'createFacilitator' || modalType === 'editFacilitator'">
     <app-facilitator-form
-      [initialData]="modalData"
+      [initialData]="modalData?.type === 'facilitator' ? modalData.data : null"
       [isSubmitting]="isSubmitting"
       (formSubmit)="onFormSubmit($event)"
       (formCancel)="onFormCancel()"
     >
     </app-facilitator-form>
   </ng-container>
-  
+
   <!-- Session Form -->
   <ng-container *ngIf="modalType === 'createSession' || modalType === 'editSession'">
     <app-session-form
-      [initialData]="modalData"
+      [initialData]="modalData?.type === 'session' ? modalData.data : null"
       [isSubmitting]="isSubmitting"
       (formSubmit)="onFormSubmit($event)"
       (formCancel)="onFormCancel()"
