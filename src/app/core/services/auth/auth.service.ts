@@ -2,7 +2,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { ExtendedAuthResponse, UserRole, LoginCredentials } from '@shared/models/auth/auth.model';
+import { Store } from '@ngrx/store';
+import { UserRole, LoginCredentials, AuthResponse, User } from '@shared/models/auth/auth.model';
+import { AuthActions } from '@store/actions/auth.actions';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -11,10 +13,11 @@ import { catchError, map, tap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly currentUserSubject = new BehaviorSubject<ExtendedAuthResponse | null>(null);
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly cookieService = inject(CookieService);
+  private readonly store = inject(Store);
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public checkedIn$ = this.currentUser$.pipe(map(user => user?.checkedIn ?? false));
@@ -29,6 +32,7 @@ export class AuthService {
   constructor() {
     this.loadStoredUser();
   }
+
   private loadStoredUser(): void {
     const currentPath = window.location.pathname;
     if (currentPath.includes('/auth/')) {
@@ -41,7 +45,7 @@ export class AuthService {
 
     if (token && userStr) {
       try {
-        const userData: ExtendedAuthResponse = JSON.parse(userStr);
+        const userData: User = JSON.parse(userStr);
         this.currentUserSubject.next(userData);
 
         const shouldFetchProfile = !currentPath.includes('/auth/') && !this.hasRecentProfileData();
@@ -78,7 +82,6 @@ export class AuthService {
 
   private fetchUserProfile(): void {
     const currentPath = window.location.pathname;
-
     if (
       currentPath.includes('/auth/') ||
       currentPath.includes('/unauthorized') ||
@@ -88,110 +91,46 @@ export class AuthService {
     }
 
     const token = this.getToken();
-    if (!token) {
+    if (!token || !this.currentUserSubject.value) {
       return;
     }
 
-    if (!environment?.api?.baseUrl) {
-      console.error('Environment.api.baseUrl is undefined:', environment);
+    if (this.hasRecentProfileData()) {
       return;
     }
 
-    const currentUser = this.currentUserSubject.value;
-    if (!currentUser) {
-      return;
-    }
-
-    const lastFetchStr = localStorage.getItem('last_profile_fetch');
-    if (lastFetchStr) {
-      const lastFetch = parseInt(lastFetchStr, 10);
-      const now = Date.now();
-      if (now - lastFetch < 5 * 60 * 1000) {
-        return;
-      }
-    }
-
-    const headers = { Authorization: `Bearer ${token}` };
-    this.http
-      .get<{
-        firstName: string;
-        middleName: string | null;
-        lastName: string;
-        role: string;
-        checkedIn: boolean;
-      }>(`${environment.api.baseUrl}/metrics/user-info`, { headers })
-      .pipe(
-        tap(profile => {
-          if (currentUser) {
-            const validRole: UserRole = this.isValidUserRole(profile.role)
-              ? profile.role
-              : currentUser.role || 'NSP';
-            const updatedUser: ExtendedAuthResponse = {
-              ...currentUser,
-              firstName: profile.firstName,
-              lastName: profile.lastName,
-              role: validRole,
-              checkedIn: profile.checkedIn,
-              email: currentUser.email ?? null,
-            };
-            localStorage.setItem('current_user', JSON.stringify(updatedUser));
-            localStorage.setItem('last_profile_fetch', Date.now().toString());
-            this.currentUserSubject.next(updatedUser);
-          }
-        }),
-        catchError(error => {
-          console.error('Error fetching user profile:', error);
-          if (error.status === 401) {
-            this.logout();
-          }
-          return throwError(() => new Error('Failed to load user profile'));
-        })
-      )
-      .subscribe();
+    this.store.dispatch(AuthActions.fetchUserProfile());
   }
 
   private isValidUserRole(role: string): role is UserRole {
     return ['ADMIN', 'FACILITATOR', 'NSP', 'RECEPTIONIST'].includes(role);
   }
 
-  public login(credentials: LoginCredentials): Observable<ExtendedAuthResponse> {
+  public login(credentials: LoginCredentials): Observable<AuthResponse> {
     if (!environment?.auth?.baseUrl) {
       console.error('Environment.auth.baseUrl is undefined:', environment);
       return throwError(() => new Error('Environment configuration missing'));
     }
     return this.http
-      .post<ExtendedAuthResponse>(`${environment.auth.baseUrl}/login`, credentials)
+      .post<AuthResponse>(`${environment.auth.baseUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          const responseWithEmail: ExtendedAuthResponse = {
-            ...response,
-            email: credentials.email ?? null,
+          const user: User = {
+            id: null,
+            firstName: '',
+            lastName: '',
+            email: credentials.email ?? '',
+            role: response.role,
+            passwordResetRequired: response.passwordResetRequired,
           };
           if (!environment?.auth?.tokenKey) {
             console.error('Environment.auth.tokenKey is undefined:', environment);
-            localStorage.setItem('auth_token', responseWithEmail.token);
+            localStorage.setItem('auth_token', response.token);
           } else {
-            localStorage.setItem(environment.auth.tokenKey, responseWithEmail.token);
+            localStorage.setItem(environment.auth.tokenKey, response.token);
           }
-          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
-          this.currentUserSubject.next(responseWithEmail);
-          this.fetchUserProfile();
-        }),
-        catchError(this.handleError)
-      );
-    return this.http
-      .post<ExtendedAuthResponse>(`${environment.auth.baseUrl}/login`, credentials)
-      .pipe(
-        tap(response => {
-          const responseWithEmail: ExtendedAuthResponse = {
-            ...response,
-            email: credentials.email ?? null,
-          };
-
-          this.setToken(responseWithEmail.token);
-
-          localStorage.setItem('current_user', JSON.stringify(responseWithEmail));
-          this.currentUserSubject.next(responseWithEmail);
+          localStorage.setItem('current_user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
           this.fetchUserProfile();
         }),
         catchError(this.handleError)
@@ -280,7 +219,7 @@ export class AuthService {
 
   public hasPasswordResetRequired(): boolean {
     const user = this.currentUserSubject.value;
-    return user ? user.passwordResetRequired : false;
+    return user?.passwordResetRequired ?? false;
   }
 
   public getCurrentUserRole(): UserRole | null {
@@ -291,6 +230,10 @@ export class AuthService {
   public getCurrentUserEmail(): string | null {
     const user = this.currentUserSubject.value;
     return user ? user.email : null;
+  }
+
+  public getCurrentUser(): User | null {
+    return this.currentUserSubject.value;
   }
 
   private handleError(error: HttpErrorResponse) {
