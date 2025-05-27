@@ -9,29 +9,22 @@ export type AuthStep = (typeof AuthStep)[keyof typeof AuthStep];
 export type UserRole = 'ADMIN' | 'FACILITATOR' | 'NSP' | 'RECEPTIONIST' | string;
 
 export interface User {
-  id: string | null;
+  id?: string | null;
   firstName: string;
   middleName?: string | null;
   lastName: string;
   email: string;
   role: UserRole;
   createdAt?: string;
+  checkedIn?: boolean;
+  passwordResetRequired?: boolean;
 }
 
 export interface AuthResponse {
   token: string;
-  email: string | null;
   role: UserRole;
+  email?: string | null;
   passwordResetRequired: boolean;
-  firstName?: string;
-  lastName?: string;
-  checkedIn?: boolean;
-}
-
-export interface ExtendedAuthResponse extends AuthResponse {
-  firstName?: string;
-  lastName?: string;
-  checkedIn?: boolean;
 }
 
 export interface LoginCredentials {
@@ -52,14 +45,7 @@ export interface CreateUserRequest {
 }
 
 export interface AuthState {
-  token: string | null;
-  user: {
-    id: string | null;
-    email: string;
-    role: UserRole | null;
-    firstName: string;
-    lastName: string;
-  } | null;
+  user: User | null;
   email: string | null;
   isLoading: boolean;
   error: string | null;
@@ -70,7 +56,6 @@ export interface AuthState {
 }
 
 export const initialAuthState: AuthState = {
-  token: null,
   user: null,
   email: null,
   isLoading: false,

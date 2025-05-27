@@ -12,9 +12,9 @@ import { Store } from '@ngrx/store';
 import { checkIn, checkOut, loadAttendanceSummary } from '@store/actions/attendance.actions';
 import {
   selectAttendanceSummary,
-  selectIsCheckedIn,
   selectError,
 } from '@store/selectors/attendance.selectors';
+import { selectUserCheckedIn } from '@store/selectors/auth.selectors';
 import { BarcodeFormat } from '@zxing/library';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 
@@ -129,7 +129,7 @@ export class DashboardComponent {
       });
 
     this.store
-      .select(selectIsCheckedIn)
+      .select(selectUserCheckedIn)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(checkedIn => {
         this.isCheckedIn.set(checkedIn);
@@ -141,7 +141,11 @@ export class DashboardComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(error => {
         if (error) {
-          this.errorMessage.set(error);
+          this.errorMessage.set(
+            error.includes('check-in') || error.includes('check-out')
+              ? `Failed to ${error.includes('check-in') ? 'check in' : 'check out'}. Please try again.`
+              : error
+          );
           this.isProcessing.set(false);
         } else {
           this.errorMessage.set(null);
