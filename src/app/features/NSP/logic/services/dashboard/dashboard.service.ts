@@ -38,15 +38,15 @@ export class DashboardService {
     return this.getAverageTimeData('average-check-out-time', endDate);
   }
 
-  private getTotalWorkingDays(): Observable<AttendanceWorkingDaysResponse> {
+  private getTotalWorkingDays(date: string): Observable<AttendanceWorkingDaysResponse> {
     return this.http.get<AttendanceWorkingDaysResponse>(
-      `${environment.api.baseUrl}/attendance/working-days`
+      `${environment.api.baseUrl}/attendance/working-days?date=${date}`
     );
   }
 
-  private getAttendancePosition(): Observable<SummaryCard> {
+  private getAttendancePosition(date: string): Observable<SummaryCard> {
     return this.http
-      .get<AttendancePositionResponse>(`${environment.api.baseUrl}/attendance/position`)
+      .get<AttendancePositionResponse>(`${environment.api.baseUrl}/attendance/position?date=${date}`)
       .pipe(
         map(response => ({
           icon: AWARD_ICON,
@@ -88,8 +88,8 @@ export class DashboardService {
           description: 'Average Check Out Time',
         }))
       ),
-      this.getAttendancePosition(),
-      this.getTotalWorkingDays().pipe(
+      this.getAttendancePosition(endDate || new Date().toISOString().split('T')[0]),
+      this.getTotalWorkingDays(endDate || new Date().toISOString().split('T')[0]).pipe(
         map(response => ({
           icon: CALENDER_ICON,
           title: 'Total Days',
@@ -100,17 +100,31 @@ export class DashboardService {
     ]);
   }
 
-  public checkIn(sessionCode: string): Observable<CheckInResponse> {
-    return this.http.post<CheckInResponse>(
-      `${environment.api.baseUrl}/attendance/check-in?session-code=${encodeURIComponent(sessionCode)}`,
-      {}
-    );
+  public checkIn(sessionCode: string): Observable<CheckInResponse & { checkedIn: boolean }> {
+    return this.http
+      .post<CheckInResponse>(
+        `${environment.api.baseUrl}/attendance/check-in?session-code=${encodeURIComponent(sessionCode)}`,
+        {}
+      )
+      .pipe(
+        map(response => ({
+          ...response,
+          checkedIn: true,
+        }))
+      );
   }
 
-  public checkOut(sessionCode: string): Observable<CheckInResponse> {
-    return this.http.put<CheckInResponse>(
-      `${environment.api.baseUrl}/attendance/check-out?session-code=${encodeURIComponent(sessionCode)}`,
-      {}
-    );
+  public checkOut(sessionCode: string): Observable<CheckInResponse & { checkedIn: boolean }> {
+    return this.http
+      .put<CheckInResponse>(
+        `${environment.api.baseUrl}/attendance/check-out?session-code=${encodeURIComponent(sessionCode)}`,
+        {}
+      )
+      .pipe(
+        map(response => ({
+          ...response,
+          checkedIn: false,
+        }))
+      );
   }
 }
