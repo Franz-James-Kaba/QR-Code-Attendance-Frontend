@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { environment } from '@environments/environment';
 import { ChartDataPoint, ChartDataSet, ChartType, TimeRange } from '@shared/models/chart.model';
 import { Observable, of } from 'rxjs';
 import { catchError, delay, map } from 'rxjs/operators';
 
-import { environment } from '@environments/environment';
 
 /**
  * Service to handle chart data operations
@@ -137,12 +137,12 @@ export class ChartService {
       return {
         data: transformedData,
         series: [
-          { name: legacyData.label1 || 'Series 1', color: legacyData.color1 || '#065186' },
-          { name: legacyData.label2 || 'Series 2', color: legacyData.color2 || '#1f2937' },
+          { name: legacyData.label1 ?? 'Series 1', color: legacyData.color1 ?? '#065186' },
+          { name: legacyData.label2 ?? 'Series 2', color: legacyData.color2 ?? '#1f2937' },
         ],
-        startDate: legacyData.startDate || new Date(),
-        endDate: legacyData.endDate || new Date(),
-        yAxisLabels: legacyData.timeLabels || [],
+        startDate: legacyData.startDate ?? new Date(),
+        endDate: legacyData.endDate ?? new Date(),
+        yAxisLabels: legacyData.timeLabels ?? [],
         showLegend: true,
         animated: true,
         type: chartType,
@@ -283,7 +283,7 @@ export class ChartService {
     let startDate: Date;
     let endDate: Date;
     // Update y-axis labels to represent times from 7 AM to 6 PM
-    const yAxisLabels: string[] = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
+    const yAxisLabels: string[] = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
                                  '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
 
     if (timeRange === 'Weekly') {

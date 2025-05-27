@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 
-// Personnel interface
+import { LeaderboardService } from '../../services/leaderboard.service';
+
 export interface Personnel {
   name: string;
   stack: string;
   points: number;
-  position?: number; // Added position field
+  position?: number;
 }
 
 @Component({
@@ -17,17 +19,12 @@ export interface Personnel {
   templateUrl: './personnel-table.component.html',
   styleUrls: ['./personnel-table.component.scss', '../../../../../shared/styles/table.css'],
 })
-export class PersonnelTableComponent implements OnInit {
+export class PersonnelTableComponent implements OnInit, OnDestroy {
+  private readonly leaderboardService = inject(LeaderboardService);
+  private readonly destroy$ = new Subject<void>();
+
   // Full list of personnel
-  allPersonnel: Personnel[] = [
-    { name: 'Abdul Rashid', stack: 'Front-End(Angular)', points: 850 },
-    { name: 'Isaac Hayfron', stack: 'UI/UX Trainer', points: 920 },
-    { name: 'Wade Warren', stack: 'UI/UX Designer', points: 760 },
-    { name: 'Robert Fox', stack: 'Back-End(Java)', points: 890 },
-    { name: 'Jacob Jones', stack: 'QA', points: 800 },
-    { name: 'Cody Fisher', stack: 'QA', points: 750 },
-    { name: 'Ralph Edwards', stack: 'Front-End(React)', points: 830 },
-  ];
+  allPersonnel: Personnel[] = [];
 
   // Filtered personnel list (what's shown in the table)
   filteredPersonnel: Personnel[] = [];
@@ -49,71 +46,84 @@ export class PersonnelTableComponent implements OnInit {
 
   // Loading state
   isLoading: boolean = false;
-
-  constructor() {}
+  error: string | null = null;
 
   ngOnInit(): void {
-    // Initialize with all personnel sorted by points
-    this.filteredPersonnel = [...this.allPersonnel]
-      .sort((a, b) => b.points - a.points)
-      .map((person, index) => ({
-        ...person,
-        position: index + 1,
-      }));
-
-    // Simulate loading
-    this.isLoading = true;
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1000);
+    this.loadLeaderboard();
   }
 
-  // Filter personnel based on search query and dropdown selections
-  filterPersonnel(): void {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  private loadLeaderboard(): void {
     this.isLoading = true;
+    this.error = null;
 
-    // Start with all personnel
-    let filtered = [...this.allPersonnel];
+    this.leaderboardService.getLeaderboard()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (entries) => {
+          // Handle empty state (204 No Content)
+          if (!entries || entries.length === 0) {
+            this.allPersonnel = [];
+            this.filteredPersonnel = [];
+            this.isLoading = false;
+            return;
+          }
+
+          this.allPersonnel = entries.map(entry => ({
+            name: `${entry.firstName} ${entry.lastName}`,
+            stack: 'Not Available', // Stack info not provided by API
+            points: entry.totalPoints,
+            position: entry.position
+          }));
+          this.filterPersonnel();
+        },
+        error: (err) => {
+          if (err.message === 'You do not have permission to view the leaderboard.') {
+            this.error = 'You do not have permission to view the leaderboard.';
+          } else if (err.message === 'Server error. Please try again later.') {
+            this.error = 'Server error. Please try again later.';
+          } else {
+            this.error = 'Failed to load leaderboard data. Please try again later.';
+          }
+          this.isLoading = false;
+          console.error('Error loading leaderboard:', err);
+        }
+      });
+  }
+  filterPersonnel(): void {
+    // Start with all personnel, sorted by points (highest first) and position
+    let filtered = [...this.allPersonnel]
+      .sort((a, b) => {
+        if (a.points === b.points) {
+          // If points are equal, sort by position (if available)
+          if (a.position && b.position) {
+            return a.position - b.position;
+          }
+          return 0;
+        }
+        return b.points - a.points;
+      });
 
     // Apply search filter (case insensitive)
     if (this.searchQuery.trim() !== '') {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(
-        person =>
-          person.name.toLowerCase().includes(query) ||
-          person.stack.toLowerCase().includes(query)
+        person => person.name.toLowerCase().includes(query)
       );
     }
 
-    // Apply stack filter
-    if (this.selectedStack !== 'All Stacks') {
-      filtered = filtered.filter(person => person.stack === this.selectedStack);
-    }
-
-    // Sort by points and assign positions
-    filtered = filtered
-      .sort((a, b) => b.points - a.points)
-      .map((person, index) => ({
-        ...person,
-        position: index + 1,
-      }));
-
     // Update the filtered list
-    setTimeout(() => {
-      this.filteredPersonnel = filtered;
-      this.isLoading = false;
-    }, 300); // Small delay to show loading indicator
+    this.filteredPersonnel = filtered;
+    this.isLoading = false;
   }
-
-  // Handle search input
   onSearch(): void {
     this.filterPersonnel();
   }
 
-  // Handle stack filter change
-  onStackFilterChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedStack = select.value;
-    this.filterPersonnel();
+  onRetry(): void {
+    this.loadLeaderboard();
   }
 }

@@ -55,95 +55,57 @@
 
     <!-- Sessions table (only show when there are sessions) -->
     <div *ngIf="!isLoading && sessions && sessions.length > 0" class="bg-white shadow">
-      <table class="standard-table">
-        <thead>
-          <tr>
-            <th>Session Name</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngIf="sessions.length === 0">
-            <td colspan="5" class="py-6 text-center text-gray-500">
-              No sessions created yet. Create your first session using the button above.
-            </td>
-          </tr>
-          <tr *ngFor="let session of sessions" class="hover:bg-gray-50">
-            <td>{{ session.sessionData.name }}</td>
-            <td>{{ formatSessionTime(session.sessionData.startTime) }}</td>
-            <td>{{ formatSessionTime(session.sessionData.endTime) }}</td>
-            <td>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                [ngClass]="getStatusClass(session.sessionData.status)">
-                {{ session.sessionData.status }}
-              </span>
-            </td>
-            <td>
-              <div class="flex">                <button
-                  type="button"
-                  (click)="viewQrCode(session.sessionData, session.qrCodeUrl)"
-                  class="action-button edit mr-2">
-                  View QR
-                </button>
-                <button
-                  type="button"
-                  (click)="openEditSessionModal(session.sessionData)"
-                  class="action-button edit mr-2">
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  (click)="deleteSession(session.sessionData.id)"
-                  class="action-button delete">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- QR Code Modal -->
-<div *ngIf="showQrModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
-  <div class="bg-white shadow-lg p-6 max-w-md w-full mx-4">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-medium">QR Code for {{ currentSession?.name }}</h3>      <button type="button" (click)="closeQrModal()" class="text-gray-400 hover:text-gray-500">
-        <!-- X icon -->
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-
-    <div class="flex flex-col items-center">
-      <img *ngIf="qrCodeUrl" [src]="qrCodeUrl" alt="QR Code" class="w-64 h-64 object-contain mb-4">
-
-      <div class="w-full">        <button
-          type="button"
-          (click)="downloadQrCode()"
-          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mb-2"
-        >
-          Download QR Code
-        </button>
-          <button
-          type="button"
-          (click)="closeQrModal()"
-          class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-        >
-          Close
-        </button>
+              <table class="standard-table">
+          <thead>
+            <tr>
+              <th>Session Code</th>
+              <th>Session Name</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredSessions.length === 0">
+              <td colspan="6" class="py-6 text-center text-gray-500">
+                No sessions found. Create your first session using the button above.
+              </td>
+            </tr>
+            <tr *ngFor="let session of filteredSessions" class="hover:bg-gray-50">
+              <td>{{ session.sessionCode }}</td>
+              <td>{{ session.name }}</td>
+              <td>{{ formatSessionTime(session.startTime) }}</td>
+              <td>{{ formatSessionTime(session.endTime) }}</td>
+              <td>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="getStatusClass(session.active)">
+                  {{ session.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>              <td>
+                <div class="flex">
+                  <button
+                    type="button"
+                    (click)="openEditSessionModal(session)"
+                    class="action-button edit mr-2">
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    (click)="deleteSession(session.id)"
+                    class="action-button delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-</div>
 
 <!-- Modal Container for create/edit forms -->
 <app-modal-container></app-modal-container>

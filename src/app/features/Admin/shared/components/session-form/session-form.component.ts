@@ -1,4 +1,4 @@
-import { CreateSessionRequest, Session } from '@Admin/shared/models/session/session.model';
+import { Session, SessionRequest } from '@Admin/shared/models/session/session.model';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,8 +13,7 @@ import { ButtonComponent } from '@shared/components/button/button.component';
 export class SessionFormComponent implements OnInit {
   @Input() initialData: Session | null = null;
   @Input() isSubmitting = false;
-
-  @Output() formSubmit = new EventEmitter<CreateSessionRequest>();
+  @Output() formSubmit = new EventEmitter<SessionRequest>();
   @Output() formCancel = new EventEmitter<void>();
 
   form!: FormGroup;
@@ -36,15 +35,13 @@ export class SessionFormComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       startTime: ['', [Validators.required]],
-      endTime: ['', [Validators.required]],
-      location: [''],
-      description: [''],
+      endTime: ['', [Validators.required]]
     });
   }
 
   private patchForm(): void {
     if (!this.initialData) return;
-    
+
     const startDateTime = this.formatDateTimeForInput(new Date(this.initialData.startTime));
     const endDateTime = this.formatDateTimeForInput(new Date(this.initialData.endTime));
 
@@ -52,16 +49,13 @@ export class SessionFormComponent implements OnInit {
       name: this.initialData.name,
       startTime: startDateTime,
       endTime: endDateTime,
-      location: this.initialData.location ?? '',
-      description: this.initialData.description ?? '',
     });
   }
 
   formatDateTimeForInput(date: Date): string {
     return date.toISOString().slice(0, 16);
   }
-  
-  onSubmit(): void {
+    onSubmit(): void {
     if (this.form.invalid) {
       Object.keys(this.form.controls).forEach(key => {
         const control = this.form.get(key);
@@ -71,12 +65,10 @@ export class SessionFormComponent implements OnInit {
     }
 
     const formValue = this.form.value;
-    const sessionData: CreateSessionRequest = {
+    const sessionData: SessionRequest = {
       name: formValue.name,
       startTime: new Date(formValue.startTime).toISOString(),
       endTime: new Date(formValue.endTime).toISOString(),
-      location: formValue.location,
-      description: formValue.description,
     };
 
     this.formSubmit.emit(sessionData);
@@ -94,7 +86,7 @@ export class SessionFormComponent implements OnInit {
   isEndDateValid(): boolean {
     const startDate = this.form.get('startTime')?.value;
     const endDate = this.form.get('endTime')?.value;
-    
+
     return !startDate || !endDate || new Date(endDate) > new Date(startDate);
   }
 

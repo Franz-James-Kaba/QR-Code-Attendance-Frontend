@@ -10,44 +10,52 @@ export type ModalType =
   | 'editSession'
   | null;
 
+export type ModalComponent = {
+  createSession?: (data: unknown) => void;
+  updateSession?: (data: unknown) => void;
+  // Add other component methods as needed
+};
+
+export interface ModalData<T = unknown> {
+  type: string;
+  data: T;
+}
+
+export interface ModalConfig {
+  component: ModalComponent;
+  type?: string;
+  onOpen: (data?: unknown) => void | ModalData<unknown> | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ModalService {
   private readonly modalVisibleSubject = new BehaviorSubject<boolean>(false);
   private readonly modalTypeSubject = new BehaviorSubject<ModalType>(null);
-  private readonly modalDataSubject = new BehaviorSubject<any>(null);
+  private readonly modalDataSubject = new BehaviorSubject<unknown>(null);
+  private readonly modalRegistry = new Map<string, ModalConfig>();
 
   // Added for supporting modal communication
-  public readonly modalClosed = new Subject<{ id: string; data: any }>();
+  public readonly modalClosed = new Subject<{ id: string; data: unknown }>();
 
   // Observable streams
   public modalVisible$: Observable<boolean> = this.modalVisibleSubject.asObservable();
   public modalType$: Observable<ModalType> = this.modalTypeSubject.asObservable();
-  public modalData$: Observable<any> = this.modalDataSubject.asObservable();
+  public modalData$: Observable<unknown> = this.modalDataSubject.asObservable();
 
-  // Modal registry for dynamic components
-  private modalRegistry = new Map<
-    string,
-    {
-      component: any;
-      onOpen: (data?: any) => void;
-    }
-  >();
-
-  constructor() {}
 
   /**
    * Register a modal component
    */
-  registerModal(id: string, config: { component: any; onOpen: (data?: any) => void }): void {
+  registerModal(id: string, config: ModalConfig): void {
     this.modalRegistry.set(id, config);
   }
 
   /**
    * Opens a modal with specified type and optional data
    */
-  openModal(type: ModalType, data?: any): void {
+  openModal(type: ModalType, data?: unknown): void {
     this.modalTypeSubject.next(type);
     this.modalDataSubject.next(data);
     this.modalVisibleSubject.next(true);
@@ -99,14 +107,14 @@ export class ModalService {
   /**
    * Gets the current modal data
    */
-  getModalData(): any {
-    return this.modalDataSubject.value;
+  getModalData<T = unknown>(): T | null {
+    return this.modalDataSubject.value as T | null;
   }
 
   /**
    * Gets a registered modal configuration
    */
-  getModal(type: ModalType): { component: any; onOpen: (data?: any) => void } | undefined {
+  getModal(type: ModalType): ModalConfig | undefined {
     if (!type) return undefined;
     return this.modalRegistry.get(type.toString());
   }
