@@ -21,7 +21,7 @@ export class FacilitatorFormComponent implements OnInit {
   form!: FormGroup;
 
   get isEdit(): boolean {
-    return !!this.initialData?.id;
+    return !!this.initialData;
   }
 
   private readonly fb = inject(FormBuilder);
@@ -38,13 +38,28 @@ export class FacilitatorFormComponent implements OnInit {
       id: [this.initialData?.id ?? ''],
       firstName: [
         this.initialData?.firstName ?? '',
-        [Validators.required, Validators.minLength(3)],
+        [Validators.required, Validators.minLength(3)]
       ],
       middleName: [this.initialData?.middleName ?? ''],
-      lastName: [this.initialData?.lastName ?? '', [Validators.required, Validators.minLength(3)]],
-      email: [this.initialData?.email ?? '', [Validators.required, Validators.email]],
-      program: [this.initialData?.program ?? '', [Validators.required]],
+      lastName: [
+        this.initialData?.lastName ?? '',
+        [Validators.required, Validators.minLength(3)]
+      ],
+      email: [
+        this.initialData?.email ?? '',
+        [Validators.required, Validators.email]
+      ],
+      program: [
+        this.initialData?.program ?? '',
+        [Validators.required]
+      ],
+      hasReceptionPrivilege: [this.initialData?.hasReceptionPrivilege ?? false]
     });
+
+    // Force form update if initialData is provided
+    if (this.initialData) {
+      this.form.patchValue(this.initialData, { emitEvent: false });
+    }
   }
 
   /**
@@ -56,14 +71,26 @@ export class FacilitatorFormComponent implements OnInit {
       return;
     }
 
-    const formData = this.form.value as FacilitatorViewModel;
-    this.formSubmit.emit(formData);
+    const formData = this.form.value;
+    // Ensure all fields are properly typed before emitting
+    const facilitatorData: FacilitatorViewModel = {
+      id: formData.id,
+      firstName: formData.firstName.trim(),
+      middleName: formData.middleName?.trim() || undefined,
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      program: formData.program,
+      hasReceptionPrivilege: formData.hasReceptionPrivilege
+    };
+
+    this.formSubmit.emit(facilitatorData);
   }
 
   /**
    * Cancel form submission
    */
   onCancel(): void {
+    this.form.reset();
     this.formCancel.emit();
   }
 
@@ -73,6 +100,7 @@ export class FacilitatorFormComponent implements OnInit {
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();
+      control.markAsDirty();
       if ((control as FormGroup).controls) {
         this.markFormGroupTouched(control as FormGroup);
       }
@@ -84,6 +112,6 @@ export class FacilitatorFormComponent implements OnInit {
    */
   hasError(controlName: string, errorName: string): boolean {
     const control = this.form.get(controlName);
-    return control !== null && control.touched && control.hasError(errorName);
+    return control !== null && (control.touched || control.dirty) && control.hasError(errorName);
   }
 }

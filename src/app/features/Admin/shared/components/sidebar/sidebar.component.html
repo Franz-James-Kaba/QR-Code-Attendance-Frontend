@@ -1,26 +1,32 @@
 <aside
-  class="fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-base-dark border-r border-gray-200"
+  class="fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-base-dark border-r border-gray-200 py-2 px-6"
   [class.translate-x-0]="isOpen"
   [class.-translate-x-full]="!isOpen"
-  [class.w-16]="isMinimized"
-  [class.w-64]="!isMinimized"
+  [class.w-[120px]]="isMinimized"
+  [class.w-[292px]]="!isMinimized"
   [class.md:translate-x-0]="true"
   clickOutside
   (clickOutside)="onClickOutside()"
 >
   <!-- Logo Section -->
-  <div class="flex items-center h-16 px-4">
+  <div class="flex items-center h-16 px-3 mt-4 mb-[50px]">
     <div class="flex items-center overflow-hidden">
       @if (!isMinimized) {
-        <span class="ml-2 text-xl font-semibold text-white truncate"> Attendance System </span>
+        <div class="w-full">
+          <span class=" text-white font-lato text-3xl font-extrabold leading-[150%] align-middle whitespace-normal break-words">
+            Attendance System
+          </span>
+        </div>
       } @else {
-        <span class="text-xl font-semibold text-white text-center w-full"> AS </span>
+        <span class="text-white text-center w-full font-lato text-3xl font-extrabold leading-[150%] align-middle">
+          AS
+        </span>
       }
     </div>
 
     <!-- Mobile close button - only visible on mobile -->
     <button
-      class="ml-auto p-2 rounded-lg hover:bg-[#656565] md:hidden"
+      class="m-auto rounded-lg hover:bg-[#656565] md:hidden"
       (click)="onToggle()"
       aria-label="Close sidebar"
     >
@@ -29,26 +35,29 @@
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="px-3 space-y-3 mt-8">
+  <nav class="space-y-[12.5px] mt-6">
     @for (item of navItems; track item.route) {
       <a
         [routerLink]="item.route"
         [class.bg-primary]="isRouteActive(item.route)"
         class="flex items-center p-2 text-white rounded-lg border border-primary hover:bg-primary group transition-colors duration-200"
+        [class.justify-center]="isMinimized"
         (click)="updateBreadcrumbs(item.breadcrumbs)"
       >
-        <app-icon [path]="item.icon" class="text-white w-5 h-5 shrink-0" />
+        <app-icon [path]="item.icon" class="text-white w-5 h-5 flex-shrink-0" />
         @if (!isMinimized) {
-          <span class="ml-3 whitespace-nowrap">{{ item.label }}</span>
+          <span class="ml-3 whitespace-nowrap font-lato text-[15px] font-medium leading-[150%]">
+            {{ item.label }}
+          </span>
         }
       </a>
     }
   </nav>
 
   <!-- Minimize Toggle Button - only visible on desktop -->
-  <div class="absolute bottom-4 w-full hidden md:block">
+  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 hidden md:block">
     <button
-      class="flex items-center justify-center mx-auto p-2 rounded-lg text-white hover:bg-[#656565] transition-colors duration-200"
+      class="flex items-center justify-center p-2 rounded-lg text-white hover:bg-[#656565] transition-colors duration-200"
       (click)="onToggle()"
       aria-label="Toggle sidebar width"
     >

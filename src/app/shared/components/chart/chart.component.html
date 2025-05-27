@@ -1,4 +1,3 @@
-<!-- Chart component template that supports bar and line chart variations -->
 <div class="chart-component" [ngClass]="getChartTypeClass()">
   <!-- Header: Time range selector and date display -->
   <div class="chart-header flex flex-row justify-between items-center mb-6">
@@ -245,7 +244,7 @@
         <!-- SVG container for pie chart -->
         <svg class="pie-chart-svg" width="100%" height="100%" viewBox="0 0 100 100">
           <!-- Background circle -->
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f1f1" stroke-width="10" />
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f1f1" stroke-width="16" />
 
           <!-- Dynamic pie segments -->
           <ng-container *ngIf="chartData.length > 0">
@@ -254,7 +253,7 @@
                 [attr.d]="arc.path"
                 [attr.fill]="arc.fill"
                 [attr.stroke]="arc.stroke"
-                stroke-width="10"
+                stroke-width="16"
                 fill="none"
                 @pieAnimation
                 (mouseenter)="showPieTooltip($event, arc.label, arc.percentage)"

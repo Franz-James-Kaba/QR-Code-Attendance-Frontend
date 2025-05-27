@@ -1,13 +1,11 @@
 <!-- Facilitator Table with list of facilitators -->
 <div class="bg-white shadow">
-  <table class="standard-table">
-    <!-- Table header row -->
+  <table class="standard-table">    <!-- Table header row -->
     <thead>
       <tr>
         <th scope="col">Facilitator Name</th>
         <th scope="col">Email</th>
         <th scope="col">Role</th>
-        <th scope="col">Reception Access</th>
         <th scope="col" class="text-right">Actions</th>
       </tr>
     </thead>
@@ -48,25 +46,6 @@
           >
             Password Reset Required
           </span>
-        </td>
-        <td>
-          <!-- Toggle switch for reception privilege -->
-          <div class="flex items-center">
-            <button
-              [ngClass]="facilitator.hasReceptionPrivilege ? 'bg-blue-600' : 'bg-gray-200'"
-              class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              (click)="onToggleReceptionPrivilege(facilitator, !facilitator.hasReceptionPrivilege)"
-            >
-              <span
-                [ngClass]="facilitator.hasReceptionPrivilege ? 'translate-x-6' : 'translate-x-1'"
-                class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"
-              >
-              </span>
-            </button>
-            <span class="ml-3 text-sm text-gray-500">
-              {{ facilitator.hasReceptionPrivilege ? 'Enabled' : 'Disabled' }}
-            </span>
-          </div>
         </td>
         <td class="text-right">
           <div class="flex justify-end space-x-2">

@@ -1,49 +1,48 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { environment } from '@environments/environment';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, map, throwError, timeout } from 'rxjs';
 
-import {
-  Attendee,
-  EarlyAttendeePagedResponse,
-  mapToAttendeeViewModel,
-} from '../models/attendee.interface';
+import { Attendee, EarlyAttendeeResponse, mapToAttendeeViewModel } from '../models/attendee.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AttendanceService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = environment.apiUrl;
+  private readonly apiUrl = 'http://54.172.108.21';
+  private readonly timeoutDuration = 10000; // 10 seconds timeout
 
   /**
-   * Get early attendees from the API
-   * @param startDate The start date for the search range (format: YYYY-MM-DD)
-   * @param endDate The end date for the search range (format: YYYY-MM-DD)
-   * @param page Page number (0-based index)
-   * @param size Number of attendees per page
+   * Get early attendees from the API for a specific date
+   * @param date The date to get early attendees for (format: YYYY-MM-DD)
+   * @returns Observable of early attendees
    */
-  getEarlyAttendees(
-    startDate: string,
-    endDate: string,
-    page: number = 0,
-    size: number = 5
-  ): Observable<{ data: Attendee[]; total: number }> {
-    const params = new HttpParams()
-      .set('startDate', startDate)
-      .set('endDate', endDate)
-      .set('page', page.toString())
-      .set('size', size.toString());
+  getEarlyAttendees(date: string): Observable<Attendee[]> {
+    const params = new HttpParams().set('date', date);
 
     return this.http
-      .get<EarlyAttendeePagedResponse>(`${this.apiUrl}/admin/early-attendees`, { params })
+      .get<EarlyAttendeeResponse[]>(`${this.apiUrl}/api/admin/early-attendees`, {
+        params,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       .pipe(
-        map(response => ({
-          data: response.content.map(attendee => mapToAttendeeViewModel(attendee)),
-          total: response.totalElements,
-        })),
+        timeout(this.timeoutDuration),
+        map(attendees => attendees.map(mapToAttendeeViewModel)),
         catchError(this.handleError)
       );
+  }
+
+  /**
+   * Grant reception privilege to a facilitator
+   * @param email The email of the facilitator
+   */
+  grantReceptionPrivilege(email: string): Observable<{ message: string; success: boolean }> {
+    return this.http
+      .post<{ message: string; success: boolean }>(`${this.apiUrl}/api/admin/grant-reception-privilege/${email}`, {})
+      .pipe(catchError(this.handleError));
   }
 
   /**
@@ -54,7 +53,9 @@ export class AttendanceService {
   ): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
 
-    if ('error' in error && error.error instanceof ErrorEvent) {
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      errorMessage = 'Request timed out. Please try again.';
+    } else if ('error' in error && error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else if ('status' in error) {
@@ -77,6 +78,9 @@ export class AttendanceService {
           break;
         case 500:
           errorMessage = 'Server Error: Please try again later';
+          break;
+        case 0:
+          errorMessage = 'Network Error: Unable to connect to the server';
           break;
         default:
           errorMessage = `Error ${status}: ${message}`;

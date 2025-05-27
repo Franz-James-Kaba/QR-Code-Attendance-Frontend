@@ -24,116 +24,107 @@
 <!-- Col 2: Stats Cards -->
 <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
   <!-- NSP Stats Card -->
-  <app-stat-card
-    [value]="isLoadingCounts ? '...' : nspCount.toString()"
-    title="Total number of NSPs"
-    iconPath="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-    detailsLink="#"
-  >
-  </app-stat-card>
+  <div class="h-full">
+    <app-stat-card
+      [value]="isLoadingCounts ? '...' : nspCount.toString()"
+      title="Total number of NSPs"
+      iconPath="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+      detailsLink="/admin/nsps"
+    >
+    </app-stat-card>
+  </div>
 
   <!-- Facilitator Stats Card -->
-  <app-stat-card
-    [value]="isLoadingCounts ? '...' : facilitatorCount.toString()"
-    title="Total number of Facilitators"
-    iconPath="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0"
-    detailsLink="#"
-  >
-  </app-stat-card>
+  <div class="h-full">
+    <app-stat-card
+      [value]="isLoadingCounts ? '...' : facilitatorCount.toString()"
+      title="Total number of Facilitators"
+      iconPath="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0"
+      detailsLink="/admin/facilitators"
+    >
+    </app-stat-card>
+  </div>
 
-  <!-- Empty third column -->
   <div class="hidden md:block"></div>
 </section>
 
 <!-- Col 3: Charts and Graphs -->
 <section class="grid grid-cols-3 gap-6 mb-6">
-  <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
-    <h2 class="text-lg font-semibold mb-4">Attendance Overview</h2>
-    <!-- Using the unified chart component for bar chart -->
-    <app-chart
-      [dataSet]="attendanceChartData"
-      [options]="attendanceChartOptions"
-      [isLoading]="attendanceChartLoading"
-      chartType="bar"
-      (timeRangeChanged)="onAttendanceTimeRangeChange($event)"
-    >
-    </app-chart>
+  <div class="col-span-2 flex flex-col h-full">
+    <h2 class="text-sm font-semibold mb-4">Attendance Overview</h2>
+    <div class="bg-white shadow-md p-4 flex-1 flex flex-col">
+      <!-- Using the unified chart component for bar chart -->
+      <app-chart
+        [dataSet]="attendanceChartData"
+        [options]="attendanceChartOptions"
+        [isLoading]="attendanceChartLoading"
+        chartType="bar"
+        (timeRangeChanged)="onAttendanceTimeRangeChange($event)"
+        class="flex-1"
+      >
+      </app-chart>
+    </div>
   </div>
-  <div class="bg-white rounded-lg shadow-md p-4">
-    <h2 class="text-lg font-semibold mb-4">Program Distribution</h2>
-    <!-- Using the unified chart component for program distribution (pie chart) -->
-    <app-chart
-      [dataSet]="programDistributionData"
-      [options]="programDistributionOptions"
-      [isLoading]="programDistributionLoading"
-      chartType="pie"
-    >
-    </app-chart>
+  <div class="flex flex-col h-full">
+    <h2 class="text-sm font-semibold mb-4">Program Distribution</h2>
+    <div class="bg-white shadow-md p-4 flex-1 flex flex-col">
+      <!-- Using the unified chart component for program distribution (pie chart) -->
+      <app-chart
+        [dataSet]="programDistributionData"
+        [options]="programDistributionOptions"
+        [isLoading]="programDistributionLoading"
+        chartType="pie"
+        class="flex-1"
+      >
+      </app-chart>
+    </div>
   </div>
 </section>
 
 <!-- Col 4: Analytics Graph and Early Attendees -->
 <section class="grid grid-cols-3 gap-6 mb-6">
-  <div class="col-span-2 bg-white rounded-lg shadow-md p-4">
-    <h2 class="text-lg font-semibold mb-4">Average Staying Time</h2>
-    <!-- Using the unified chart component for line chart -->
-    <app-chart
-      [dataSet]="stayingTimeChartData"
-      [options]="stayingTimeChartOptions"
-      [isLoading]="stayingTimeChartLoading"
-      chartType="line"
-      (timeRangeChanged)="onStayingTimeRangeChange($event)"
-    >
-    </app-chart>
-  </div>  <div class="col-span-1 bg-white rounded-lg shadow-md p-4 relative flex flex-col" style="min-height: 400px">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Early Attendees</h2>
-      <span *ngIf="earlyAttendeesTotal > 5" class="text-xs text-blue-600"
-        >{{ earlyAttendeesTotal }} total</span
+  <div class="col-span-2 flex flex-col h-full">
+    <h2 class="text-sm font-semibold mb-4">Average Staying Time</h2>
+    <div class="bg-white shadow-md p-4 flex-1 flex flex-col">
+      <!-- Using the unified chart component for line chart -->
+      <app-chart
+        [dataSet]="stayingTimeChartData"
+        [options]="stayingTimeChartOptions"
+        [isLoading]="stayingTimeChartLoading"
+        chartType="line"
+        (timeRangeChanged)="onStayingTimeRangeChange($event)"
+        class="flex-1"
       >
+      </app-chart>
     </div>
+  </div>
 
-    <!-- Loading state -->
-    <div *ngIf="isLoadingEarlyAttendees" class="flex flex-col items-center justify-center p-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-      <p class="text-sm text-gray-500">Loading early attendees...</p>
-    </div>    <!-- Empty state -->    <div
-      *ngIf="!isLoadingEarlyAttendees && earlyAttendees.length === 0"
-      class="absolute inset-0 flex flex-col items-center justify-center mt-12"
-    >
-      <div class="rounded-full bg-gray-100 p-4 mb-3">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-          />
-        </svg>
-      </div>
-      <p class="text-base font-medium text-gray-900 mb-1">No Early Birds Today</p>
-      <p class="text-sm text-gray-500 text-center max-w-sm">
-        Looks like everyone's taking their time this morning. Check back later for any early attendees.
-      </p>
-    </div>
+  <div class="flex flex-col h-full">
+    <h2 class="text-sm font-semibold mb-4">Early Attendees</h2>
+    <div class="bg-white shadow-md p-4 flex-1">
+      <div class="flex flex-col h-full">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold">Early Attendees</h2>
+          <span *ngIf="earlyAttendeesTotal > 10" class="text-xs text-blue-600">
+            {{ earlyAttendeesTotal }} total
+          </span>
+        </div>
 
-    <!-- Attendees list with pagination -->
-    <div *ngIf="!isLoadingEarlyAttendees && earlyAttendees.length > 0" class="flex flex-col">
-      <div class="space-y-4">
+        <!-- Loading state -->
+        <div *ngIf="isLoadingEarlyAttendees" class="flex-1 flex flex-col items-center justify-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+          <p class="text-sm text-gray-500">Loading early attendees...</p>
+        </div>
+
+        <!-- Empty state -->
         <div
-          *ngFor="let attendee of earlyAttendees"
-          class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+          *ngIf="!isLoadingEarlyAttendees && earlyAttendees.length === 0"
+          class="flex-1 flex flex-col items-center justify-center"
         >
-          <div class="rounded-full bg-green-100 p-3 mr-4">
+          <div class="rounded-full bg-gray-100 p-4 mb-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 text-green-600"
+              class="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -146,38 +137,49 @@
               />
             </svg>
           </div>
-          <div>
-            <p class="font-medium text-gray-800">{{ attendee.name }}</p>
-            <p class="text-sm text-gray-500">{{ attendee.program }}</p>
-          </div>
-          <div class="ml-auto">
-            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-              {{ attendee.time }}
-            </span>
-          </div>
+          <p class="text-base font-medium text-gray-900 mb-1">No Early Birds Today</p>
+          <p class="text-sm text-gray-500 text-center max-w-sm">
+            Looks like everyone's taking their time this morning. Check back later for any early attendees.
+          </p>
         </div>
-      </div>
 
-      <!-- Pagination -->
-      <div class="mt-4 flex justify-between items-center border-t pt-4">
-        <span class="text-sm text-gray-700">
-          Showing {{ earlyAttendees.length }} of {{ earlyAttendeesTotal }}
-        </span>
-        <div class="flex space-x-2">
-          <button
-            class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
-            [disabled]="earlyAttendeesPage === 0"
-            (click)="onEarlyAttendeesPageChange(earlyAttendeesPage - 1)"
-          >
-            Previous
-          </button>
-          <button
-            class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
-            [disabled]="(earlyAttendeesPage + 1) * earlyAttendeesSize >= earlyAttendeesTotal"
-            (click)="onEarlyAttendeesPageChange(earlyAttendeesPage + 1)"
-          >
-            Next
-          </button>
+        <!-- Attendees list -->
+        <div
+          *ngIf="!isLoadingEarlyAttendees && earlyAttendees.length > 0"
+          class="flex-1 flex flex-col overflow-y-auto"
+        >
+          <div class="space-y-4">
+            <div
+              *ngFor="let attendee of earlyAttendees"
+              class="flex items-center p-3 rounded-lg hover:bg-gray-50"
+            >
+              <div class="rounded-full bg-green-100 p-3 mr-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">{{ attendee.name }}</p>
+                <p class="text-sm text-gray-500">{{ attendee.role }}</p>
+              </div>
+              <div class="ml-auto">
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  {{ attendee.time }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

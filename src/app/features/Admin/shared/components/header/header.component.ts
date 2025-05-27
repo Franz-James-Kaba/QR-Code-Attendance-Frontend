@@ -10,12 +10,10 @@ import {
   Output,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import {
-  BreadcrumbComponent,
-  Breadcrumb,
-} from '@shared/components/breadcrumb/breadcrumb.component';
+import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.component';
 import { UserBadgeComponent } from '@shared/components/user-badge/user-badge.component';
 import { ClickOutsideDirective } from '@shared/directives/click-outside.directive';
+import { BreadcrumbItem } from '@shared/models/breadcrumb.model';
 
 import { AdminNotificationService } from '../../services/admin-notification.service';
 import { UserProfileService } from '../../services/user-profile.service';
@@ -49,7 +47,7 @@ export class HeaderComponent implements OnInit {
   isScrolled = false;
   showUserDropdown = false;
   showNotificationDropdown = false;
-  get breadcrumbs(): Breadcrumb[] {
+  get breadcrumbs(): BreadcrumbItem[] {
     const items = this.breadcrumbService.breadcrumbs().map(item => ({
       label: item.label,
       url: item.link ?? '',

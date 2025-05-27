@@ -99,7 +99,7 @@ export class ChartComponent implements OnInit, OnChanges {
   @ViewChild('chartContentWrapper') chartContentWrapper!: ElementRef;
 
   // Public properties
-  public timeRanges: TimeRange[] = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
+  public timeRanges: TimeRange[] = ['Weekly', 'Monthly', 'Yearly'];
   public selectedTimeRange: TimeRange = 'Weekly';
   public chartData: ChartDataPoint[] = [];
   public yAxisLabels: string[] = [];
@@ -317,9 +317,9 @@ export class ChartComponent implements OnInit, OnChanges {
     // Simple calculation based on number of data points
     return Math.max(300, this.chartData.length * 50);
   }
-
   getBarWidthPx(): string {
-    return `${this.barWidth}px`;
+    // Return the bar width from options (with fallback to default)
+    return `${this.options.barWidth ?? this.barWidth}px`;
   }
 
   // LINE CHART SPECIFIC METHODS
@@ -585,8 +585,6 @@ export class ChartComponent implements OnInit, OnChanges {
       return `${startDate.getDate()}${this.getOrdinalSuffix(startDate.getDate())} - ${endDate.getDate()}${this.getOrdinalSuffix(endDate.getDate())} ${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
     } else if (this.selectedTimeRange === 'Monthly') {
       return `${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
-    } else if (this.selectedTimeRange === 'Daily') {
-      return `${startDate.getDate()}${this.getOrdinalSuffix(startDate.getDate())} ${this.getMonthName(startDate.getMonth())}, ${startDate.getFullYear()}`;
     } else {
       return `${startDate.getFullYear()}`;
     }

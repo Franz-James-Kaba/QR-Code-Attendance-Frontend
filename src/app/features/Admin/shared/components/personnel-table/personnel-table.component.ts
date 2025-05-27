@@ -6,7 +6,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 export interface Personnel {
   name: string;
   stack: string;
-  status: string;
+  points: number;
+  position?: number; // Added position field
 }
 
 @Component({
@@ -19,13 +20,13 @@ export interface Personnel {
 export class PersonnelTableComponent implements OnInit {
   // Full list of personnel
   allPersonnel: Personnel[] = [
-    { name: 'Abdul Rashid', stack: 'Front-End(Angular)', status: 'NSP' },
-    { name: 'Isaac Hayfron', stack: 'UI/UX Trainer', status: 'Facilitator' },
-    { name: 'Wade Warren', stack: 'UI/UX Designer', status: 'NSP' },
-    { name: 'Robert Fox', stack: 'Back-End(Java)', status: 'NSP' },
-    { name: 'Jacob Jones', stack: 'QA', status: 'NSP' },
-    { name: 'Cody Fisher', stack: 'QA', status: 'NSP' },
-    { name: 'Ralph Edwards', stack: 'Front-End(React)', status: 'NSP' },
+    { name: 'Abdul Rashid', stack: 'Front-End(Angular)', points: 850 },
+    { name: 'Isaac Hayfron', stack: 'UI/UX Trainer', points: 920 },
+    { name: 'Wade Warren', stack: 'UI/UX Designer', points: 760 },
+    { name: 'Robert Fox', stack: 'Back-End(Java)', points: 890 },
+    { name: 'Jacob Jones', stack: 'QA', points: 800 },
+    { name: 'Cody Fisher', stack: 'QA', points: 750 },
+    { name: 'Ralph Edwards', stack: 'Front-End(React)', points: 830 },
   ];
 
   // Filtered personnel list (what's shown in the table)
@@ -34,7 +35,6 @@ export class PersonnelTableComponent implements OnInit {
   // Search and filter states
   searchQuery: string = '';
   selectedStack: string = 'All Stacks';
-  selectedStatus: string = 'All Status';
 
   // Dropdown options
   stackOptions: string[] = [
@@ -46,7 +46,6 @@ export class PersonnelTableComponent implements OnInit {
     'UI/UX Trainer',
     'QA',
   ];
-  statusOptions: string[] = ['All Status', 'NSP', 'Facilitator'];
 
   // Loading state
   isLoading: boolean = false;
@@ -54,8 +53,13 @@ export class PersonnelTableComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    // Initialize with all personnel
-    this.filteredPersonnel = [...this.allPersonnel];
+    // Initialize with all personnel sorted by points
+    this.filteredPersonnel = [...this.allPersonnel]
+      .sort((a, b) => b.points - a.points)
+      .map((person, index) => ({
+        ...person,
+        position: index + 1,
+      }));
 
     // Simulate loading
     this.isLoading = true;
@@ -77,8 +81,7 @@ export class PersonnelTableComponent implements OnInit {
       filtered = filtered.filter(
         person =>
           person.name.toLowerCase().includes(query) ||
-          person.stack.toLowerCase().includes(query) ||
-          person.status.toLowerCase().includes(query)
+          person.stack.toLowerCase().includes(query)
       );
     }
 
@@ -87,10 +90,13 @@ export class PersonnelTableComponent implements OnInit {
       filtered = filtered.filter(person => person.stack === this.selectedStack);
     }
 
-    // Apply status filter
-    if (this.selectedStatus !== 'All Status') {
-      filtered = filtered.filter(person => person.status === this.selectedStatus);
-    }
+    // Sort by points and assign positions
+    filtered = filtered
+      .sort((a, b) => b.points - a.points)
+      .map((person, index) => ({
+        ...person,
+        position: index + 1,
+      }));
 
     // Update the filtered list
     setTimeout(() => {
@@ -108,13 +114,6 @@ export class PersonnelTableComponent implements OnInit {
   onStackFilterChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
     this.selectedStack = select.value;
-    this.filterPersonnel();
-  }
-
-  // Handle status filter change
-  onStatusFilterChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedStatus = select.value;
     this.filterPersonnel();
   }
 }

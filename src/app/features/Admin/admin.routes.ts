@@ -8,35 +8,28 @@ export const adminRoutes: Routes = [
   {
     path: '',
     component: AdminLayoutComponent,
-    canActivate: [AuthGuard, AdminGuard], // Add AdminGuard to ensure only admin users can access
+    canActivate: [AuthGuard, AdminGuard],
     children: [
       {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
-      },
-      {
+      },      {
         path: 'dashboard',
         loadComponent: () =>
           import('@Admin/features/dashboard/pages/dashboard/dashboard.component').then(
             m => m.DashboardComponent
           ),
         data: {
-          title: 'Dashboard',
+          title: 'Overview',
+          breadcrumb: 'Overview'
         },
       },
-      // {
-      //   path: 'users',
-      //   loadComponent: () => import('@Admin/features/dashboard/pages/user-management/user-management.component')
-      //     .then(m => m.UserManagementComponent),
-      //   data: {
-      //     title: 'User Management'
-      //   }
-      // },
       {
         path: 'nsps',
         data: {
-          title: 'NSP Management',
+          title: 'NSPs',
+          breadcrumb: 'NSPs'
         },
         children: [
           {
@@ -46,7 +39,8 @@ export const adminRoutes: Routes = [
                 '@app/features/Admin/features/dashboard/pages/nsp-overview/nsp-overview.component'
               ).then(m => m.NspOverviewComponent),
             data: {
-              title: 'NSP Overview',
+              title: 'NSPs',
+              breadcrumb: 'NSPs'
             },
           },
         ],
@@ -54,7 +48,8 @@ export const adminRoutes: Routes = [
       {
         path: 'facilitators',
         data: {
-          title: 'Facilitator Management',
+          title: 'Facilitators',
+          breadcrumb: 'Facilitators'
         },
         children: [
           {
@@ -64,7 +59,8 @@ export const adminRoutes: Routes = [
                 '@app/features/Admin/features/dashboard/pages/facilitator-overview/facilitator-overview.component'
               ).then(m => m.FacilitatorOverviewComponent),
             data: {
-              title: 'Facilitator Overview',
+              title: 'Facilitators',
+              breadcrumb: 'Facilitators'
             },
           },
         ],
@@ -76,17 +72,8 @@ export const adminRoutes: Routes = [
             '@Admin/features/dashboard/pages/session-management/session-management.component'
           ).then(m => m.SessionManagementComponent),
         data: {
-          title: 'Session Management',
-        },
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('@Admin/features/dashboard/pages/settings/settings.component').then(
-            m => m.SettingsComponent
-          ),
-        data: {
-          title: 'Settings',
+          title: 'Sessions',
+          breadcrumb: 'Sessions'
         },
       },
       {
