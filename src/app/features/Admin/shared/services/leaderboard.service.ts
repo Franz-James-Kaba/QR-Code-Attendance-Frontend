@@ -18,7 +18,7 @@ export class LeaderboardService {
   private readonly apiUrl = environment.apiUrl;
 
   getLeaderboard(): Observable<LeaderboardEntry[]> {
-    return this.http.get<LeaderboardEntry[]>(`${this.apiUrl}/points/leaderboard`).pipe(
+    return this.http.get<LeaderboardEntry[]>(`${this.apiUrl}/admin/points/leaderboard`).pipe(
       map((response: LeaderboardEntry[] | null) => {
         // If we get a 204 No Content response, return an empty array
         if (!response) {
@@ -28,22 +28,22 @@ export class LeaderboardService {
       }),
       catchError((error: HttpErrorResponse) => {
         let errorMessage = 'An error occurred while fetching leaderboard data.';
-        
+
         if (error.status === 403) {
           errorMessage = 'You do not have permission to view the leaderboard.';
         } else if (error.status === 500) {
           errorMessage = 'Server error. Please try again later.';
         }
-        
+
         // Log the error for debugging
         console.error('Error fetching leaderboard:', error);
-        
+
         // Rethrow as a new error with our custom message
         return throwError(() => new Error(errorMessage));
       })
     );
   }
-  
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred';
 

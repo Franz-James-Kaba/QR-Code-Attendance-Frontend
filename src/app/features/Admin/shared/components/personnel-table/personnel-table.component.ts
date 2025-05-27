@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -20,29 +20,19 @@ export interface Personnel {
   styleUrls: ['./personnel-table.component.scss', '../../../../../shared/styles/table.css'],
 })
 export class PersonnelTableComponent implements OnInit, OnDestroy {
-  private readonly leaderboardService = inject(LeaderboardService);
-  private readonly destroy$ = new Subject<void>();
+  private readonly leaderboardService = inject(LeaderboardService);  private readonly destroy$ = new Subject<void>();
 
-  // Full list of personnel
   allPersonnel: Personnel[] = [];
-
-  // Filtered personnel list (what's shown in the table)
   filteredPersonnel: Personnel[] = [];
+  paginatedPersonnel: Personnel[] = [];
 
-  // Search and filter states
+  // Pagination
+  pageSize: number = 10;
+  currentPage: number = 1;
+  totalPages: number = 1;
+
   searchQuery: string = '';
   selectedStack: string = 'All Stacks';
-
-  // Dropdown options
-  stackOptions: string[] = [
-    'All Stacks',
-    'Front-End(Angular)',
-    'Front-End(React)',
-    'Back-End(Java)',
-    'UI/UX Designer',
-    'UI/UX Trainer',
-    'QA',
-  ];
 
   // Loading state
   isLoading: boolean = false;
@@ -92,8 +82,7 @@ export class PersonnelTableComponent implements OnInit, OnDestroy {
           console.error('Error loading leaderboard:', err);
         }
       });
-  }
-  filterPersonnel(): void {
+  }  filterPersonnel(): void {
     // Start with all personnel, sorted by points (highest first) and position
     let filtered = [...this.allPersonnel]
       .sort((a, b) => {
@@ -115,15 +104,49 @@ export class PersonnelTableComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Update the filtered list
+    // Update the filtered list and paginate
     this.filteredPersonnel = filtered;
+    this.totalPages = Math.ceil(this.filteredPersonnel.length / this.pageSize);
+    this.currentPage = Math.min(this.currentPage, this.totalPages) || 1;
+    this.updatePaginatedResults();
     this.isLoading = false;
   }
+
+  private updatePaginatedResults(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedPersonnel = this.filteredPersonnel.slice(startIndex, endIndex);
+  }
+
+  private updateTotalPages(): void {
+    this.totalPages = Math.ceil(this.filteredPersonnel.length / this.pageSize);
+    // Reset current page if it's out of bounds
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages || 1;
+    }
+  }
+
   onSearch(): void {
+    this.currentPage = 1; // Reset to first page on search
     this.filterPersonnel();
   }
 
   onRetry(): void {
     this.loadLeaderboard();
+  }
+
+  onPageChange(newPage: number): void {
+    if (newPage >= 1 && newPage <= this.totalPages) {
+      this.currentPage = newPage;
+      this.updatePaginatedResults();
+    }
+  }
+
+  get pages(): number[] {
+    const pagesArray: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      pagesArray.push(i);
+    }
+    return pagesArray;
   }
 }
