@@ -46,7 +46,7 @@ export class StorageService {
   removeSession(sessionId: string): void {
     const storedSessions = this.getStoredSessions();
     const updatedSessions = storedSessions.filter(
-      session => session.sessionData.id !== sessionId
+      session => String(session.sessionData.id) !== sessionId
     );
     localStorage.setItem(this.sessionsKey, JSON.stringify(updatedSessions));
   }

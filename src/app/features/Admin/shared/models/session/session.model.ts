@@ -5,6 +5,7 @@ export interface Session {
   sessionCode: string;
   name: string;
   active: boolean;
+  status?: SessionStatus;
   startTime: string;
   endTime: string;
 }
@@ -25,6 +26,11 @@ export interface SessionQRCodeRequest {
 export interface SessionResponse {
   message: string;
   success: boolean;
+  sessionId: number;
+}
+
+export interface GenerateQRCodeResponse {
+  qrCodeUrl: string;
 }
 
 export interface CreateSessionRequest {

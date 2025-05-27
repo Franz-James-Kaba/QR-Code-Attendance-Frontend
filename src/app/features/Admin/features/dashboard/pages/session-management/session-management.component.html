@@ -2,14 +2,31 @@
 <div class="container mx-auto">
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-semibold">Session Management</h2>
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-4">
+        <h2 class="text-2xl font-semibold">
+          {{ selectedSessionId ? 'Session Attendees' : 'Session Management' }}
+        </h2>
+        <!-- Back button when viewing attendees -->
+        <button
+          *ngIf="selectedSessionId"
+          (click)="selectedSessionId = null"
+          class="flex items-center text-gray-600 hover:text-gray-900"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Back to Sessions
+        </button>
+      </div>
+
+      <!-- Only show search and create button when viewing sessions -->
+      <div *ngIf="!selectedSessionId" class="flex items-center space-x-3">
         <!-- Search field -->
         <div class="relative">
           <input
             type="text"
             placeholder="Search sessions..."
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nspBg focus:border-nspBg bg-nspBg/50 w-64"
+            class="pl-10 pr-4 py-2 border border-nspBg/50 focus:ring-2 focus:ring-nspBg focus:border-nspBg bg-nspBg/50 w-64"
             [(ngModel)]="searchQuery"
             (input)="onSearch()"
           />
@@ -19,16 +36,13 @@
             </svg>
           </div>
         </div>
-        <!-- Create button -->        <app-button
+        <!-- Create button -->
+        <app-button
           (click)="openCreateSessionModal()"
           variant="primary"
           size="md"
           [disabled]="isLoading"
           [loading]="isLoading"
-          onkeydown="
-            if (event.key === 'Enter') {
-              openCreateSessionModal();
-            }"
         >
           {{ isLoading ? 'Creating Session...' : 'Create New Session' }}
         </app-button>
@@ -36,7 +50,7 @@
     </div>
 
     <!-- Empty state / No items found state -->
-    <div *ngIf="!isLoading && (!sessions || sessions.length === 0)" class="text-center">
+    <div *ngIf="!isLoading && !selectedSessionId && (!sessions || sessions.length === 0)" class="text-center">
       <div class="flex justify-center mb-4">
         <img src="/not-item.svg" alt="No items found" class="w-4xl h-auto" />
       </div>
@@ -53,67 +67,115 @@
       </app-button>
     </div>
 
-    <!-- Sessions table (only show when there are sessions) -->
-    <div *ngIf="!isLoading && sessions && sessions.length > 0" class="bg-white shadow">
-              <table class="standard-table">
-          <thead>
-            <tr>
-              <th>Session Code</th>
-              <th>Session Name</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="filteredSessions.length === 0">
-              <td colspan="6" class="py-6 text-center text-gray-500">
-                No sessions found. Create your first session using the button above.
-              </td>
-            </tr>
-            <tr *ngFor="let session of filteredSessions" class="hover:bg-gray-50">
-              <td>{{ session.sessionCode }}</td>
-              <td>{{ session.name }}</td>
-              <td>{{ formatSessionTime(session.startTime) }}</td>
-              <td>{{ formatSessionTime(session.endTime) }}</td>
-              <td>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  [ngClass]="getStatusClass(session.active)">
-                  {{ session.active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>              <td>
-                <div class="flex">
-                  <button
-                    type="button"
-                    (click)="openEditSessionModal(session)"
-                    class="action-button edit mr-2">
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    (click)="deleteSession(session.id)"
-                    class="action-button delete">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Sessions Table -->
+    <div *ngIf="!isLoading && !selectedSessionId && sessions && sessions.length > 0" class="bg-white shadow">
+      <table class="standard-table">
+        <thead>
+          <tr>
+            <th>Session Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredSessions.length === 0">
+            <td colspan="5" class="py-6 text-center text-gray-500">
+              No sessions found matching your search.
+            </td>
+          </tr>
+          <tr *ngFor="let session of filteredSessions" class="hover:bg-gray-50">
+            <td class="cursor-pointer" (click)="onSessionClick(session)">{{ session.name }}</td>
+            <td class="cursor-pointer" (click)="onSessionClick(session)">{{ formatSessionTime(session.startTime) }}</td>
+            <td class="cursor-pointer" (click)="onSessionClick(session)">{{ formatSessionTime(session.endTime) }}</td>
+            <td class="cursor-pointer" (click)="onSessionClick(session)">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                [ngClass]="getStatusClass(session.active)">
+                {{ session.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <div class="flex space-x-2">
+                <button
+                  *ngIf="hasQrCode(session)"
+                  type="button"
+                  (click)="openQrCodeModal(session, $event)"
+                  class="action-button view">
+                  View QR
+                </button>
+                <button
+                  type="button"
+                  (click)="openEditSessionModal(session)"
+                  class="action-button edit">
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  (click)="deleteSession(session.id)"
+                  class="action-button delete"
+                  title="Delete session">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Attendees Table -->
+    <div *ngIf="selectedSessionId" class="bg-white shadow">
+      <!-- Loading State for Attendees -->
+      <div *ngIf="loadingAttendees" class="p-6 text-center">
+        <div class="animate-pulse flex flex-col items-center justify-center min-h-[200px]">
+          <div class="h-12 w-12 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mb-4"></div>
+          <p class="text-gray-600">Loading attendees...</p>
+        </div>
+      </div>
+
+      <!-- Attendees Table Content -->
+      <table *ngIf="!loadingAttendees" class="standard-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="attendees.length === 0">
+            <td colspan="4" class="py-6 text-center text-gray-500">
+              No attendees found for this session.
+            </td>
+          </tr>
+          <tr *ngFor="let attendee of attendees" class="hover:bg-gray-50">
+            <td>{{ attendee.name }}</td>
+            <td>{{ formatTime(attendee.checkInTime) }}</td>
+            <td>{{ attendee.checkOutTime ? formatTime(attendee.checkOutTime) : '-' }}</td>
+            <td>
+              <span [ngClass]="getAttendanceStatusClass(attendee.status)" 
+                    class="px-2.5 py-0.5 rounded-full text-xs font-medium">
+                {{ attendee.status | titlecase }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="bg-white rounded-lg shadow p-6 text-center">
+      <div class="animate-pulse flex flex-col items-center justify-center min-h-[60vh]">
+        <div class="h-12 w-12 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-600">Loading sessions...</p>
       </div>
     </div>
   </div>
-
-<!-- Modal Container for create/edit forms -->
-<app-modal-container></app-modal-container>
-
-<!-- Loading state -->
-<div *ngIf="isLoading" class="bg-white rounded-lg shadow p-6 text-center">
-  <div class="animate-pulse flex flex-col items-center justify-center min-h-[60vh]">
-    <div class="h-12 w-12 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mb-4"></div>
-    <p class="text-gray-600">Loading sessions...</p>
-  </div>
 </div>
+
+<!-- Modal Container -->
+<app-modal-container></app-modal-container>

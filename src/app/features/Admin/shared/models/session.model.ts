@@ -23,6 +23,7 @@ export interface SessionQRCodeRequest {
 export interface SessionResponse {
   message: string;
   success: boolean;
+  sessionId?: number;
 }
 
 export interface GenerateQRCodeResponse {

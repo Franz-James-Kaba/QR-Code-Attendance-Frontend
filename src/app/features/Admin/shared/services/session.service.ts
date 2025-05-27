@@ -104,7 +104,34 @@ export class SessionService {
           throwError(() => new Error(`Error generating QR code: ${error.message}`))
         )
       );
-  }  // Get color for session status (for UI display)
+  }
+
+  // QR Code storage methods
+  private getQrCodeKey(sessionId: number): string {
+    return `session_qr_${sessionId}`;
+  }
+
+  storeQrCode(sessionId: number, qrBlob: Blob): void {
+    const reader = new FileReader();
+    reader.readAsDataURL(qrBlob);
+    reader.onloadend = () => {
+      localStorage.setItem(this.getQrCodeKey(sessionId), reader.result as string);
+    };
+  }
+
+  getStoredQrCode(sessionId: number): string | null {
+    return localStorage.getItem(this.getQrCodeKey(sessionId));
+  }
+
+  removeStoredQrCode(sessionId: number): void {
+    localStorage.removeItem(this.getQrCodeKey(sessionId));
+  }
+
+  hasStoredQrCode(sessionId: number): boolean {
+    return !!this.getStoredQrCode(sessionId);
+  }
+
+  // Get color for session status (for UI display)
   getStatusColor(status: boolean): string {
     return status ? 'text-green-600' : 'text-red-600';
   }

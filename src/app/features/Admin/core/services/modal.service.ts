@@ -8,6 +8,10 @@ export type ModalType =
   | 'editFacilitator'
   | 'createSession'
   | 'editSession'
+  | 'deleteSession'
+  | 'viewQrCode'
+  | 'session'
+  | 'qrCode'
   | null;
 
 export type ModalComponent = {
