@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { BELL_ICON } from '@app/core/data/svg-data';
 import { AuthService } from '@app/core/services/auth/auth.service';
+import { AuthActions } from '@app/core/store/actions/auth.actions';
+import { selectUser } from '@app/core/store/selectors/auth.selectors';
 import { IconComponent } from '@app/shared/components/icon/icon.component';
 import { UserBadgeComponent } from '@app/shared/components/user-badge/user-badge.component';
-import { ExtendedAuthResponse } from '@app/shared/models/auth/auth.model';
+import { User } from '@app/shared/models/auth/auth.model';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -36,8 +40,15 @@ import { Observable } from 'rxjs';
     </div>
   `,
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   public bellIcon = BELL_ICON;
   private readonly authService = inject(AuthService);
-  public user$: Observable<ExtendedAuthResponse | null> = this.authService.currentUser$;
+  private readonly store = inject(Store);
+  public user$: Observable<User | null> = this.store.select(selectUser);
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.store.dispatch(AuthActions.fetchUserProfile());
+    }
+  }
 }

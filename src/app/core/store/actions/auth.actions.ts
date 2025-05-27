@@ -1,9 +1,8 @@
 import { createAction, props } from '@ngrx/store';
-import { AuthResponse, AuthStep } from '@shared/models/auth/auth.model';
+import { AuthResponse, AuthStep, User } from '@shared/models/auth/auth.model';
 
 export const AuthActions = {
   initAuth: createAction('[Auth] Initialize Auth'),
-  initAuthSuccess: createAction('[Auth] Initialize Auth Success', props<{ token: string }>()),
 
   login: createAction('[Auth] Login', props<{ email: string; password: string }>()),
   loginSuccess: createAction('[Auth] Login Success', props<{ response: AuthResponse }>()),
@@ -37,6 +36,11 @@ export const AuthActions = {
     '[Auth] First Time Password Reset Failure',
     props<{ error: string }>()
   ),
+
+  fetchUserProfile: createAction('[Auth] Fetch User Profile'),
+  fetchUserProfileSuccess: createAction('[Auth] Fetch User Profile Success', props<{ user: User }>()),
+  fetchUserProfileFailure: createAction('[Auth] Fetch User Profile Failure', props<{ error: string }>()),
+  updateUserCheckedIn: createAction('[Auth] Update User Checked In', props<{ checkedIn: boolean }>()),
 
   clearError: createAction('[Auth] Clear Error'),
   setSuccessMessage: createAction('[Auth] Set Success Message', props<{ message: string }>()),

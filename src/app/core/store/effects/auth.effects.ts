@@ -1,8 +1,10 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth.service';
+import { environment } from '@environments/environment';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { AuthStep } from '@shared/models/auth/auth.model';
+import { AuthResponse, AuthStep, User, UserRole } from '@shared/models/auth/auth.model';
 import { NotificationService } from '@shared/services/notification.service';
 import { AuthActions } from '@store/actions/auth.actions';
 import { of } from 'rxjs';
@@ -13,7 +15,10 @@ export class AuthEffects {
   private readonly actions$ = inject(Actions);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly notificationService = inject(NotificationService);  initAuth$ = createEffect(() =>
+  private readonly notificationService = inject(NotificationService);
+  private readonly http = inject(HttpClient);
+
+  initAuth$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.initAuth),
       map(() => {
@@ -22,17 +27,21 @@ export class AuthEffects {
           const userStr = localStorage.getItem('current_user');
           if (userStr) {
             try {
-              const userData = JSON.parse(userStr);
-              return AuthActions.loginSuccess({ response: userData });
+              const userData: User = JSON.parse(userStr);
+              const response: AuthResponse = {
+                token,
+                role: userData.role,
+                email: userData.email,
+                passwordResetRequired: userData.passwordResetRequired ?? false,
+              };
+              return AuthActions.loginSuccess({ response });
             } catch (e) {
               console.error('Error parsing stored user data during init', e);
               return AuthActions.logout();
             }
           }
-          return AuthActions.initAuthSuccess({ token });
-        } else {
-          return AuthActions.logout();
         }
+        return AuthActions.logout();
       })
     )
   );
@@ -63,13 +72,11 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(({ response }) => {
-          // Handle password reset if required
           if (response.passwordResetRequired) {
             this.router.navigate(['/auth/reset-password']);
             return;
           }
 
-          // Route based on role
           switch (response.role) {
             case 'ADMIN':
               this.router.navigate(['/admin']);
@@ -141,6 +148,7 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
+
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -148,7 +156,6 @@ export class AuthEffects {
         tap(() => {
           this.authService.logout();
           this.notificationService.info('You have been logged out');
-          // Navigate to login page
           this.router.navigate(['/auth/login']);
         })
       ),
@@ -180,6 +187,61 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.forgotPasswordSuccess),
       map(() => AuthActions.setAuthStep({ step: AuthStep.OTP }))
+    )
+  );
+
+  fetchUserProfile$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.fetchUserProfile),
+      exhaustMap(() => {
+        const token = this.authService.getToken();
+        if (!token) {
+          return of(AuthActions.logout());
+        }
+        return this.http
+          .get<{
+            firstName: string;
+            middleName: string | null;
+            lastName: string;
+            role: string;
+            checkedIn: boolean;
+          }>(`${environment.api.baseUrl}/metrics/user-info`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .pipe(
+            map(profile => {
+              const currentUser = this.authService.getCurrentUser();
+              const validRole: UserRole = this.authService['isValidUserRole'](profile.role)
+                ? profile.role
+                : currentUser?.role || 'NSP';
+              const updatedUser: User = {
+                ...currentUser,
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                middleName: profile.middleName,
+                role: validRole,
+                checkedIn: profile.checkedIn,
+                email: currentUser?.email ?? '',
+                passwordResetRequired: currentUser?.passwordResetRequired ?? false,
+              };
+              localStorage.setItem('current_user', JSON.stringify(updatedUser));
+              localStorage.setItem('last_profile_fetch', Date.now().toString());
+              this.authService['currentUserSubject'].next(updatedUser);
+              return AuthActions.fetchUserProfileSuccess({ user: updatedUser });
+            }),
+            catchError(error => {
+              console.error('Error fetching user profile:', error);
+              if (error.status === 401) {
+                return of(AuthActions.logout());
+              }
+              return of(
+                AuthActions.fetchUserProfileFailure({
+                  error: 'Failed to load user profile',
+                })
+              );
+            })
+          );
+      })
     )
   );
 }

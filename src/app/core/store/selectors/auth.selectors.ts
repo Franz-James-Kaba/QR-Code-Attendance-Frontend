@@ -5,7 +5,10 @@ export const selectAuthState = createFeatureSelector<AuthState>('auth');
 
 export const selectUser = createSelector(selectAuthState, state => state.user);
 
-export const selectIsAuthenticated = createSelector(selectAuthState, state => !!state.token);
+export const selectIsAuthenticated = createSelector(
+  selectAuthState,
+  state => !!state.user
+);
 
 export const selectPasswordResetRequired = createSelector(
   selectAuthState,
@@ -25,3 +28,5 @@ export const selectEmail = createSelector(selectAuthState, state => state.email)
 export const selectOtpVerified = createSelector(selectAuthState, state => state.otpVerified);
 
 export const selectCurrentUserRole = createSelector(selectUser, user => user?.role ?? null);
+
+export const selectUserCheckedIn = createSelector(selectUser, user => user?.checkedIn ?? false);

@@ -42,14 +42,12 @@ export interface AttendanceWorkingDaysResponse {
 
 export interface DashboardState {
   selectedDate: Date | undefined;
-  isCheckedIn: boolean;
   attendanceSummary: SummaryCard[];
   error: string | null;
 }
 
 export const initialState: DashboardState = {
   selectedDate: new Date(),
-  isCheckedIn: false,
   attendanceSummary: [],
   error: null,
 };

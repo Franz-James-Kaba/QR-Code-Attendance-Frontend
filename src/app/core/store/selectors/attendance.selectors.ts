@@ -8,11 +8,6 @@ export const selectAttendanceSummary = createSelector(
   (state: DashboardState) => state.attendanceSummary
 );
 
-export const selectIsCheckedIn = createSelector(
-  selectDashboardState,
-  (state: DashboardState) => state.isCheckedIn
-);
-
 export const selectSelectedDate = createSelector(
   selectDashboardState,
   (state: DashboardState) => state.selectedDate

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-
-import { IconComponent } from '../../../../shared/components/icon/icon.component';
-import { SummaryCard } from '../../models/nsp.interface';
+import { SummaryCard } from '@app/features/NSP/models/nsp.interface';
+import { IconComponent } from '@app/shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-attendance-summary',

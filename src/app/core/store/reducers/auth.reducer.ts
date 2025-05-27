@@ -5,11 +5,6 @@ import { AuthActions } from '@store/actions/auth.actions';
 export const authReducer = createReducer(
   initialAuthState,
 
-  on(AuthActions.initAuthSuccess, (state, { token }) => ({
-    ...state,
-    token: token,
-  })),
-
   on(AuthActions.login, state => ({
     ...state,
     isLoading: true,
@@ -18,15 +13,15 @@ export const authReducer = createReducer(
 
   on(AuthActions.loginSuccess, (state, { response }) => ({
     ...state,
-    token: response.token,
-    passwordResetRequired: response.passwordResetRequired,
     user: {
-      role: response.role,
       id: null,
-      email: response.email ?? state.email ?? '',
       firstName: '',
       lastName: '',
+      email: response.email ?? state.email ?? '',
+      role: response.role,
+      passwordResetRequired: response.passwordResetRequired,
     },
+    passwordResetRequired: response.passwordResetRequired,
     isLoading: false,
     error: null,
   })),
@@ -135,5 +130,34 @@ export const authReducer = createReducer(
   on(AuthActions.verifyOtpFailure, (state, { error }) => ({
     ...state,
     error,
-  }))
+  })),
+
+  on(AuthActions.fetchUserProfile, state => ({
+    ...state,
+    isLoading: true,
+    error: null,
+  })),
+
+  on(AuthActions.fetchUserProfileSuccess, (state, { user }) => ({
+    ...state,
+    user,
+    isLoading: false,
+    error: null,
+  })),
+
+  on(AuthActions.fetchUserProfileFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error,
+  })),
+
+  on(AuthActions.updateUserCheckedIn, (state, { checkedIn }) => ({
+    ...state,
+    user: state.user
+      ? {
+          ...state.user,
+          checkedIn,
+        }
+      : null,
+  })),
 );
