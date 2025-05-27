@@ -17,18 +17,4 @@ export const loadAttendanceSummaryFailure = createAction(
 
 export const checkIn = createAction('[Dashboard] Check In', props<{ sessionCode: string }>());
 
-export const checkInSuccess = createAction('[Dashboard] Check In Success');
-
-export const checkInFailure = createAction(
-  '[Dashboard] Check In Failure',
-  props<{ error: string }>()
-);
-
 export const checkOut = createAction('[Dashboard] Check Out', props<{ sessionCode: string }>());
-
-export const checkOutSuccess = createAction('[Dashboard] Check Out Success');
-
-export const checkOutFailure = createAction(
-  '[Dashboard] Check Out Failure',
-  props<{ error: string }>()
-);
